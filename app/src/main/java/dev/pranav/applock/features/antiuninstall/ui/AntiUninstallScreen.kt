@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import rikka.shizuku.Shizuku
 
 class AntiUninstallViewModel: ViewModel() {
     private val _allApps = MutableStateFlow<List<AppInfo>>(emptyList())
@@ -176,6 +178,9 @@ fun AntiUninstallScreen(
         viewModel.loadApps(context)
     }
 
+    val showMessage =
+        remember { mutableStateOf(Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -263,9 +268,10 @@ fun AntiUninstallScreen(
     if (showManualAddDialog.value) {
         AlertDialog(
             onDismissRequest = { showManualAddDialog.value = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
             title = { Text("Add Package Manually") },
             text = {
-                Column {
+                Column(Modifier.fillMaxWidth(0.8f)) {
                     Text(
                         text = "Enter the package name of the app you want to protect:",
                         style = MaterialTheme.typography.bodyMedium,
@@ -292,6 +298,37 @@ fun AntiUninstallScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showManualAddDialog.value = false }) { Text("Cancel") }
+            }
+        )
+    }
+
+    if (showMessage.value) {
+        AlertDialog(
+            onDismissRequest = { showMessage.value = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            title = { Text("Shizuku") },
+            text = {
+                Column(Modifier.fillMaxWidth(0.8f)) {
+                    Text(
+                        text = "Please note that Shizuku must be installed and granted for this feature to work. You may revoke the permission later on, if you wish.\n\nThankfully, Shizuku does not require root, and its only required while you Block/Unblock uninstalls, so you don't need it always running ;)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        Shizuku.requestPermission(0)
+                        showMessage.value = false
+                    }
+                ) { Text("Confirm") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    navController.popBackStack()
+                    showMessage.value = false
+                }) { Text("Cancel") }
             }
         )
     }

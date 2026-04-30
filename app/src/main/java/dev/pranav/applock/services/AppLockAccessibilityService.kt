@@ -147,8 +147,6 @@ class AppLockAccessibilityService : AccessibilityService() {
             return
         }
 
-        Log.d(TAG, AppLockManager.isLockScreenShown.toString() + " " + event.toString())
-
         // Extract and validate package name
         val packageName = event.packageName?.toString() ?: return
 

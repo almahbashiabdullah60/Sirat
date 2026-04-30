@@ -47,6 +47,7 @@ class ShizukuAppLockService : Service() {
     override fun onCreate() {
         super.onCreate()
         AppLockManager.isLockScreenShown.set(false)
+        startForegroundService()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -74,8 +75,6 @@ class ShizukuAppLockService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-
-        startForegroundService()
 
         return START_STICKY
     }

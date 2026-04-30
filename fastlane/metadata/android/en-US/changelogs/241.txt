@@ -1,0 +1,9 @@
+
+- Fixed split screen, floating window bypass for accessibility service
+- Fixed Split screen, floating window bypass for shizuku
+- Simplified workflow
+- Fixed missing lines in pattern lock
+- Improve performance in pattern lock
+- Improve error handling to ensure full uptime
+- Fixed multiple bugs in accessibility and shizuku handling
+- Anti Uninstall for third party apps via Shizuku
