@@ -141,7 +141,9 @@ fun MainScreen(
 
     var showDonateDialog by remember { mutableStateOf(appLockRepository.isShowDonateLink()) }
     if (showDonateDialog && !showCommunityLink) {
-        DonateModalBottomSheet { showDonateDialog = false }
+        DonateModalBottomSheet {
+            appLockRepository.setShowDonateLink(false); showDonateDialog = false
+        }
     }
 
     Scaffold(
