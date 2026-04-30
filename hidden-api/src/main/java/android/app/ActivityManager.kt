@@ -660,7 +660,7 @@ class ActivityManager {
      * Information you can retrieve about a particular Service that is currently running in the system.
      */
     class RunningServiceInfo {
-        var service: ComponentName
+        lateinit var service: ComponentName
         var pid: Int = 0
         var uid: Int = 0
         var process: String? = null
