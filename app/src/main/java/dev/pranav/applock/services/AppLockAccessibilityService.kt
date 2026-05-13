@@ -357,6 +357,7 @@ class AppLockAccessibilityService : AccessibilityService() {
                 },
                 onExit = {
                     performGlobalAction(GLOBAL_ACTION_HOME)
+                    Thread.sleep(200)
                     AppLockManager.isLockScreenShown.set(false)
                 }
             )

@@ -102,6 +102,11 @@ class LockScreenOverlayManager(private val context: Context):
                         if (lockType == PreferencesRepository.LOCK_TYPE_PATTERN) {
                             PatternLockScreen(
                                 fromMainActivity = false,
+                                showCloseButton = true,
+                                onClose = {
+                                    onExit()
+                                    removeOverlay()
+                                },
                                 lockedAppName = appName,
                                 triggeringPackageName = triggeringPackageName,
                                 onPatternAttempt = onPatternAttemptCallback
@@ -110,6 +115,11 @@ class LockScreenOverlayManager(private val context: Context):
                             PasswordOverlayScreen(
                                 showBiometricButton = appLockRepository.isBiometricAuthEnabled(),
                                 fromMainActivity = false,
+                                showCloseButton = true,
+                                onClose = {
+                                    onExit()
+                                    removeOverlay()
+                                },
                                 lockedAppName = appName,
                                 triggeringPackageName = triggeringPackageName,
                                 onAuthSuccess = {
@@ -142,8 +152,8 @@ class LockScreenOverlayManager(private val context: Context):
             WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-                    WindowManager.LayoutParams.FLAG_SECURE,
+                    WindowManager.LayoutParams.FLAG_SECURE or
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
             PixelFormat.TRANSLUCENT
         ).apply {
             // Respect brightness setting
