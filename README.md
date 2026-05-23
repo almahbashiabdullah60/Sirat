@@ -9,8 +9,8 @@
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
   </a>
-  <a href="https://github.com/PranavPurwar/AppLock/releases">
-    <img src="https://img.shields.io/github/v/release/PranavPurwar/AppLock?label=Release" alt="Latest Release">
+  <a href="https://github.com/aload0/AppLock/releases">
+    <img src="https://img.shields.io/github/v/release/aload0/AppLock?label=Release" alt="Latest Release">
   </a>
   <a href="https://apt.izzysoft.de/packages/dev.pranav.applock">
     <img src="https://img.shields.io/badge/IzzyOnDroid-Available-brightgreen" alt="IzzyOnDroid">
