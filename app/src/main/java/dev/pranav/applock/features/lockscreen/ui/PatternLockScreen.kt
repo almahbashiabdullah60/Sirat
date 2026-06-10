@@ -1,11 +1,11 @@
 package dev.pranav.applock.features.lockscreen.ui
 
-import androidx.compose.animation.ExperimentalAnimationApi
+import android.content.res.Configuration
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -13,8 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,7 +26,6 @@ import dev.pranav.applock.core.utils.appLockRepository
 import dev.pranav.applock.core.utils.vibrate
 import dev.pranav.applock.ui.icons.Fingerprint
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun PatternLockScreen(
     modifier: Modifier = Modifier,
@@ -40,11 +39,8 @@ fun PatternLockScreen(
 ) {
     val appLockRepository = LocalContext.current.appLockRepository()
     val context = LocalContext.current
-    val windowInfo = LocalWindowInfo.current
-
-    val screenWidth = windowInfo.containerSize.width
-    val screenHeight = windowInfo.containerSize.height
-    val isLandscape = screenWidth > screenHeight
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -52,8 +48,6 @@ fun PatternLockScreen(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             var showError by remember { mutableStateOf(false) }
-
-            @Suppress("ASSIGNED_BUT_NOT_ACCESSED_WARNING")
             var errorShakeOffset by remember { mutableStateOf(0f) }
 
             val shakeAnimation by animateFloatAsState(
@@ -62,9 +56,7 @@ fun PatternLockScreen(
                 label = "shake"
             )
 
-            val patternIds = remember { mutableStateOf<List<Int>>(emptyList()) }
-
-            val lockCallback = object: LockCallback {
+            val lockCallback = object : LockCallback {
                 override fun onStart(dot: Dot) {
                     showError = false
                     if (!appLockRepository.shouldDisableHaptics()) {
@@ -79,13 +71,11 @@ fun PatternLockScreen(
                 }
 
                 override fun onResult(result: List<Dot>) {
-                    patternIds.value = result.map { it.id }
                     val patternString = result.joinToString("") { it.id.toString() }
-
                     val isValid = onPatternAttempt?.invoke(patternString) ?: false
                     if (!isValid) {
                         showError = true
-                        errorShakeOffset = 10f
+                        errorShakeOffset = if (errorShakeOffset == 0f) 10f else 0f
                     }
                 }
             }
@@ -134,7 +124,7 @@ fun PatternLockScreen(
                             FilledTonalIconButton(
                                 onClick = { onBiometricAuth() },
                                 modifier = Modifier.size(44.dp),
-                                shape = RoundedCornerShape(40),
+                                shape = CircleShape,
                             ) {
                                 Icon(
                                     imageVector = Fingerprint,
@@ -142,7 +132,7 @@ fun PatternLockScreen(
                                         .fillMaxSize()
                                         .padding(10.dp),
                                     contentDescription = stringResource(R.string.biometric_authentication_cd),
-                                    tint = MaterialTheme.colorScheme.surfaceTint
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -209,7 +199,7 @@ fun PatternLockScreen(
                             FilledTonalIconButton(
                                 onClick = { onBiometricAuth() },
                                 modifier = Modifier.size(44.dp),
-                                shape = RoundedCornerShape(40),
+                                shape = CircleShape,
                             ) {
                                 Icon(
                                     imageVector = Fingerprint,
@@ -217,7 +207,7 @@ fun PatternLockScreen(
                                         .fillMaxSize()
                                         .padding(10.dp),
                                     contentDescription = stringResource(R.string.biometric_authentication_cd),
-                                    tint = MaterialTheme.colorScheme.surfaceTint
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
 

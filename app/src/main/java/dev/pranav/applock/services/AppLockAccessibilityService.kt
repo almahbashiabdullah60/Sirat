@@ -38,10 +38,6 @@ class AppLockAccessibilityService : AccessibilityService() {
     private var overlayManager: LockScreenOverlayManager? = null
     private lateinit var mainHandler: Handler
 
-    enum class BiometricState {
-        IDLE, AUTH_STARTED
-    }
-
     companion object {
         private const val TAG = "AppLockAccessibility"
         private const val DEVICE_ADMIN_SETTINGS_PACKAGE = "com.android.settings"
@@ -70,7 +66,7 @@ class AppLockAccessibilityService : AccessibilityService() {
         super.onCreate()
         try {
             isServiceRunning = true
-            AppLockManager.currentBiometricState = BiometricState.IDLE
+            AppLockManager.currentBiometricState = AppLockManager.BiometricState.IDLE
             AppLockManager.isLockScreenShown.set(false)
             startPrimaryBackendService()
 
@@ -284,7 +280,7 @@ class AppLockAccessibilityService : AccessibilityService() {
 
     private fun checkAndLockApp(packageName: String, triggeringPackage: String, currentTime: Long) {
         // Return early if lock screen is already shown or biometric auth is in progress
-        if (AppLockManager.currentBiometricState == BiometricState.AUTH_STARTED) {
+        if (AppLockManager.currentBiometricState == AppLockManager.BiometricState.AUTH_STARTED) {
             return
         }
 
@@ -332,7 +328,7 @@ class AppLockAccessibilityService : AccessibilityService() {
         }
 
         if (AppLockManager.isLockScreenShown.get() ||
-            AppLockManager.currentBiometricState == BiometricState.AUTH_STARTED
+            AppLockManager.currentBiometricState == AppLockManager.BiometricState.AUTH_STARTED
         ) {
             LogUtils.d(TAG, "Lock screen already shown or biometric auth in progress, skipping")
             return

@@ -1,9 +1,8 @@
 package dev.pranav.applock.features.setpassword.ui
 
+import android.content.res.Configuration
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Arrangement
@@ -16,8 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,15 +41,14 @@ import androidx.navigation.NavController
 import dev.pranav.applock.AppLockApplication
 import dev.pranav.applock.R
 import dev.pranav.applock.core.navigation.Screen
+import dev.pranav.applock.core.navigation.findFragmentActivity
 import dev.pranav.applock.data.repository.PreferencesRepository
 import dev.pranav.applock.features.lockscreen.ui.KeypadRow
 import dev.pranav.applock.features.lockscreen.ui.PasswordIndicators
 import dev.pranav.applock.ui.icons.Backspace
+import dev.pranav.applock.ui.theme.titleMediumEmphasized
 
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3ExpressiveApi::class,
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetPasswordScreen(
     navController: NavController,
@@ -69,55 +66,19 @@ fun SetPasswordScreen(
     val minLength = 4
 
     val context = LocalContext.current
-    val activity = LocalActivity.current as? ComponentActivity
+    val activity = context.findFragmentActivity()
     val appLockRepository = remember {
         (context.applicationContext as? AppLockApplication)?.appLockRepository
     }
 
     val configuration = LocalConfiguration.current
-    val windowInfo = LocalWindowInfo.current
-
-    val screenWidth = windowInfo.containerSize.width
-    val screenHeight = windowInfo.containerSize.height
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val screenWidthDp = configuration.screenWidthDp.dp
     val screenHeightDp = configuration.screenHeightDp.dp
 
-    val isLandscape = screenWidth > screenHeight
-
-    val horizontalPadding = remember(screenWidthDp, isLandscape) {
-        if (isLandscape) {
-            0.dp
-        } else {
-            screenWidthDp * 0.12f
-        }
-    }
-
-    val buttonSpacing = remember(screenWidthDp, screenHeightDp, isLandscape) {
-        if (isLandscape) {
-            screenHeightDp * 0.015f
-        } else {
-            screenWidthDp * 0.02f
-        }
-    }
-
-    val buttonSize =
-        remember(screenWidthDp, screenHeightDp, isLandscape, buttonSpacing, horizontalPadding) {
-            if (isLandscape) {
-                val availableHeight = screenHeightDp * 0.8f
-                val totalVerticalSpacing = buttonSpacing * 3
-                val heightBasedSize = (availableHeight - totalVerticalSpacing) / 4f
-
-                val availableWidth = (screenWidthDp * 0.45f)
-                val totalHorizontalSpacing = buttonSpacing * 2
-                val widthBasedSize = (availableWidth - totalHorizontalSpacing) / 3f
-
-                minOf(heightBasedSize, widthBasedSize)
-            } else {
-                val availableWidth = screenWidthDp - (horizontalPadding * 2)
-                val totalSpacing = buttonSpacing * 2
-                (availableWidth - totalSpacing) / 3.5f
-            }
-        }
+    val horizontalPadding = if (isLandscape) 0.dp else screenWidthDp * 0.12f
+    val buttonSpacing = if (isLandscape) screenHeightDp * 0.015f else screenWidthDp * 0.02f
+    val buttonSize = if (isLandscape) 64.dp else 72.dp
 
     BackHandler {
         if (isFirstTimeSetup) {
@@ -131,10 +92,8 @@ fun SetPasswordScreen(
         }
     }
 
-    val fragmentActivity = LocalActivity.current as? androidx.fragment.app.FragmentActivity
-
     fun launchDeviceCredentialAuth() {
-        if (fragmentActivity == null) return
+        if (activity == null) return
         val executor = ContextCompat.getMainExecutor(context)
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(context.getString(R.string.authenticate_to_reset_pin_title))
@@ -144,7 +103,7 @@ fun SetPasswordScreen(
             )
             .build()
         val biometricPrompt = BiometricPrompt(
-            fragmentActivity, executor,
+            activity, executor,
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
@@ -153,13 +112,12 @@ fun SetPasswordScreen(
                     confirmPasswordState = ""
                     showInvalidOldPasswordError = false
                 }
-
             })
         biometricPrompt.authenticate(promptInfo)
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             if (isFirstTimeSetup && !isLandscape) {
                 TopAppBar(
@@ -174,7 +132,7 @@ fun SetPasswordScreen(
                         )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        containerColor = MaterialTheme.colorScheme.surface,
                         titleContentColor = MaterialTheme.colorScheme.onSurface
                     )
                 )

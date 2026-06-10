@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,12 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import dev.pranav.applock.R
 import dev.pranav.applock.features.applist.domain.AppInfo
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +53,7 @@ fun TriggerExclusionsScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             SearchTopBar(
-                title = "Trigger Exclusions",
+                title = stringResource(R.string.trigger_exclusions_title),
                 searchQuery = searchQuery,
                 onSearchQueryChange = viewModel::updateSearchQuery,
                 onBack = { navController.navigateUp() },
@@ -70,7 +73,7 @@ fun TriggerExclusionsScreen(
         ) {
             item {
                 Text(
-                    text = "Select apps that will NOT trigger locks when switching to locked apps.",
+                    text = stringResource(R.string.trigger_exclusions_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -94,7 +97,7 @@ fun TriggerExclusionsScreen(
                 if (excludedNotInList.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Manually Added Packages",
+                            text = stringResource(R.string.manually_added_packages),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(bottom = 4.dp)
@@ -108,7 +111,7 @@ fun TriggerExclusionsScreen(
                     }
                     item {
                         Text(
-                            text = "Installed Apps",
+                            text = stringResource(R.string.installed_apps),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
@@ -130,18 +133,18 @@ fun TriggerExclusionsScreen(
     if (showManualAddDialog.value) {
         AlertDialog(
             onDismissRequest = { showManualAddDialog.value = false },
-            title = { Text("Add Package Manually") },
+            title = { Text(stringResource(R.string.add_package_manually)) },
             text = {
                 Column {
                     Text(
-                        text = "Enter the package name of the app you want to exclude:",
+                        text = stringResource(R.string.exclude_package_name_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     OutlinedTextField(
                         value = manualPackageName,
                         onValueChange = viewModel::updateManualPackageName,
-                        label = { Text("Package Name") },
+                        label = { Text(stringResource(R.string.package_name_label)) },
                         placeholder = { Text("com.example.app") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -155,10 +158,10 @@ fun TriggerExclusionsScreen(
                         showManualAddDialog.value = false
                     },
                     enabled = manualPackageName.isNotBlank()
-                ) { Text("Add") }
+                ) { Text(stringResource(R.string.add_button)) }
             },
             dismissButton = {
-                TextButton(onClick = { showManualAddDialog.value = false }) { Text("Cancel") }
+                TextButton(onClick = { showManualAddDialog.value = false }) { Text(stringResource(R.string.cancel_button)) }
             }
         )
     }
@@ -190,7 +193,7 @@ private fun SearchTopBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_screen_back_cd))
                 }
                 Text(
                     text = title,
@@ -198,7 +201,7 @@ private fun SearchTopBar(
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = onAdd) {
-                    Icon(Icons.Default.Add, contentDescription = "Add package manually")
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_package_manually))
                 }
             }
 
@@ -211,7 +214,7 @@ private fun SearchTopBar(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = onSearchQueryChange,
-                    placeholder = { Text("Search apps or package names...") },
+                    placeholder = { Text(stringResource(R.string.search_apps_hint)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -229,7 +232,7 @@ private fun AppExclusionItem(app: AppInfo, isExcluded: Boolean, onToggle: () -> 
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable { onToggle() },
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -272,7 +275,7 @@ private fun ManualPackageItem(packageName: String, onToggle: () -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable { onToggle() },
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -282,7 +285,12 @@ private fun ManualPackageItem(packageName: String, onToggle: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-                Text("📦", style = MaterialTheme.typography.headlineMedium)
+                Icon(
+                    imageVector = Icons.Outlined.Shield,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -294,7 +302,7 @@ private fun ManualPackageItem(packageName: String, onToggle: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Manually added package",
+                    text = stringResource(R.string.manually_added_label),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

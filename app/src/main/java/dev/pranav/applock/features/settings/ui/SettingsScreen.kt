@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import dev.pranav.applock.R
 import dev.pranav.applock.core.broadcast.DeviceAdmin
 import dev.pranav.applock.core.navigation.Screen
+import dev.pranav.applock.core.navigation.findFragmentActivity
 import dev.pranav.applock.core.utils.LogUtils
 import dev.pranav.applock.core.utils.hasUsagePermission
 import dev.pranav.applock.core.utils.isAccessibilityServiceEnabled
@@ -64,6 +65,7 @@ fun SettingsScreen(
 
     var showDialog by remember { mutableStateOf(false) }
     var showUnlockTimeDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
     val shizukuPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -90,6 +92,7 @@ fun SettingsScreen(
     var antiUninstallEnabled by remember { mutableStateOf(appLockRepository.isAntiUninstallEnabled()) }
     var disableHapticFeedback by remember { mutableStateOf(appLockRepository.shouldDisableHaptics()) }
     var loggingEnabled by remember { mutableStateOf(appLockRepository.isLoggingEnabled()) }
+    var appLanguage by remember { mutableStateOf(appLockRepository.getAppLanguage()) }
 
     var showPermissionDialog by remember { mutableStateOf(false) }
     var showDeviceAdminDialog by remember { mutableStateOf(false) }
@@ -140,6 +143,20 @@ fun SettingsScreen(
                 unlockTimeDuration = newDuration
                 appLockRepository.setUnlockTimeDuration(newDuration)
                 showUnlockTimeDialog = false
+            }
+        )
+    }
+
+    if (showLanguageDialog) {
+        LanguageSelectionDialog(
+            currentLanguage = appLanguage,
+            onDismiss = { showLanguageDialog = false },
+            onConfirm = { newLanguage ->
+                appLanguage = newLanguage
+                appLockRepository.setAppLanguage(newLanguage)
+                showLanguageDialog = false
+                // Recreate activity to apply language changes
+                context.findFragmentActivity()?.recreate()
             }
         )
     }
@@ -376,6 +393,16 @@ fun SettingsScreen(
                 SettingsGroup(
                     items = listOf(
                         ActionSettingItem(
+                            icon = Icons.Default.Language,
+                            title = stringResource(R.string.language_settings_title),
+                            subtitle = when(appLanguage) {
+                                "ar" -> stringResource(R.string.language_arabic)
+                                "en" -> stringResource(R.string.language_english)
+                                else -> stringResource(R.string.language_system_default)
+                            },
+                            onClick = { showLanguageDialog = true }
+                        ),
+                        ActionSettingItem(
                             icon = Icons.Outlined.Security,
                             title = stringResource(R.string.settings_Screen_export_audit),
                             subtitle = stringResource(R.string.settings_screen_export_audit_desc),
@@ -570,7 +597,7 @@ fun SettingsCard(
                 .fillMaxWidth()
                 .padding(vertical = 1.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
             ),
             shape = shape
         ) {
@@ -751,6 +778,57 @@ fun UnlockTimeDurationDialog(
 }
 
 @Composable
+fun LanguageSelectionDialog(
+    currentLanguage: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    val languages = listOf("system", "en", "ar")
+    var selectedLanguage by remember { mutableStateOf(currentLanguage) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.language_settings_title)) },
+        text = {
+            Column {
+                languages.forEach { lang ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedLanguage = lang }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = selectedLanguage == lang,
+                            onClick = { selectedLanguage = lang }
+                        )
+                        Text(
+                            text = when (lang) {
+                                "en" -> stringResource(R.string.language_english)
+                                "ar" -> stringResource(R.string.language_arabic)
+                                else -> stringResource(R.string.language_system_default)
+                            },
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(selectedLanguage) }) {
+                Text(stringResource(R.string.confirm_button))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel_button))
+            }
+        }
+    )
+}
+
+@Composable
 fun BackendSelectionCard(
     appLockRepository: AppLockRepository,
     context: Context,
@@ -831,7 +909,6 @@ fun BackendSelectionCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BackendSelectionItem(
     backend: BackendImplementation,
@@ -854,13 +931,15 @@ fun BackendSelectionItem(
                 )
                 if (backend == BackendImplementation.SHIZUKU) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    Badge(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    Surface(
+                        color = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                        shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.settings_screen_backend_implementation_shizuku_advanced),
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                         )
                     }
                 }

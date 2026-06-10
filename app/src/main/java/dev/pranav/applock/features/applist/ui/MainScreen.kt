@@ -59,7 +59,6 @@ import rikka.shizuku.Shizuku
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(
-    ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalMaterial3Api::class
 )
 @Composable
@@ -150,9 +149,9 @@ fun MainScreen(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
-            MediumFlexibleTopAppBar(
+            MediumTopAppBar(
                 title = {
                     Text(
                         stringResource(R.string.app_name),
@@ -183,7 +182,7 @@ fun MainScreen(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = if (applockEnabled) "ON" else "OFF",
+                                text = if (applockEnabled) stringResource(R.string.status_on) else stringResource(R.string.status_off),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = if (applockEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -211,7 +210,7 @@ fun MainScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Block,
-                            contentDescription = "Trigger exclusions",
+                            contentDescription = stringResource(R.string.trigger_exclusions_title),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -224,15 +223,12 @@ fun MainScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Lock,
-                            contentDescription = "Anti-Uninstall",
+                            contentDescription = stringResource(R.string.anti_uninstall_title),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
+                scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
@@ -244,7 +240,7 @@ fun MainScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.main_screen_search_cd) // Update ideally
+                        contentDescription = stringResource(R.string.main_screen_search_cd)
                     )
                 }
             }
@@ -404,7 +400,7 @@ private fun ProtectedAppsDashboard(
     } else {
         LazyColumn(
             modifier = modifier,
-            contentPadding = PaddingValues(bottom = 88.dp, top = 8.dp), // Extra padding for FAB
+            contentPadding = PaddingValues(bottom = 88.dp, top = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(lockedApps, key = { it.packageName }) { appInfo ->
@@ -432,13 +428,13 @@ private fun EmptyDashboardState(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "No Protected Apps",
+            text = stringResource(R.string.no_protected_apps),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Tap the + button to selectively secure your apps.",
+            text = stringResource(R.string.tap_to_secure_apps),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -487,7 +483,6 @@ private fun AddProtectedAppsSheetContent(
             .fillMaxWidth()
             .fillMaxHeight(0.9f)
     ) {
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -496,7 +491,7 @@ private fun AddProtectedAppsSheetContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Select Apps",
+                text = stringResource(R.string.select_apps),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -504,36 +499,29 @@ private fun AddProtectedAppsSheetContent(
                 onClick = onSave,
                 enabled = selectedPackages.isNotEmpty()
             ) {
-                Text("Protect (${selectedPackages.size})")
+                Text(stringResource(R.string.protect_with_count, selectedPackages.size))
             }
         }
 
-        // Search Bar
         SearchBar(
-            inputField = {
-                SearchBarDefaults.InputField(
-                    query = searchQuery,
-                    onQueryChange = onSearchQueryChanged,
-                    onSearch = { focusManager.clearFocus() },
-                    expanded = false,
-                    onExpandedChange = {},
-                    placeholder = {
-                        Text(
-                            stringResource(R.string.main_screen_search_apps_placeholder),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = stringResource(R.string.main_screen_search_cd),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
+            query = searchQuery,
+            onQueryChange = onSearchQueryChanged,
+            onSearch = { focusManager.clearFocus() },
+            active = false,
+            onActiveChange = {},
+            placeholder = {
+                Text(
+                    stringResource(R.string.main_screen_search_apps_placeholder),
+                    style = MaterialTheme.typography.bodyLarge
                 )
             },
-            expanded = false,
-            onExpandedChange = {},
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(R.string.main_screen_search_cd),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -541,11 +529,9 @@ private fun AddProtectedAppsSheetContent(
             shape = RoundedCornerShape(28.dp),
             colors = SearchBarDefaults.colors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
-            ),
-            content = {},
-        )
+            )
+        ) {}
 
-        // List
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(vertical = 8.dp)
@@ -593,7 +579,7 @@ private fun ProtectedAppItem(
         },
         supportingContent = {
             Text(
-                text = "Protected",
+                text = stringResource(R.string.protected_label),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
@@ -604,7 +590,7 @@ private fun ProtectedAppItem(
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -630,7 +616,7 @@ private fun ProtectedAppItem(
             }
         },
         colors = ListItemDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -682,7 +668,7 @@ private fun SelectableAppItem(
             Surface(
                 modifier = Modifier.size(42.dp),
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -759,7 +745,7 @@ private fun CommunityDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = { onDismiss() }) {
                 Text(stringResource(R.string.maybe_later))
             }
         }

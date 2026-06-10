@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "dev.pranav.applock"
-    compileSdk = 37
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "dev.pranav.applock"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 243
         versionName = "2.4.3"
 

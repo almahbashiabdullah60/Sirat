@@ -1,38 +1,18 @@
 package dev.pranav.applock.features.setpassword.ui
 
+import android.content.res.Configuration
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,10 +24,12 @@ import com.mrhwsn.composelock.PatternLock
 import dev.pranav.applock.AppLockApplication
 import dev.pranav.applock.R
 import dev.pranav.applock.core.navigation.Screen
+import dev.pranav.applock.core.navigation.findFragmentActivity
 import dev.pranav.applock.core.utils.vibrate
 import dev.pranav.applock.data.repository.PreferencesRepository
+import dev.pranav.applock.ui.theme.titleMediumEmphasized
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatternSetPasswordScreen(
     navController: NavController,
@@ -64,15 +46,13 @@ fun PatternSetPasswordScreen(
 
     val minLength = 4
     val context = LocalContext.current
-    val activity = LocalActivity.current as? ComponentActivity
+    val activity = context.findFragmentActivity()
     val appLockRepository = remember {
         (context.applicationContext as? AppLockApplication)?.appLockRepository
     }
 
-    val windowInfo = LocalWindowInfo.current
-    val screenWidth = windowInfo.containerSize.width
-    val screenHeight = windowInfo.containerSize.height
-    val isLandscape = screenWidth > screenHeight
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     BackHandler {
         if (isFirstTimeSetup) {
@@ -91,10 +71,8 @@ fun PatternSetPasswordScreen(
         }
     }
 
-    val fragmentActivity = LocalActivity.current as? androidx.fragment.app.FragmentActivity
-
     fun launchDeviceCredentialAuth() {
-        if (fragmentActivity == null) return
+        if (activity == null) return
         val executor = ContextCompat.getMainExecutor(context)
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(context.getString(R.string.authenticate_to_reset_pin_title))
@@ -104,7 +82,7 @@ fun PatternSetPasswordScreen(
             )
             .build()
         val biometricPrompt = BiometricPrompt(
-            fragmentActivity, executor,
+            activity, executor,
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
@@ -177,7 +155,7 @@ fun PatternSetPasswordScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             if (isFirstTimeSetup && !isLandscape) {
                 TopAppBar(
@@ -192,7 +170,7 @@ fun PatternSetPasswordScreen(
                         )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        containerColor = MaterialTheme.colorScheme.surface,
                         titleContentColor = MaterialTheme.colorScheme.onSurface
                     )
                 )

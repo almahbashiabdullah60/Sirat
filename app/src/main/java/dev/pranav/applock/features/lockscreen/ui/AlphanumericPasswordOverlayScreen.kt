@@ -26,8 +26,8 @@ import dev.pranav.applock.R
 import dev.pranav.applock.core.utils.SecurityUtils
 import dev.pranav.applock.core.utils.appLockRepository
 import dev.pranav.applock.ui.icons.Fingerprint
+import dev.pranav.applock.ui.theme.headlineMediumEmphasized
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AlphanumericPasswordOverlayScreen(
     modifier: Modifier = Modifier,
@@ -56,7 +56,7 @@ fun AlphanumericPasswordOverlayScreen(
 
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surfaceContainer
+        color = MaterialTheme.colorScheme.surface
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (showCloseButton) {

@@ -2,12 +2,16 @@ package dev.pranav.applock
 
 import android.app.Application
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
+import android.os.LocaleList
 import android.util.Log
 import dev.pranav.applock.core.utils.LogUtils
 import dev.pranav.applock.data.repository.AppLockRepository
+import dev.pranav.applock.data.repository.PreferencesRepository
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.sui.Sui
+import java.util.Locale
 import kotlin.concurrent.thread
 
 class AppLockApplication : Application() {
@@ -16,8 +20,22 @@ class AppLockApplication : Application() {
         private set
 
     override fun attachBaseContext(base: Context?) {
-        super.attachBaseContext(base)
-        initializeHiddenApiBypass()
+        if (base == null) {
+            super.attachBaseContext(base)
+            return
+        }
+        val repository = PreferencesRepository(base)
+        val language = repository.getAppLanguage()
+        val context = if (language != "system") {
+            val locale = Locale(language)
+            Locale.setDefault(locale)
+            val config = Configuration(base.resources.configuration)
+            config.setLocales(LocaleList(locale))
+            base.createConfigurationContext(config)
+        } else {
+            base
+        }
+        super.attachBaseContext(context)
     }
 
     override fun onCreate() {
@@ -30,6 +48,7 @@ class AppLockApplication : Application() {
         thread(start = true, name = "LogPurge") {
             LogUtils.purgeOldLogs()
         }
+        initializeHiddenApiBypass()
     }
 
     private fun initializeHiddenApiBypass() {

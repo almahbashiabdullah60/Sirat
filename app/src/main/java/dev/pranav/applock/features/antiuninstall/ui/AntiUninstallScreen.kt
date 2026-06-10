@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import dev.pranav.applock.R
 import dev.pranav.applock.core.utils.appLockRepository
 import dev.pranav.applock.core.utils.blockUninstallForUser
 import dev.pranav.applock.core.utils.unblockUninstallForUser
@@ -185,7 +187,7 @@ fun AntiUninstallScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             SearchTopBar(
-                title = "Anti-Uninstall Protection",
+                title = stringResource(R.string.anti_uninstall_title),
                 searchQuery = searchQuery,
                 onSearchQueryChange = viewModel::updateSearchQuery,
                 onBack = { navController.navigateUp() },
@@ -205,7 +207,7 @@ fun AntiUninstallScreen(
         ) {
             item {
                 Text(
-                    text = "Select apps that will be protected from uninstallation.",
+                    text = stringResource(R.string.anti_uninstall_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -232,7 +234,7 @@ fun AntiUninstallScreen(
                 if (protectedNotInList.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Manually Added Packages",
+                            text = stringResource(R.string.manually_added_packages),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(bottom = 4.dp)
@@ -246,7 +248,7 @@ fun AntiUninstallScreen(
                     }
                     item {
                         Text(
-                            text = "Installed Apps",
+                            text = stringResource(R.string.installed_apps),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
@@ -269,18 +271,18 @@ fun AntiUninstallScreen(
         AlertDialog(
             onDismissRequest = { showManualAddDialog.value = false },
             properties = DialogProperties(usePlatformDefaultWidth = false),
-            title = { Text("Add Package Manually") },
+            title = { Text(stringResource(R.string.add_package_manually)) },
             text = {
                 Column(Modifier.fillMaxWidth(0.8f)) {
                     Text(
-                        text = "Enter the package name of the app you want to protect:",
+                        text = stringResource(R.string.enter_package_name_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     OutlinedTextField(
                         value = manualPackageName,
                         onValueChange = viewModel::updateManualPackageName,
-                        label = { Text("Package Name") },
+                        label = { Text(stringResource(R.string.package_name_label)) },
                         placeholder = { Text("com.example.app") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -294,10 +296,10 @@ fun AntiUninstallScreen(
                         showManualAddDialog.value = false
                     },
                     enabled = manualPackageName.isNotBlank()
-                ) { Text("Add") }
+                ) { Text(stringResource(R.string.add_button)) }
             },
             dismissButton = {
-                TextButton(onClick = { showManualAddDialog.value = false }) { Text("Cancel") }
+                TextButton(onClick = { showManualAddDialog.value = false }) { Text(stringResource(R.string.cancel_button)) }
             }
         )
     }
@@ -310,7 +312,7 @@ fun AntiUninstallScreen(
             text = {
                 Column(Modifier.fillMaxWidth(0.8f)) {
                     Text(
-                        text = "Please note that Shizuku must be installed and granted for this feature to work. You may revoke the permission later on, if you wish.\n\nThankfully, Shizuku does not require root, and its only required while you Block/Unblock uninstalls, so you don't need it always running ;)",
+                        text = stringResource(R.string.shizuku_desc_detailed),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -322,13 +324,13 @@ fun AntiUninstallScreen(
                         Shizuku.requestPermission(0)
                         showMessage.value = false
                     }
-                ) { Text("Confirm") }
+                ) { Text(stringResource(R.string.confirm_button)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     navController.popBackStack()
                     showMessage.value = false
-                }) { Text("Cancel") }
+                }) { Text(stringResource(R.string.cancel_button)) }
             }
         )
     }
@@ -360,7 +362,7 @@ private fun SearchTopBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_screen_back_cd))
                 }
                 Text(
                     text = title,
@@ -368,7 +370,7 @@ private fun SearchTopBar(
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = onAdd) {
-                    Icon(Icons.Default.Add, contentDescription = "Add package manually")
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_package_manually))
                 }
             }
 
@@ -381,7 +383,7 @@ private fun SearchTopBar(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = onSearchQueryChange,
-                    placeholder = { Text("Search apps or package names...") },
+                    placeholder = { Text(stringResource(R.string.search_apps_hint)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -399,7 +401,7 @@ private fun AppProtectionItem(app: AppInfo, isProtected: Boolean, onToggle: () -
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable { onToggle() },
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -442,7 +444,7 @@ private fun ManualPackageItem(packageName: String, onToggle: () -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable { onToggle() },
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -469,7 +471,7 @@ private fun ManualPackageItem(packageName: String, onToggle: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Manually added package",
+                    text = stringResource(R.string.manually_added_label),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

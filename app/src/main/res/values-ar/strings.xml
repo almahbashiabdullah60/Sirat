@@ -1,6 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">قفل التطبيقات</string>
+
     <string name="device_admin_description">يمنع الأشخاص غير المصرح لهم من إلغاء تثبيت التطبيق.</string>
     <string name="accessibility_service_description">يسمح لقفل التطبيقات باكتشاف فتح التطبيقات المحمية وعرض شاشة التحقق بكلمة المرور.</string>
+
+    <string name="unlock_to_disable_admin">أدخل كلمة المرور لتعطيل صلاحية المسؤول.</string>
+    <string name="incorrect_pin_try_again">رمز PIN غير صحيح. حاول مرة أخرى.</string>
+    <string name="password_verified_admin">تم التحقق من كلمة المرور، يمكنك الآن تعطيل إذن المسؤول.</string>
+    <string name="choose_app_detection">اختر طريقة اكتشاف التطبيقات</string>
+    <string name="app_detection_desc">اختر كيف تود أن يكتشف التطبيق تشغيل التطبيقات المحمية.</string>
+    <string name="notif_perm">إذن الإشعارات</string>
+    <string name="notif_perm_desc">يحتاج التطبيق لإذن الإشعارات لإبقائك على اطلاع وضمان عمله في الخلفية بشكل صحيح. اضغط \'التالي\' لمنح الإذن.</string>
+    <string name="notif_perm_granted">تم منح إذن الإشعارات تلقائياً في إصدار أندرويد الخاص بك.</string>
+    <string name="welc_applock">مرحباً بك في قفل التطبيقات</string>
+    <string name="welcome_desc">احمِ تطبيقاتك وخصوصيتك. سنقوم بإرشادك خلال إعداد سريع.</string>
+    <string name="secure_apps">أمّن تطبيقاتك</string>
+    <string name="secure_apps_desc">حافظ على خصوصية تطبيقاتك باستخدام آليات قفل متطورة.</string>
+    <string name="display_over_apps">العرض فوق التطبيقات الأخرى</string>
+    <string name="display_over_apps_desc">يحتاج التطبيق لإذن "الظهور فوق التطبيقات الأخرى" لإظهار شاشة القفل. اضغط \'التالي\' وقم بتفعيل الإذن.</string>
+
+    <!-- AppIntroScreen -->
+    <string name="notification_permission_required_desc">إذن الإشعارات مطلوب ليعمل التطبيق بشكل صحيح.</string>
+    <string name="shizuku_permission_granted">تم منح إذن Shizuku بنجاح.</string>
+    <string name="shizuku_permission_required_desc">إذن Shizuku مطلوب للميزات المتقدمة.</string>
+    <string name="allow_display_over_other_apps">يرجى السماح للتطبيق بالعرض فوق التطبيقات الأخرى.</string>
+    <string name="disable_battery_optimization_title">تعطيل تحسين البطارية</string>
+    <string name="disable_battery_optimization_desc">لضمان عمل التطبيق بشكل موثوق في الخلفية، يرجى تعطيل تحسينات البطارية للتطبيق.</string>
+    <string name="accessibility_service_title">خدمة إمكانية الوصول</string>
+    <string name="accessibility_service_card_desc">الطريقة القياسية التي تعمل على معظم الأجهزة. تتطلب إذن إمكانية الوصول.</string>
+    <string name="usage_stats_title">إحصائيات الاستخدام</string>
+    <string name="usage_stats_card_desc">طريقة تجريبية تستخدم إحصائيات استخدام النظام. تعمل بشكل أفضل على بعض الأجهزة.</string>
+    <string name="shizuku_service_title">خدمة Shizuku</string>
+    <string name="shizuku_service_card_desc">طريقة متقدمة بأداء أفضل وتجربة فائقة. تتطلب تثبيت تطبيق Shizuku وتفعيله عبر ADB.</string>
+    <string name="can_change_later_in_settings">يمكنك تغيير هذا لاحقاً من الإعدادات.</string>
+    <string name="app_intro_accessibility_desc">خدمة إمكانية الوصول مطلوبة ليعمل التطبيق بشكل صحيح.</string>
+    <string name="app_intro_usage_stats_title">إذن إحصائيات الاستخدام</string>
+    <string name="app_intro_usage_stats_desc">هذا الإذن مطلوب لاكتشاف وقت تشغيل التطبيقات المقفلة.</string>
+    <string name="app_intro_shizuku_desc">توفر Shizuku ميزات متقدمة مثل قفل تطبيقات النظام والمزيد.</string>
+    <string name="app_intro_complete_privacy_title">خصوصية كاملة</string>
+    <string name="app_intro_complete_privacy_desc">بياناتك لا تغادر جهازك أبداً. قفل التطبيقات يحمي خصوصيتك في جميع الأوقات.</string>
+    <string name="all_permissions_required">جميع الأذونات مطلوبة للمتابعة.</string>
+    <string name="next_button">التالي</string>
+    <string name="get_started_button">ابدأ الآن</string>
+
+    <!-- PasswordOverlayScreen -->
+    <string name="default_app_name">التطبيق</string>
+    <string name="this_app">هذا التطبيق</string>
+    <string name="unlock_app_title">فتح %1$s</string>
+    <string name="confirm_biometric_subtitle">أكد الهوية عبر البصمة للمتابعة</string>
+    <string name="use_pin_button">استخدم PIN</string>
+    <string name="enter_password_to_continue">أدخل كلمة المرور للمتابعة</string>
+    <string name="biometric_authentication_cd">المصادقة الحيوية</string>
+
+    <!-- SetPasswordScreen -->
+    <string name="set_pin_to_continue_toast">يرجى تعيين رمز PIN للمتابعة</string>
+    <string name="authenticate_to_reset_pin_title">تأكيد الهوية لإعادة تعيين PIN</string>
+    <string name="use_device_pin_pattern_password_subtitle">استخدم رمز PIN أو النمط أو كلمة مرور الجهاز</string>
+    <string name="enter_current_pin_title">أدخل رمز PIN الحالي</string>
+    <string name="confirm_pin_title">تأكيد رمز PIN</string>
+    <string name="set_new_pin_title">تعيين PIN جديد</string>
+    <string name="create_pin_explanation">يرجى إنشاء رمز PIN لحماية تطبيقاتك المقفلة.</string>
+    <string name="enter_current_pin_label">أدخل رمز PIN الحالي الخاص بك</string>
+    <string name="confirm_new_pin_label">أكد رمز PIN الجديد</string>
+    <string name="create_new_pin_label">إنشاء رمز PIN جديد</string>
+    <string name="tooltip_enter_current_pin">أدخل رمز PIN الحالي للمتابعة</string>
+    <string name="tooltip_confirm_pin">يرجى إدخال نفس رمز PIN مرة أخرى للتأكيد</string>
+    <string name="tooltip_create_pin_min_length">أنشئ رمز PIN مكون من 4 أرقام على الأقل</string>
+    <string name="information_cd">معلومات</string>
+    <string name="pins_dont_match_error">الرموز غير متطابقة. حاول مرة أخرى.</string>
+    <string name="pin_min_length_error">يجب أن يتكون رمز PIN من 4 أرقام على الأقل</string>
+    <string name="re_enter_new_pin_confirm_label">أعد إدخال رمز PIN الجديد للتأكيد</string>
+    <string name="reset_using_device_password_button">إعادة تعيين باستخدام كلمة مرور الجهاز</string>
+    <string name="cancel_button">إلغاء</string>
+    <string name="start_over_button">البدء من جديد</string>
+    <string name="password_set_successfully_toast">تم تعيين كلمة المرور بنجاح.</string>
+    <string name="use_pattern_button">استخدام نمط</string>
+    <string name="use_password_button">استخدام كلمة مرور</string>
+    <string name="use_pin_instead">استخدام PIN</string>
+
+    <!-- Alphanumeric Password Strings -->
+    <string name="set_alphanumeric_password_title">تعيين كلمة المرور</string>
+    <string name="create_alphanumeric_password_label">إنشاء كلمة مرور</string>
+    <string name="confirm_alphanumeric_password_label">تأكيد كلمة المرور</string>
+    <string name="enter_current_password_label">أدخل كلمة المرور الحالية</string>
+    <string name="password_hint">أدخل كلمة المرور</string>
+    <string name="password_too_short_error">يجب أن تتكون كلمة المرور من 4 أحرف على الأقل</string>
+    <string name="password_too_long_error">يجب ألا تتجاوز كلمة المرور 64 حرفاً</string>
+    <string name="passwords_dont_match_error">كلمات المرور غير متطابقة</string>
+    <string name="incorrect_password_try_again">كلمة المرور غير صحيحة. حاول مرة أخرى.</string>
+
+    <!-- MainScreen -->
+    <string name="main_screen_anti_uninstall_log">حماية إلغاء التثبيت مفعلة</string>
+    <string name="main_screen_shizuku_not_available_toast">Shizuku غير متوفر. يرجى تثبيته وإعداده.</string>
+    <string name="main_screen_overlay_permission_dialog_title">إذن العرض مطلوب</string>
+    <string name="main_screen_overlay_permission_dialog_text">يرجى منح التطبيق إذن العرض فوق التطبيقات الأخرى من الإعدادات لإظهار شاشة القفل.</string>
+    <string name="main_screen_overlay_permission_open_settings_button">فتح الإعدادات</string>
+    <string name="main_screen_shizuku_manual_permission_toast">يرجى منح إذن Shizuku يدوياً.</string>
+    <string name="main_screen_device_admin_explanation">يتطلب قفل التطبيقات إذن مسؤول الجهاز لمنع إلغاء التثبيت.</string>
+    <string name="main_screen_join_community_dialog_title">انضم إلى المجتمع</string>
+    <string name="main_screen_join_community_dialog_text">انضم إلى مجتمع ديسكورد للحصول على التحديثات والدعم.</string>
+    <string name="main_screen_join_community_join_discord_button">انضم لديسكورد</string>
+    <string name="main_screen_join_community_dismiss_button">إغلاق</string>
+    <string name="main_screen_support_development_dialog_title">دعم التطوير</string>
+    <string name="main_screen_support_development_donate_button">تبرع</string>
+    <string name="main_screen_app_protection_cd">حماية التطبيقات</string>
+    <string name="main_screen_settings_cd">الإعدادات</string>
+    <string name="main_screen_loading_applications_text">جاري تحميل التطبيقات…</string>
+    <string name="main_screen_search_apps_placeholder">البحث عن تطبيقات</string>
+    <string name="main_screen_search_cd">بحث</string>
+    <string name="main_screen_empty_search_title">لم يتم العثور على تطبيقات</string>
+    <string name="main_screen_empty_search_subtitle">حاول تغيير كلمة البحث.</string>
+    <string name="status_on">تشغيل</string>
+    <string name="status_off">إيقاف</string>
+    <string name="no_protected_apps">لا توجد تطبيقات محمية.</string>
+    <string name="tap_to_secure_apps">اضغط على زر + لتأمين تطبيقاتك.</string>
+    <string name="select_apps">اختر التطبيقات</string>
+    <string name="protect_with_count">حماية (%1$d)</string>
+    <string name="protected_label">محمي</string>
+
+    <!-- SettingsScreen -->
+    <string name="settings_screen_title">الإعدادات</string>
+    <string name="settings_screen_back_cd">رجوع</string>
+    <string name="settings_screen_lock_screen_customization_title">تخصيص شاشة القفل</string>
+    <string name="settings_screen_max_brightness_title">أقصى سطوع</string>
+    <string name="settings_screen_max_brightness_desc">عرض شاشة القفل بأقصى سطوع للوضوح.</string>
+    <string name="settings_screen_biometric_auth_title">المصادقة الحيوية</string>
+    <string name="settings_screen_biometric_auth_desc">استخدم البصمة أو التعرف على الوجه إذا كان متاحاً.</string>
+    <string name="settings_screen_auto_unlock_title">فتح تلقائي</string>
+    <string name="settings_screen_auto_unlock_desc">فتح التطبيق بمجرد إدخال PIN الصحيح.</string>
+    <string name="settings_screen_unlock_duration_title">مدة بقاء القفل مفتوحاً</string>
+    <string name="settings_screen_unlock_duration_desc">إبقاء التطبيقات مفتوحة لفترة محددة بعد أول فتح.</string>
+    <string name="settings_screen_unlock_duration_dialog_title">ضبط مدة الفتح</string>
+    <string name="settings_screen_security_title">الأمان</string>
+    <string name="settings_screen_change_pin_title">تغيير PIN</string>
+    <string name="settings_screen_change_pin_desc">تغيير كلمة المرور أو النمط أو رمز PIN الحالي.</string>
+    <string name="settings_screen_anti_uninstall_title">حماية إلغاء التثبيت</string>
+    <string name="settings_screen_anti_uninstall_desc">تطلب المصادقة قبل محاولة إلغاء تثبيت التطبيق.</string>
+    <string name="settings_screen_haptic_feedback_title">الاهتزاز عند اللمس</string>
+    <string name="settings_screen_haptic_feedback_desc">الاهتزاز عند التفاعل مع أزرار شاشة القفل.</string>
+    <string name="settings_screen_backend_implementation_title">طريقة الاكتشاف (Backend)</string>
+    <string name="settings_screen_about_title">حول</string>
+    <string name="settings_screen_developer_title">المطور</string>
+    <string name="settings_screen_advanced_title">متقدم</string>
+    <string name="settings_screen_unlock_until_screen_off">حتى إغلاق الشاشة</string>
+    <string name="links_title">روابط</string>
+    <string name="discord_community">مجتمع ديسكورد</string>
+    <string name="source_code">الكود المصدري</string>
+    <string name="report_issue">الإبلاغ عن مشكلة</string>
+
+    <!-- DeviceAdminPermissionDialog.kt -->
+    <string name="device_admin_permission_dialog_title">إذن المسؤول مطلوب</string>
+    <string name="device_admin_permission_dialog_text">إذن مسؤول الجهاز مطلوب لمنع إلغاء تثبيت التطبيق بشكل غير مصرح به.</string>
+    <string name="anti_uninstall_accessibility_permission_dialog_title">إذن إمكانية الوصول مطلوب</string>
+    <string name="anti_uninstall_accessibility_permission_dialog_text">خدمة إمكانية الوصول مطلوبة لتعزيز حماية إلغاء التثبيت.</string>
+    <string name="shizuku_permission_dialog_title">إذن Shizuku</string>
+    <string name="shizuku_permission_dialog_text_1">إذن Shizuku مطلوب للميزات المتقدمة مثل حماية تطبيقات النظام.</string>
+
+    <!-- Pattern Lock Strings -->
+    <string name="enter_pattern_to_continue">ارسم النمط للمتابعة</string>
+    <string name="incorrect_pattern_try_again">نمط غير صحيح. حاول مرة أخرى.</string>
+
+    <!-- Language Settings -->
+    <string name="language_settings_title">اللغة</string>
+    <string name="language_settings_desc">اختر لغة التطبيق المفضلة.</string>
+    <string name="language_arabic">العربية</string>
+    <string name="language_english">الإنجليزية</string>
+    <string name="language_system_default">لغة النظام</string>
+
+    <string name="join_community">انضم للمجتمع</string>
+    <string name="join_community_desc">انضم إلى مجتمع ديسكورد للتواصل مع المستخدمين الآخرين ومشاركة الملاحظات.</string>
+    <string name="join_discord">انضم لديسكورد</string>
+    <string name="maybe_later">ربما لاحقاً</string>
+
+    <string name="donate">تبرع</string>
+    <string name="donate_subtitle">حافظ على التطبيق مجانياً وخالياً من الإعلانات.</string>
+
+    <!-- Anti-Uninstall Extra Strings -->
+    <string name="anti_uninstall_title">حماية إلغاء التثبيت</string>
+    <string name="anti_uninstall_subtitle">اختر التطبيقات التي سيتم حمايتها من إلغاء التثبيت.</string>
+    <string name="manually_added_packages">الحزم المضافة يدوياً</string>
+    <string name="installed_apps">التطبيقات المثبتة</string>
+    <string name="add_package_manually">إضافة حزمة يدوياً</string>
+    <string name="enter_package_name_desc">أدخل اسم الحزمة للتطبيق الذي تريد حمايته:</string>
+    <string name="package_name_label">اسم الحزمة</string>
+    <string name="add_button">إضافة</string>
+    <string name="confirm_button">تأكيد</string>
+    <string name="shizuku_desc_detailed">يرجى ملاحظة أن Shizuku يجب أن يكون مثبتاً ومفعلاً لتعمل هذه الميزة.</string>
+    <string name="search_apps_hint">البحث عن تطبيقات أو حزم...</string>
+    <string name="manually_added_label">حزمة مضافة يدوياً</string>
+    <string name="trigger_exclusions_title">استثناءات التشغيل</string>
+    <string name="trigger_exclusions_subtitle">اختر التطبيقات التي لن تقوم بتفعيل القفل.</string>
+    <string name="exclude_package_name_desc">أدخل اسم الحزمة للتطبيق الذي تريد استثناءه:</string>
+    <string name="settings_screen_backend_implementation_shizuku_advanced">متقدم</string>
+
+    <string name="settings_screen_backend_accessibility_name">خدمة إمكانية الوصول</string>
+    <string name="settings_screen_backend_usage_name">إحصائيات الاستخدام</string>
+    <string name="settings_screen_backend_shizuku_name">خدمة Shizuku</string>
+    <string name="settings_screen_backend_accessibility_desc">الطريقة القياسية التي تعمل على معظم الأجهزة.</string>
+    <string name="settings_screen_backend_usage_desc">طريقة تجريبية، تعمل بشكل أفضل على بعض الأجهزة.</string>
+    <string name="settings_screen_backend_shizuku_desc">طريقة متقدمة باستخدام Shizuku والواجهات الداخلية.</string>
 </resources>

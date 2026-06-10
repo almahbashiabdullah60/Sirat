@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import dev.pranav.applock.R
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DonateButton() {
     var showSheet by remember { mutableStateOf(false) }
@@ -79,7 +79,7 @@ fun DonateButton() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DonateModalBottomSheet(
     onDismiss: () -> Unit,
@@ -146,8 +146,7 @@ fun DonateModalBottomSheet(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                shapes = ButtonDefaults.shapes()
+                    .height(56.dp)
             ) {
                 Icon(Icons.Rounded.Favorite, null, Modifier.size(24.dp))
                 Spacer(Modifier.width(12.dp))

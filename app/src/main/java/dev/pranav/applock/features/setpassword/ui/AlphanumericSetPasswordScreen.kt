@@ -3,7 +3,6 @@ package dev.pranav.applock.features.setpassword.ui
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.*
@@ -15,7 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
@@ -31,10 +29,12 @@ import androidx.navigation.NavController
 import dev.pranav.applock.AppLockApplication
 import dev.pranav.applock.R
 import dev.pranav.applock.core.navigation.Screen
+import dev.pranav.applock.core.navigation.findFragmentActivity
 import dev.pranav.applock.core.utils.SecurityUtils
 import dev.pranav.applock.data.repository.PreferencesRepository
+import dev.pranav.applock.ui.theme.titleMediumEmphasized
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlphanumericSetPasswordScreen(
     navController: NavController,
@@ -55,7 +55,7 @@ fun AlphanumericSetPasswordScreen(
     val minLength = 8
     val maxLength = 64
     val context = LocalContext.current
-    val activity = LocalActivity.current as? ComponentActivity
+    val activity = context.findFragmentActivity()
     val appLockRepository = remember {
         (context.applicationContext as? AppLockApplication)?.appLockRepository
     }
@@ -82,10 +82,8 @@ fun AlphanumericSetPasswordScreen(
         }
     }
 
-    val fragmentActivity = LocalActivity.current as? androidx.fragment.app.FragmentActivity
-
     fun launchDeviceCredentialAuth() {
-        if (fragmentActivity == null) return
+        if (activity == null) return
         val executor = ContextCompat.getMainExecutor(context)
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(context.getString(R.string.authenticate_to_reset_pin_title))
@@ -95,7 +93,7 @@ fun AlphanumericSetPasswordScreen(
             )
             .build()
         val biometricPrompt = BiometricPrompt(
-            fragmentActivity, executor,
+            activity, executor,
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
@@ -170,7 +168,7 @@ fun AlphanumericSetPasswordScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TopAppBar(
                 title = {
@@ -184,7 +182,7 @@ fun AlphanumericSetPasswordScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )

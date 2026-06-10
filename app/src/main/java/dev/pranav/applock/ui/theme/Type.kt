@@ -1,16 +1,12 @@
 package dev.pranav.applock.ui.theme
 
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-val default = Typography()
-
-// Enhanced Typography definitions matching the appintro module
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+// Standard Typography definitions
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -19,18 +15,34 @@ val Typography = Typography(
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
     ),
-    titleMediumEmphasized = TextStyle(
+    titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp,
+        fontSize = 22.sp,
         lineHeight = 28.sp,
-        letterSpacing = 0.15.sp
+        letterSpacing = 0.sp
     ),
-    titleLargeEmphasized = TextStyle(
+    titleMedium = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
         letterSpacing = 0.15.sp
     ),
 )
+
+// Extensions to maintain compatibility with existing code that used "Emphasized"
+val Typography.titleMediumEmphasized: TextStyle
+    get() = titleMedium.copy(fontWeight = FontWeight.Bold)
+
+val Typography.titleLargeEmphasized: TextStyle
+    get() = titleLarge.copy(fontWeight = FontWeight.Bold)
+
+val Typography.headlineMediumEmphasized: TextStyle
+    get() = headlineMedium.copy(fontWeight = FontWeight.Bold)
+
+val Typography.headlineLargeEmphasized: TextStyle
+    get() = headlineLarge.copy(fontWeight = FontWeight.Bold)
+
+val Typography.bodyLargeEmphasized: TextStyle
+    get() = bodyLarge.copy(fontWeight = FontWeight.Bold)

@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.dp
 /**
  * Displays the content of a single intro page with enhanced Material 3 design and animations
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun IntroPageContent(
     page: IntroPage,
@@ -52,7 +50,7 @@ fun IntroPageContent(
     // Optimization: Use a single transition state instead of multiple
     val contentVisible = remember { MutableTransitionState(false) }
 
-    // Trigger animations when page becomes visible - simplified animation trigger
+    // Trigger animations when page becomes visible
     LaunchedEffect(isVisible) {
         contentVisible.targetState = isVisible
     }
@@ -86,16 +84,16 @@ fun IntroPageContent(
                     .fillMaxSize()
                     .padding(bottom = 80.dp) // Extra padding for bottom navigation
             ) {
-                // Icon with optimized animation - use a more performant animation spec
+                // Icon with optimized animation
                 AnimatedVisibility(
                     visibleState = contentVisible,
                     enter = fadeIn(animationSpec = tween(300)) +
                             scaleIn(
                                 animationSpec = spring(
                                     dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessLow // Lower stiffness for smoother animation
+                                    stiffness = Spring.StiffnessLow
                                 ),
-                                initialScale = 0.8f // Start closer to final size
+                                initialScale = 0.8f
                             ),
                     exit = fadeOut(animationSpec = tween(200))
                 ) {
@@ -130,7 +128,7 @@ fun IntroPageContent(
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // Title with sequential animation - slightly delayed
+                // Title with sequential animation
                 AnimatedVisibility(
                     visibleState = contentVisible,
                     enter = fadeIn(animationSpec = tween(300, delayMillis = 100)) +
@@ -139,13 +137,13 @@ fun IntroPageContent(
                                     dampingRatio = Spring.DampingRatioMediumBouncy,
                                     stiffness = Spring.StiffnessLow
                                 ),
-                                initialOffsetY = { it / 3 } // Smaller initial offset for smoother animation
+                                initialOffsetY = { it / 3 }
                             ),
                     exit = fadeOut(animationSpec = tween(200))
                 ) {
                     Text(
                         text = page.title,
-                        style = MaterialTheme.typography.headlineMediumEmphasized,
+                        style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = contentColor,
                         textAlign = TextAlign.Center,
@@ -164,7 +162,7 @@ fun IntroPageContent(
                                     dampingRatio = Spring.DampingRatioMediumBouncy,
                                     stiffness = Spring.StiffnessLow
                                 ),
-                                initialOffsetY = { it / 4 } // Even smaller initial offset
+                                initialOffsetY = { it / 4 }
                             ),
                     exit = fadeOut(animationSpec = tween(150))
                 ) {

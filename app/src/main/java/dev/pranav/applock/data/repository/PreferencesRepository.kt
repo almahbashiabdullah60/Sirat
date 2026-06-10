@@ -146,11 +146,11 @@ class PreferencesRepository(context: Context) {
         settingsPrefs.edit { putBoolean(KEY_COMMUNITY_LINK_SHOWN, shown) }
     }
 
-    fun isShowDonateLink(context: Context): Boolean {
+    fun isShowDonateLink(): Boolean {
         return settingsPrefs.getBoolean(KEY_SHOW_DONATE_LINK, false)
     }
 
-    fun setShowDonateLink(context: Context, show: Boolean) {
+    fun setShowDonateLink(show: Boolean) {
         settingsPrefs.edit { putBoolean(KEY_SHOW_DONATE_LINK, show) }
     }
 
@@ -160,6 +160,14 @@ class PreferencesRepository(context: Context) {
 
     fun setLoggingEnabled(enabled: Boolean) {
         settingsPrefs.edit { putBoolean(KEY_LOGGING_ENABLED, enabled) }
+    }
+
+    fun setAppLanguage(languageCode: String) {
+        settingsPrefs.edit { putString(KEY_APP_LANGUAGE, languageCode) }
+    }
+
+    fun getAppLanguage(): String {
+        return settingsPrefs.getString(KEY_APP_LANGUAGE, "system") ?: "system"
     }
 
     companion object {
@@ -182,6 +190,7 @@ class PreferencesRepository(context: Context) {
         private const val KEY_AUTO_UNLOCK = "auto_unlock"
         private const val KEY_SHOW_SYSTEM_APPS = "show_system_apps"
         private const val KEY_LOCK_TYPE = "lock_type"
+        private const val KEY_APP_LANGUAGE = "app_language"
 
         private const val DEFAULT_PROTECT_ENABLED = true
         private const val DEFAULT_UNLOCK_DURATION = 0

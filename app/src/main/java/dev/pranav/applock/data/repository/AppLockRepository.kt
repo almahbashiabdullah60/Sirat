@@ -92,11 +92,14 @@ class AppLockRepository(private val context: Context) {
 
     fun isShowCommunityLink(): Boolean = preferencesRepository.isShowCommunityLink()
     fun setCommunityLinkShown(shown: Boolean) = preferencesRepository.setCommunityLinkShown(shown)
-    fun isShowDonateLink(): Boolean = preferencesRepository.isShowDonateLink(context)
-    fun setShowDonateLink(show: Boolean) = preferencesRepository.setShowDonateLink(context, show)
+    fun isShowDonateLink(): Boolean = preferencesRepository.isShowDonateLink()
+    fun setShowDonateLink(show: Boolean) = preferencesRepository.setShowDonateLink(show)
 
     fun isLoggingEnabled(): Boolean = preferencesRepository.isLoggingEnabled()
     fun setLoggingEnabled(enabled: Boolean) = preferencesRepository.setLoggingEnabled(enabled)
+
+    fun setAppLanguage(languageCode: String) = preferencesRepository.setAppLanguage(languageCode)
+    fun getAppLanguage(): String = preferencesRepository.getAppLanguage()
 
     fun setActiveBackend(backend: BackendImplementation) =
         backendServiceManager.setActiveBackend(backend)
