@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.pranav.hidden_api"
+    namespace = "com.atyafcode.sirat.hidden_api"
     compileSdk = 35
 
     defaultConfig {

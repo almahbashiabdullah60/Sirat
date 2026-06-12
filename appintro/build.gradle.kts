@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.pranav.appintro"
+    namespace = "com.atyafcode.sirat.appintro"
     compileSdk = 35
 
     defaultConfig {

@@ -10,11 +10,11 @@ Architecture & Performance:
 
 Security & Privacy Improvements:
 
-* Fixed system unlock conflict: Resolved critical issue where app lock screen would incorrectly appear over the system unlock screen.
+* Fixed system unlock conflict: Resolved critical issue where sirat screen would incorrectly appear over the system unlock screen.
 * Close stale password overlays (#3): Fixed issue when lock screen pops up after closing the locked app from recents.
 * Improved lock screen behavior and UI: Enhanced verification to prevent unnecessary lock screens with improved user interface.
 * Lock the app and remove lockscreen from recents: Prevented unauthorized access through recent apps list.
-* Locked List: The app now asks for password every time you open App Lock to prevent unauthorized modifications.
+* Locked List: The app now asks for password every time you open sirat to prevent unauthorized modifications.
 
 User Experience:
 
@@ -26,3 +26,4 @@ User Experience:
 
 Thank you for choosing AppLock for your privacy needs. We welcome your feedback and suggestions
 through GitHub issues!
+

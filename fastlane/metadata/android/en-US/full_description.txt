@@ -20,8 +20,9 @@ Perfect for:
 * Parents restricting access for children
 * Professionals protecting work apps
 
-App Lock is designed to be lightweight and efficient, with minimal battery impact. It runs entirely offline, ensuring your data remains private and secure.
+sirat is designed to be lightweight and efficient, with minimal battery impact. It runs entirely offline, ensuring your data remains private and secure.
 
 Built with Jetpack Compose and Material 3 for a smooth, intuitive experience. AppLock is free, open-source, and respects your privacy — always.
 
 Source code and issue tracker: https://github.com/PranavPurwar/AppLock
+

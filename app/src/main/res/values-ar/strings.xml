@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">قفل التطبيقات</string>
+    <string name="app_name">صراط</string>
 
-    <string name="device_admin_description">يمنع الأشخاص غير المصرح لهم من إلغاء تثبيت التطبيق.</string>
-    <string name="accessibility_service_description">يسمح لقفل التطبيقات باكتشاف فتح التطبيقات المحمية وعرض شاشة التحقق بكلمة المرور.</string>
+    <string name="device_admin_description">يساعد في الحفاظ على ثباتك بمنع حذف التطبيق في لحظات الضعف.</string>
+    <string name="accessibility_service_description">يساعدك صراط على الثبات على عهدك عبر تنبيهك وحمايتك عند محاولة الوصول لمحتوى لا يناسب أهدافك.</string>
 
     <string name="unlock_to_disable_admin">أدخل كلمة المرور لتعطيل صلاحية المسؤول.</string>
     <string name="incorrect_pin_try_again">رمز PIN غير صحيح. حاول مرة أخرى.</string>
@@ -11,17 +11,17 @@
     <string name="choose_app_detection">اختر طريقة اكتشاف التطبيقات</string>
     <string name="app_detection_desc">اختر كيف تود أن يكتشف التطبيق تشغيل التطبيقات المحمية.</string>
     <string name="notif_perm">إذن الإشعارات</string>
-    <string name="notif_perm_desc">يحتاج التطبيق لإذن الإشعارات لإبقائك على اطلاع وضمان عمله في الخلفية بشكل صحيح. اضغط \'التالي\' لمنح الإذن.</string>
+    <string name="notif_perm_desc">يحتاج صراط لإذن الإشعارات لإبقائك على اطلاع وضمان عمله في الخلفية بشكل صحيح. اضغط \'التالي\' لمنح الإذن.</string>
     <string name="notif_perm_granted">تم منح إذن الإشعارات تلقائياً في إصدار أندرويد الخاص بك.</string>
-    <string name="welc_applock">مرحباً بك في قفل التطبيقات</string>
-    <string name="welcome_desc">احمِ تطبيقاتك وخصوصيتك. سنقوم بإرشادك خلال إعداد سريع.</string>
-    <string name="secure_apps">أمّن تطبيقاتك</string>
-    <string name="secure_apps_desc">حافظ على خصوصية تطبيقاتك باستخدام آليات قفل متطورة.</string>
+    <string name="welc_sirat">مرحباً بك في صراط</string>
+    <string name="welcome_desc">خطوتك الأولى نحو حياة أكثر نقاءً واتزاناً. سنرافقك في رحلة التغيير وبناء إرادة أقوى.</string>
+    <string name="secure_apps">احمِ قِيَمك</string>
+    <string name="secure_apps_desc">اختر التطبيقات التي تود حمايتها لضمان بقائك على المسار الصحيح بعيداً عن المشتتات.</string>
     <string name="display_over_apps">العرض فوق التطبيقات الأخرى</string>
-    <string name="display_over_apps_desc">يحتاج التطبيق لإذن "الظهور فوق التطبيقات الأخرى" لإظهار شاشة القفل. اضغط \'التالي\' وقم بتفعيل الإذن.</string>
+    <string name="display_over_apps_desc">يحتاج صراط لإذن "الظهور فوق التطبيقات الأخرى" لإظهار شاشة القفل. اضغط \'التالي\' وقم بتفعيل الإذن.</string>
 
     <!-- AppIntroScreen -->
-    <string name="notification_permission_required_desc">إذن الإشعارات مطلوب ليعمل التطبيق بشكل صحيح.</string>
+    <string name="notification_permission_required_desc">إذن الإشعارات مطلوب ليعمل صراط بشكل صحيح.</string>
     <string name="shizuku_permission_granted">تم منح إذن Shizuku بنجاح.</string>
     <string name="shizuku_permission_required_desc">إذن Shizuku مطلوب للميزات المتقدمة.</string>
     <string name="allow_display_over_other_apps">يرجى السماح للتطبيق بالعرض فوق التطبيقات الأخرى.</string>
@@ -33,13 +33,14 @@
     <string name="usage_stats_card_desc">طريقة تجريبية تستخدم إحصائيات استخدام النظام. تعمل بشكل أفضل على بعض الأجهزة.</string>
     <string name="shizuku_service_title">خدمة Shizuku</string>
     <string name="shizuku_service_card_desc">طريقة متقدمة بأداء أفضل وتجربة فائقة. تتطلب تثبيت تطبيق Shizuku وتفعيله عبر ADB.</string>
+    <string name="shizuku_service_notification_desc">حماية تطبيقاتك باستخدام خدمة Shizuku.</string>
     <string name="can_change_later_in_settings">يمكنك تغيير هذا لاحقاً من الإعدادات.</string>
-    <string name="app_intro_accessibility_desc">خدمة إمكانية الوصول مطلوبة ليعمل التطبيق بشكل صحيح.</string>
+    <string name="app_intro_accessibility_desc">خدمة إمكانية الوصول مطلوبة ليعمل صراط بشكل صحيح.</string>
     <string name="app_intro_usage_stats_title">إذن إحصائيات الاستخدام</string>
     <string name="app_intro_usage_stats_desc">هذا الإذن مطلوب لاكتشاف وقت تشغيل التطبيقات المقفلة.</string>
     <string name="app_intro_shizuku_desc">توفر Shizuku ميزات متقدمة مثل قفل تطبيقات النظام والمزيد.</string>
-    <string name="app_intro_complete_privacy_title">خصوصية كاملة</string>
-    <string name="app_intro_complete_privacy_desc">بياناتك لا تغادر جهازك أبداً. قفل التطبيقات يحمي خصوصيتك في جميع الأوقات.</string>
+    <string name="app_intro_complete_privacy_title">خصوصية وأمان</string>
+    <string name="app_intro_complete_privacy_desc">رحلتك خاصة بك وحدك. بياناتك لا تغادر جهازك أبداً، فنحن نحترم خصوصيتك لأبعد حد.</string>
     <string name="all_permissions_required">جميع الأذونات مطلوبة للمتابعة.</string>
     <string name="next_button">التالي</string>
     <string name="get_started_button">ابدأ الآن</string>
@@ -48,6 +49,7 @@
     <string name="default_app_name">التطبيق</string>
     <string name="this_app">هذا التطبيق</string>
     <string name="unlock_app_title">فتح %1$s</string>
+    <string name="continue_to_app">المتابعة إلى %1$s</string>
     <string name="confirm_biometric_subtitle">أكد الهوية عبر البصمة للمتابعة</string>
     <string name="use_pin_button">استخدم PIN</string>
     <string name="enter_password_to_continue">أدخل كلمة المرور للمتابعة</string>
@@ -60,7 +62,7 @@
     <string name="enter_current_pin_title">أدخل رمز PIN الحالي</string>
     <string name="confirm_pin_title">تأكيد رمز PIN</string>
     <string name="set_new_pin_title">تعيين PIN جديد</string>
-    <string name="create_pin_explanation">يرجى إنشاء رمز PIN لحماية تطبيقاتك المقفلة.</string>
+    <string name="create_pin_explanation">أنشئ رمز PIN ليكون درعاً يحمي خصوصيتك ويدعم التزامك.</string>
     <string name="enter_current_pin_label">أدخل رمز PIN الحالي الخاص بك</string>
     <string name="confirm_new_pin_label">أكد رمز PIN الجديد</string>
     <string name="create_new_pin_label">إنشاء رمز PIN جديد</string>
@@ -97,7 +99,7 @@
     <string name="main_screen_overlay_permission_dialog_text">يرجى منح التطبيق إذن العرض فوق التطبيقات الأخرى من الإعدادات لإظهار شاشة القفل.</string>
     <string name="main_screen_overlay_permission_open_settings_button">فتح الإعدادات</string>
     <string name="main_screen_shizuku_manual_permission_toast">يرجى منح إذن Shizuku يدوياً.</string>
-    <string name="main_screen_device_admin_explanation">يتطلب قفل التطبيقات إذن مسؤول الجهاز لمنع إلغاء التثبيت.</string>
+    <string name="main_screen_device_admin_explanation">يتطلب صراط إذن مسؤول الجهاز لمنع إلغاء التثبيت.</string>
     <string name="main_screen_join_community_dialog_title">انضم إلى المجتمع</string>
     <string name="main_screen_join_community_dialog_text">انضم إلى مجتمع ديسكورد للحصول على التحديثات والدعم.</string>
     <string name="main_screen_join_community_join_discord_button">انضم لديسكورد</string>
@@ -106,15 +108,15 @@
     <string name="main_screen_support_development_donate_button">تبرع</string>
     <string name="main_screen_app_protection_cd">حماية التطبيقات</string>
     <string name="main_screen_settings_cd">الإعدادات</string>
-    <string name="main_screen_loading_applications_text">جاري تحميل التطبيقات…</string>
+    <string name="main_screen_loading_applications_text">جاري إعداد بيئتك الآمنة…</string>
     <string name="main_screen_search_apps_placeholder">البحث عن تطبيقات</string>
     <string name="main_screen_search_cd">بحث</string>
     <string name="main_screen_empty_search_title">لم يتم العثور على تطبيقات</string>
     <string name="main_screen_empty_search_subtitle">حاول تغيير كلمة البحث.</string>
     <string name="status_on">تشغيل</string>
     <string name="status_off">إيقاف</string>
-    <string name="no_protected_apps">لا توجد تطبيقات محمية.</string>
-    <string name="tap_to_secure_apps">اضغط على زر + لتأمين تطبيقاتك.</string>
+    <string name="no_protected_apps">لم تضف تطبيقات لمسيرة حمايتك بعد.</string>
+    <string name="tap_to_secure_apps">اضغط على زر + للبدء في تأمين مسار نموك.</string>
     <string name="select_apps">اختر التطبيقات</string>
     <string name="protect_with_count">حماية (%1$d)</string>
     <string name="protected_label">محمي</string>
@@ -178,7 +180,7 @@
 
     <!-- Anti-Uninstall Extra Strings -->
     <string name="anti_uninstall_title">حماية إلغاء التثبيت</string>
-    <string name="anti_uninstall_subtitle">اختر التطبيقات التي سيتم حمايتها من إلغاء التثبيت.</string>
+    <string name="anti_uninstall_subtitle">اختر التطبيقات التي تود حمايتها لضمان بقائك على المسار الصحيح.</string>
     <string name="manually_added_packages">الحزم المضافة يدوياً</string>
     <string name="installed_apps">التطبيقات المثبتة</string>
     <string name="add_package_manually">إضافة حزمة يدوياً</string>
@@ -201,3 +203,12 @@
     <string name="settings_screen_backend_usage_desc">طريقة تجريبية، تعمل بشكل أفضل على بعض الأجهزة.</string>
     <string name="settings_screen_backend_shizuku_desc">طريقة متقدمة باستخدام Shizuku والواجهات الداخلية.</string>
 </resources>
+
+
+
+
+
+
+
+
+

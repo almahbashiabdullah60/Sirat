@@ -1,29 +1,29 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="app_name">App Lock</string>
-    <string name="device_admin_description">Prevents unauthorized people from uninstalling the app.</string>
-    <string name="accessibility_service_description">Allows App Lock to detect when protected apps are opened.</string>
+    <string name="app_name">sirat</string>
+    <string name="device_admin_description">Helps you stay disciplined by preventing accidental or impulsive uninstallation.</string>
+    <string name="accessibility_service_description">Sirat helps you stay on track by shielding you from content that hinders your progress.</string>
 
     <string name="unlock_to_disable_admin">Enter your password to disable admin permission.</string>
     <string name="incorrect_pin_try_again">Incorrect PIN. Please try again.</string>
     <string name="incorrect_password_try_again">Incorrect password. Please try again.</string>
     <string name="password_verified_admin">Password verified, you can now disable admin permission</string>
     <string name="choose_app_detection">Choose App Detection Method</string>
-    <string name="app_detection_desc">Select how you want AppLock to detect apps.</string>
+    <string name="app_detection_desc">Select how you want sirat to detect apps.</string>
     <string name="notif_perm">Notification Permission</string>
-    <string name="notif_perm_desc">AppLock needs permission to show notifications.</string>
+    <string name="notif_perm_desc">sirat needs permission to show notifications.</string>
     <string name="notif_perm_granted">Notification permission is automatically granted.</string>
-    <string name="welc_applock">Welcome to AppLock</string>
-    <string name="welcome_desc">Protect your apps and privacy with AppLock.</string>
-    <string name="secure_apps">Secure Your Apps</string>
-    <string name="secure_apps_desc">Keep your private apps protected.</string>
+    <string name="welc_sirat">Welcome to sirat</string>
+    <string name="welcome_desc">Your first step towards a purer and more focused life. Let’s build your inner strength together.</string>
+    <string name="secure_apps">Guard Your Values</string>
+    <string name="secure_apps_desc">Choose the apps you want to protect to stay committed to your path and goals.</string>
     <string name="display_over_apps">Display Over Other Apps</string>
-    <string name="display_over_apps_desc">AppLock needs permission to display over other apps.</string>
+    <string name="display_over_apps_desc">sirat needs permission to display over other apps.</string>
 
     <!-- AppIntroScreen -->
     <string name="notification_permission_required_desc">Notification permission is required.</string>
     <string name="shizuku_permission_granted">Shizuku permission granted</string>
     <string name="shizuku_permission_required_desc">Shizuku permission is required.</string>
-    <string name="allow_display_over_other_apps">Please allow AppLock to display over other apps.</string>
+    <string name="allow_display_over_other_apps">Please allow sirat to display over other apps.</string>
     <string name="disable_battery_optimization_title">Disable Battery Optimization</string>
     <string name="disable_battery_optimization_desc">Disable battery optimizations for the app.</string>
     <string name="accessibility_service_title">Accessibility Service</string>
@@ -32,13 +32,14 @@
     <string name="usage_stats_card_desc">Experimental method utilizing usage statistics.</string>
     <string name="shizuku_service_title">Shizuku Service</string>
     <string name="shizuku_service_card_desc">Advanced method with better performance.</string>
+    <string name="shizuku_service_notification_desc">Protecting your apps with Shizuku</string>
     <string name="can_change_later_in_settings">You can change this later in settings</string>
-    <string name="app_intro_accessibility_desc">Accessibility service is required for AppLock to function properly.</string>
+    <string name="app_intro_accessibility_desc">Accessibility service is required for sirat to function properly.</string>
     <string name="app_intro_usage_stats_title">Usage Stats Permission</string>
     <string name="app_intro_usage_stats_desc">This permission is required to detect app launches.</string>
     <string name="app_intro_shizuku_desc">Shizuku provides advanced features like locking system apps.</string>
-    <string name="app_intro_complete_privacy_title">Complete Privacy</string>
-    <string name="app_intro_complete_privacy_desc">Your data never leaves your device.</string>
+    <string name="app_intro_complete_privacy_title">Your Journey is Private</string>
+    <string name="app_intro_complete_privacy_desc">Your growth is a personal matter. Your data never leaves your device; we value your trust and privacy.</string>
     <string name="all_permissions_required">All permissions are required to proceed.</string>
     <string name="next_button">Next</string>
     <string name="get_started_button">Get Started</string>
@@ -47,6 +48,7 @@
     <string name="default_app_name">App</string>
     <string name="this_app">this app</string>
     <string name="unlock_app_title">Unlock %1$s</string>
+    <string name="continue_to_app">Continue to %1$s</string>
     <string name="confirm_biometric_subtitle">Confirm biometric to continue</string>
     <string name="use_pin_button">Use PIN</string>
     <string name="enter_password_to_continue">Enter password to continue</string>
@@ -59,7 +61,7 @@
     <string name="enter_current_pin_title">Enter Current PIN</string>
     <string name="confirm_pin_title">Confirm PIN</string>
     <string name="set_new_pin_title">Set New PIN</string>
-    <string name="create_pin_explanation">Please create a PIN to protect your apps.</string>
+    <string name="create_pin_explanation">Create a PIN to serve as a shield for your values and privacy.</string>
     <string name="enter_current_pin_label">Enter your current PIN</string>
     <string name="confirm_new_pin_label">Confirm your new PIN</string>
     <string name="create_new_pin_label">Create a new PIN</string>
@@ -103,7 +105,7 @@
     <string name="main_screen_support_development_donate_button">Donate</string>
     <string name="main_screen_app_protection_cd">App Protection</string>
     <string name="main_screen_settings_cd">Settings</string>
-    <string name="main_screen_loading_applications_text">Loading applications…</string>
+    <string name="main_screen_loading_applications_text">Preparing your safe environment…</string>
     <string name="main_screen_search_apps_placeholder">Search apps</string>
     <string name="main_screen_search_cd">Search</string>
     <string name="main_screen_empty_search_title">No apps found</string>
@@ -111,8 +113,8 @@
     <string name="main_screen_anti_uninstall_log">Anti-uninstall protection active</string>
     <string name="status_on">ON</string>
     <string name="status_off">OFF</string>
-    <string name="no_protected_apps">No Protected Apps</string>
-    <string name="tap_to_secure_apps">Tap + button to secure apps.</string>
+    <string name="no_protected_apps">No apps added to your growth path yet.</string>
+    <string name="tap_to_secure_apps">Tap + button to start securing your journey.</string>
     <string name="select_apps">Select Apps</string>
     <string name="protect_with_count">Protect (%1$d)</string>
     <string name="protected_label">Protected</string>
@@ -121,7 +123,7 @@
     <string name="settings_screen_title">Settings</string>
     <string name="settings_screen_back_cd">Back</string>
     <string name="settings_screen_support_development_dialog_title">Support Development</string>
-    <string name="support_development_text">Thank you for supporting App Lock!</string>
+    <string name="support_development_text">Thank you for supporting sirat!</string>
     <string name="settings_screen_support_development_donate_button">Donate</string>
     <string name="settings_screen_permission_required_dialog_title">Permission Required</string>
     <string name="settings_screen_permission_required_proceed_button">Proceed</string>
@@ -162,7 +164,7 @@
     <string name="source_code">Source Code</string>
     <string name="report_issue">Report Issue</string>
 
-    <!-- AppLockUtils.kt -->
+    <!-- siratUtils.kt -->
     <string name="utils_battery_ignore_toast">Allow battery optimization skip.</string>
     <string name="utils_battery_specific_settings_not_found_toast">Settings not found.</string>
     <string name="utils_battery_settings_not_found_toast">Could not open battery settings.</string>
@@ -258,7 +260,7 @@
 
     <!-- Anti-Uninstall Extra Strings -->
     <string name="anti_uninstall_title">Anti-Uninstall</string>
-    <string name="anti_uninstall_subtitle">Select apps to protect.</string>
+    <string name="anti_uninstall_subtitle">Stay committed to your progress.</string>
     <string name="manually_added_packages">Manual Packages</string>
     <string name="installed_apps">Installed Apps</string>
     <string name="add_package_manually">Add Manually</string>
@@ -272,3 +274,5 @@
     <string name="trigger_exclusions_subtitle">Apps that don\'t trigger lock.</string>
     <string name="exclude_package_name_desc">Exclude package:</string>
 </resources>
+
+

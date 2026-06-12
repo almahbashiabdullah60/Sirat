@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "dev.pranav.applock"
+    namespace = "com.atyafcode.sirat"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dev.pranav.applock"
+        applicationId = "com.atyafcode.sirat"
         minSdk = 26
         targetSdk = 35
         versionCode = 243

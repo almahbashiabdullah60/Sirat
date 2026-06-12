@@ -1,158 +1,59 @@
 <div align="center">
-  <img src="fastlane/metadata/android/en-US/images/featureGraphic.png" alt="AppLock Android Privacy Security" width="600" />
+  <h1 align="center">Sirat | صراط</h1>
+  <p align="center"><b>خطوتك الأولى نحو حياة أكثر نقاءً واتزاناً</b></p>
+  <p align="center"><b>Your first step towards a purer and more focused life</b></p>
 </div>
 
-<h1 align="center">App Lock</h1>
-<p align="center"><b>Open Source Android App Locker & Privacy Guard</b></p>
+---
 
-<p align="center">
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  </a>
-  <a href="https://github.com/aload0/AppLock/releases">
-    <img src="https://img.shields.io/github/v/release/aload0/AppLock?label=Release" alt="Latest Release">
-  </a>
-  <a href="https://apt.izzysoft.de/packages/dev.pranav.applock">
-    <img src="https://img.shields.io/badge/IzzyOnDroid-Available-brightgreen" alt="IzzyOnDroid">
-  </a>
-  <a href="https://paypal.me/pranavpurwar">
-    <img src="https://img.shields.io/badge/Donate-PayPal-00457C?logo=paypal&logoColor=white" alt="Donate via PayPal">
-  </a>
-</p>
+## نظرة عامة | Overview
 
-<p align="center">
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="30%" alt="App List"/>
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="30%" alt="Settings"/>
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="30%" alt="Password Screen"/>
-</p>
+**صراط** هو تطبيق أندرويد مفتوح المصدر مصمم لمساعدتك على الثبات على قِيَمك وتعزيز إرادتك. يساعدك التطبيق على حماية نفسك من المشتتات والمحتوى الذي لا يناسب أهدافك في النمو الشخصي، من خلال توفير طبقة حماية قوية لتطبيقاتك، مما يمنحك الفرصة للتفكير والالتزام بقرارك في لحظات الضعف.
 
-<p align="center">
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="30%" alt="Set Password"/>
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="30%" alt="Unlock time"/>
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="30%" alt="Unlock time"/>
-</p>
-<p align="center">
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="30%" alt="Set Password"/>
-</p>
+**Sirat** is an open-source Android application designed to help you stay committed to your values and strengthen your willpower. It empowers you to shield yourself from distractions and content that hinders your personal growth by providing a robust protection layer for your apps, giving you the space to remain disciplined during challenging moments.
+
+<br/>
+
+## المميزات | Features
+
+- **حماية القيم (Guard Your Values):** اختر التطبيقات التي تود حمايتها لضمان بقائك على المسار الصحيح.
+- **خصوصية تامة (Complete Privacy):** رحلتك خاصة بك وحدك؛ بياناتك لا تغادر جهازك أبداً.
+- **دعم الثبات (Stay Disciplined):** ميزة حماية إلغاء التثبيت لمنع القرارات الاندفاعية.
+- **تصميم عصري (Modern Design):** واجهة مستخدم مريحة تدعم "Material You".
+- **تعدد طرق القفل (Multiple Lock Methods):** يدعم البصمة (Biometric)، والنمط (Pattern)، ورمز PIN.
+- **طرق اكتشاف متطورة (Advanced Detection):** يدعم خدمة Accessibility و Shizuku لأداء فائق.
+
+<br/>
+
+## لماذا "صراط"؟ | Why Sirat?
+
+نحن نؤمن أن بناء الإرادة يبدأ بوضع حدود ذكية. "صراط" ليس مجرد قفل للتطبيقات، بل هو رفيق في رحلة التغيير نحو الأفضل، يحترم خصوصيتك ويقدّر سعيك نحو النقاء والارتقاء بالنفس.
+
+We believe that building willpower starts with setting smart boundaries. **Sirat** is more than just an app locker; it is a companion on your journey toward self-improvement, respecting your privacy and valuing your pursuit of purity and self-elevation.
+
+<br/>
+
+## التقنيات المستخدمة | Technologies
+
+- **Jetpack Compose:** لبناء واجهة مستخدم حديثة وسلسة.
+- **Kotlin:** اللغة الأساسية للتطوير.
+- **Material 3:** لأحدث معايير التصميم من جوجل.
+- **Shizuku API:** للميزات المتقدمة والأداء العالي.
+
+<br/>
 
 ---
 
-## Overview
+## الترخيص والمصدر | License & Credits
 
-AppLock is a modern, open-source Android app locker designed to protect your privacy and sensitive
-data. Lock any app, prevent unauthorized access, and enjoy a seamless Material You experience. No
-root required.
+هذا المشروع هو نسخة معدلة وجذرية (Rebranded & Modified) مبنية على الأساس البرمجي لمشروع [AppLock](https://github.com/PranavPurwar/AppLock) للمطور Pranav Purwar. تم تغيير الرؤية والمصطلحات والأهداف لتناسب رسالة "صراط".
 
-<br/>
+This project is a rebranded and significantly modified version based on the core of [AppLock](https://github.com/PranavPurwar/AppLock) by Pranav Purwar. The vision, terminology, and goals have been redefined to align with the mission of **Sirat**.
 
-> [!CAUTION]
-> Google Play Protect is blocking some people from installing/updating App Lock because it uses Overlay Permission. It uses a false pretext of "this app may try to access sensitive information"
-> without any base or information. If this happens to you, consider disabling Play Protect temporarily as mentioned [here](https://www.airdroid.com/quick-guides/disable-google-play-protect).
->
-> You may enable it back later after you install the app. We understand this introduces unnecessary friction but there's nothing we can do about it. Google does not like it
-> when other developers try to fill the gaps they create themselves.
-
-<br/>
-
-> [!NOTE]
-> You may confirm that the app is completely secure
->
-> VirusTotal Analysis: [v1.5.0 Analysis](https://www.virustotal.com/gui/url/ead3a434b961ce332b49398d73a10598b2cee6d665c54bb4a66c825794465d72)
-> 
-> Exodus Privacy: [Privacy Report](https://reports.exodus-privacy.eu.org/en/reports/dev.pranav.applock/latest)
-
-<br/>
-
-## Features
-
-- Material You design, adapts to your theme
-- Biometric and PIN authentication
-- Fingerprint, Face Unlock, and PIN support
-- Lock any app on your device
-- Anti-uninstall protection
-- Unlock timeout for convenience
-- No root required
-- One-tap app locking
-- All data stays on your device
-- Real-time background protection
-- Lightweight and fast
-
-<br/>
-
-## Download
-
-The app is available for download via F-Droid, IzzyOnDroid aswell
-as [Github Releases](https://github.com/PranavPurwar/AppLock/releases/latest).
-
-<a href="https://f-droid.org/packages/dev.pranav.applock/">
-    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="F-Droid" height="100"/>
-  </a>
-<a href="https://apt.izzysoft.de/packages/dev.pranav.applock">
-    <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="IzzyOnDroid" height="100"/>
-  </a>
-
-Beta Builds can be
-found [here](https://github.com/PranavPurwar/AppLock/raw/refs/heads/master/app/debug/app-debug.apk)
-
-<br/>
-
-## Use Cases
-
-- Shared devices
-- Parental controls
-- Protecting work apps
-- General privacy
-
-<br/>
-
-## Support Development
-
-If you find AppLock useful, please consider supporting its development with a small donation.
-Every contribution matters.
-
-**OpenCollective:** https://opencollective.com/invokevirtual
-
-**Bitcoin (BTC):** `bc1qec5ccz85qn90a6zxnqnes0rx274cv6vw7j5x4g`
-
-**Ethereum (ETH):** `0xD80A8D6E0fa433A8bDFC2D3F325159Db70605816`
-
-**Solana (SOL):** `7FxTAJLmhXFp6wxVbUTpf8jDmzEX1CKVMdE8oLPNQvyb`
-
-**Litecoin (LTC):** `ltc1q3pqyj5ge5rdmqr00w03x4tlhm6rhcc6wrfyx8k`
-
-**Monero (XMR):**
-`44w9JtiXxwifyH5CU6Ln1BNViyWNz4z7pEZ4nqbCvUejiK3yEjdyAv6bAofXX2Eh6Fbe3DXJ6eCX6YWKh9SF15fyKBjeJ5H`
-
-<br/>
-
-**UPI (India):** `pranavpurwar@fam`
-
-<img src="https://github.com/PranavPurwar/Reef/raw/refs/heads/main/upi.jpeg" width="200" />
-
----
-
-## License
-
+### License
 ```text
 MIT License
-
 Copyright (c) 2023-2025 Pranav Purwar
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Modified Version (Sirat) Copyright (c) 2026 Abdullah Al-Mahbashi
 ```
+*(راجع ملف LICENSE لمزيد من التفاصيل)*
