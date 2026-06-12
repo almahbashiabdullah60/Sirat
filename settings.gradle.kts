@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "sirat"
+rootProject.name = "Sirat"
 include(":app")
 include(":appintro")
 include(":hidden-api")
