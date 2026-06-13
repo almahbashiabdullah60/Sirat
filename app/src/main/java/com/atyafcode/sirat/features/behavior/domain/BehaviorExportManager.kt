@@ -7,6 +7,7 @@ import com.atyafcode.sirat.data.repository.BehaviorRepository
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
 class BehaviorExportManager(private val context: Context, private val repository: BehaviorRepository) {
@@ -15,7 +16,9 @@ class BehaviorExportManager(private val context: Context, private val repository
         return try {
             val logs = repository.getAllLogs()
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                OutputStreamWriter(outputStream).use { writer ->
+                OutputStreamWriter(outputStream, StandardCharsets.UTF_8).use { writer ->
+                    // Add UTF-8 BOM for Excel compatibility with Arabic characters
+                    writer.write("\uFEFF")
                     // Header
                     writer.write("Date,Count,Reason\n")
                     // Data
@@ -36,16 +39,25 @@ class BehaviorExportManager(private val context: Context, private val repository
         return try {
             val logs = mutableListOf<BehaviorLog>()
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                BufferedReader(InputStreamReader(inputStream)).use { reader ->
-                    val header = reader.readLine() // Skip header
+                BufferedReader(InputStreamReader(inputStream, StandardCharsets.UTF_8)).use { reader ->
+                    // Read header and strip BOM if present
+                    val firstLine = reader.readLine() ?: return@use
+                    
                     var line: String?
                     while (reader.readLine().also { line = it } != null) {
-                        val parts = parseCsvLine(line!!)
+                        val currentLine = line ?: continue
+                        if (currentLine.isBlank()) continue
+                        
+                        val parts = parseCsvLine(currentLine)
                         if (parts.size >= 2) {
-                            val date = LocalDate.parse(parts[0])
-                            val count = parts[1].toInt()
-                            val reason = if (parts.size > 2) parts[2] else ""
-                            logs.add(BehaviorLog(date, count, reason))
+                            try {
+                                val date = LocalDate.parse(parts[0].trim().removePrefix("\uFEFF"))
+                                val count = parts[1].trim().toInt()
+                                val reason = if (parts.size > 2) parts[2].trim() else ""
+                                logs.add(BehaviorLog(date, count, reason))
+                            } catch (_: Exception) {
+                                // Skip invalid lines
+                            }
                         }
                     }
                 }

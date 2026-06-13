@@ -273,6 +273,20 @@
     <string name="trigger_exclusions_title">Exclusions</string>
     <string name="trigger_exclusions_subtitle">Apps that don\'t trigger lock.</string>
     <string name="exclude_package_name_desc">Exclude package:</string>
+
+    <!-- Navigation Bar -->
+    <string name="nav_apps">Apps</string>
+    <string name="nav_behavior">Behavior</string>
+    <string name="nav_plan">Plan</string>
+    <string name="nav_reminders">Reminders</string>
+
+    <!-- Behavior Log -->
+    <string name="add_behavior_log">Add Behavior Log</string>
+    <string name="behavior_count">Repetitions</string>
+    <string name="behavior_reason">Reason (Optional)</string>
+    <string name="save_behavior">Save</string>
+    <string name="behavior_history_title">Analysis for %1$s</string>
+    <string name="no_behavior_recorded">No behavior recorded for this day.</string>
 </resources>
 
 

@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.core.net.toUri
 import com.atyafcode.sirat.AppLockApplication
 import com.atyafcode.sirat.data.repository.AppLockRepository
+import com.atyafcode.sirat.data.repository.BehaviorRepository
 
 /**
  * Provides vibration feedback with proper error handling and API level compatibility.
@@ -115,4 +116,7 @@ private const val DEFAULT_VIBRATION_DURATION = 500L
  */
 fun Context.appLockRepository(): AppLockRepository =
     (applicationContext as AppLockApplication).appLockRepository
+
+fun Context.behaviorRepository(): BehaviorRepository =
+    (applicationContext as AppLockApplication).behaviorRepository
 

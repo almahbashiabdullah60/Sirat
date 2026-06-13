@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.Log
 import com.atyafcode.sirat.core.utils.LogUtils
 import com.atyafcode.sirat.data.repository.AppLockRepository
+import com.atyafcode.sirat.data.repository.BehaviorRepository
 import com.atyafcode.sirat.data.repository.PreferencesRepository
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.sui.Sui
@@ -14,6 +15,9 @@ import kotlin.concurrent.thread
 class AppLockApplication : Application() {
 
     lateinit var appLockRepository: AppLockRepository
+        private set
+
+    lateinit var behaviorRepository: BehaviorRepository
         private set
 
     override fun attachBaseContext(base: Context?) {
@@ -52,6 +56,7 @@ class AppLockApplication : Application() {
     private fun initializeComponents() {
         try {
             appLockRepository = AppLockRepository(this)
+            behaviorRepository = BehaviorRepository(this)
             initializeSui()
             Log.d(TAG, "Application components initialized successfully")
         } catch (e: Exception) {

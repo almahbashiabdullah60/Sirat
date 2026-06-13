@@ -17,8 +17,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.outlined.Assignment
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.rounded.Forum
 import androidx.compose.material.icons.rounded.Groups
@@ -29,12 +33,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -52,10 +58,23 @@ import com.atyafcode.sirat.core.utils.hasUsagePermission
 import com.atyafcode.sirat.core.utils.isAccessibilityServiceEnabled
 import com.atyafcode.sirat.core.utils.openAccessibilitySettings
 import com.atyafcode.sirat.data.repository.BackendImplementation
+import com.atyafcode.sirat.features.behavior.ui.BehaviorScreen
 import com.atyafcode.sirat.ui.components.DonateModalBottomSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
+
+private enum class MainTab(
+    val route: String,
+    val titleResId: Int,
+    val icon: ImageVector,
+    val selectedIcon: ImageVector
+) {
+    APPS("apps", R.string.nav_apps, Icons.Outlined.Apps, Icons.Default.Apps),
+    BEHAVIOR("behavior", R.string.nav_behavior, Icons.Outlined.BarChart, Icons.Default.BarChart),
+    PLAN("plan", R.string.nav_plan, Icons.Outlined.Assignment, Icons.Default.Assignment),
+    REMINDERS("reminders", R.string.nav_reminders, Icons.Outlined.Notifications, Icons.Default.Notifications)
+}
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(
@@ -79,6 +98,7 @@ fun MainScreen(
 
     val lifecycleOwner = LocalLifecycleOwner.current
     var firstMissingPermission by remember { mutableStateOf<MissingPermission?>(null) }
+    var selectedTab by remember { mutableStateOf(MainTab.APPS) }
 
     LaunchedEffect(Unit) {
         val appLockRepository = context.appLockRepository()
@@ -232,7 +252,7 @@ fun MainScreen(
             )
         },
         floatingActionButton = {
-            if (!isLoading) {
+            if (selectedTab == MainTab.APPS && !isLoading) {
                 FloatingActionButton(
                     onClick = { showAddAppsSheet = true },
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -244,6 +264,23 @@ fun MainScreen(
                     )
                 }
             }
+        },
+        bottomBar = {
+            NavigationBar {
+                MainTab.entries.forEach { tab ->
+                    NavigationBarItem(
+                        selected = selectedTab == tab,
+                        onClick = { selectedTab = tab },
+                        icon = {
+                            Icon(
+                                imageVector = if (selectedTab == tab) tab.selectedIcon else tab.icon,
+                                contentDescription = stringResource(tab.titleResId)
+                            )
+                        },
+                        label = { Text(stringResource(tab.titleResId)) }
+                    )
+                }
+            }
         }
     ) { innerPadding ->
         Column(
@@ -251,77 +288,93 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            firstMissingPermission?.let { missingPerm ->
-                PermissionWarningBanner(
-                    missingPermission = missingPerm,
-                    onClick = {
-                        when (missingPerm) {
-                            MissingPermission.OVERLAY -> {
-                                context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
-                                    data = "package:${context.packageName}".toUri()
-                                })
-                            }
-
-                            MissingPermission.ACCESSIBILITY -> {
-                                openAccessibilitySettings(context)
-                            }
-
-                            MissingPermission.USAGE_STATS -> {
-                                context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-                            }
-
-                            MissingPermission.SHIZUKU -> {
-                                try {
-                                    if (Shizuku.isPreV11()) {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.main_screen_shizuku_manual_permission_toast),
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    } else {
-                                        Shizuku.requestPermission(423)
+            when (selectedTab) {
+                MainTab.APPS -> {
+                    firstMissingPermission?.let { missingPerm ->
+                        PermissionWarningBanner(
+                            missingPermission = missingPerm,
+                            onClick = {
+                                when (missingPerm) {
+                                    MissingPermission.OVERLAY -> {
+                                        context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                                            data = "package:${context.packageName}".toUri()
+                                        })
                                     }
-                                } catch (_: Exception) {
-                                    Toast.makeText(
-                                        context,
-                                        context.getString(R.string.main_screen_shizuku_not_available_toast),
-                                        Toast.LENGTH_LONG
-                                    ).show()
+
+                                    MissingPermission.ACCESSIBILITY -> {
+                                        openAccessibilitySettings(context)
+                                    }
+
+                                    MissingPermission.USAGE_STATS -> {
+                                        context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                                    }
+
+                                    MissingPermission.SHIZUKU -> {
+                                        try {
+                                            if (Shizuku.isPreV11()) {
+                                                Toast.makeText(
+                                                    context,
+                                                    context.getString(R.string.main_screen_shizuku_manual_permission_toast),
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            } else {
+                                                Shizuku.requestPermission(423)
+                                            }
+                                        } catch (_: Exception) {
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.main_screen_shizuku_not_available_toast),
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+
+                                    MissingPermission.DEVICE_ADMIN -> {
+                                        val component =
+                                            ComponentName(context, DeviceAdmin::class.java)
+                                        val intent =
+                                            Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+                                                putExtra(
+                                                    DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                                                    component
+                                                )
+                                                putExtra(
+                                                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                                    context.getString(R.string.main_screen_device_admin_explanation)
+                                                )
+                                            }
+                                        context.startActivity(intent)
+                                    }
                                 }
                             }
-
-                            MissingPermission.DEVICE_ADMIN -> {
-                                val component = ComponentName(context, DeviceAdmin::class.java)
-                                val intent =
-                                    Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-                                        putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, component)
-                                        putExtra(
-                                            DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                                            context.getString(R.string.main_screen_device_admin_explanation)
-                                        )
-                                    }
-                                context.startActivity(intent)
+                        )
+                    }
+                    if (isLoading) {
+                        LoadingContent(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        )
+                    } else {
+                        ProtectedAppsDashboard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            lockedApps = lockedApps,
+                            onUnlockApp = { appInfo ->
+                                mainViewModel.unlockApp(appInfo.packageName)
                             }
-                        }
+                        )
                     }
-                )
-            }
-            if (isLoading) {
-                LoadingContent(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                )
-            } else {
-                ProtectedAppsDashboard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    lockedApps = lockedApps,
-                    onUnlockApp = { appInfo ->
-                        mainViewModel.unlockApp(appInfo.packageName)
-                    }
-                )
+                }
+
+                MainTab.BEHAVIOR -> {
+                    BehaviorScreen()
+                }
+
+                else -> {
+                    EmptyTabPlaceholder(tab = selectedTab)
+                }
             }
         }
     }
@@ -361,6 +414,36 @@ fun MainScreen(
                 }
             )
         }
+    }
+}
+
+@Composable
+private fun EmptyTabPlaceholder(tab: MainTab) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = tab.icon,
+            contentDescription = null,
+            modifier = Modifier.size(80.dp),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = stringResource(tab.titleResId),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "هذه التبويبة قيد التطوير حالياً",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
     }
 }
 
