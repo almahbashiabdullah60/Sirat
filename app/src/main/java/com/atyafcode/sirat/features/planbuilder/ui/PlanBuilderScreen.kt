@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.atyafcode.sirat.R
@@ -33,9 +34,12 @@ fun PlanBuilderScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val isModelDownloaded by viewModel.isModelDownloaded.collectAsState()
+    val downloadStatus by viewModel.downloadStatus.collectAsState()
     val planLanguage by viewModel.planLanguage.collectAsState()
     val religion by viewModel.religion.collectAsState()
     val aiProvider by viewModel.aiProvider.collectAsState()
+    val cloudProvider by viewModel.cloudProvider.collectAsState()
     val apiKey by viewModel.apiKey.collectAsState()
 
     val pdfExporter = remember { PlanPdfExporter(context) }
@@ -60,11 +64,11 @@ fun PlanBuilderScreen(
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("إعدادات بناء الخطة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.plan_settings_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Language
-                Text("لغة الخطة", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.plan_language_label), style = MaterialTheme.typography.labelLarge)
                 Row(modifier = Modifier.fillMaxWidth()) {
                     FilterChip(
                         selected = planLanguage == "ar",
@@ -85,33 +89,50 @@ fun PlanBuilderScreen(
                 OutlinedTextField(
                     value = religion,
                     onValueChange = { viewModel.religion.value = it },
-                    label = { Text("الديانة (اختياري)") },
-                    placeholder = { Text("مثلاً: الإسلام") },
+                    label = { Text(stringResource(R.string.plan_religion_label)) },
+                    placeholder = { Text(stringResource(R.string.plan_religion_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // AI Provider
-                Text("مصدر الذكاء الاصطناعي", style = MaterialTheme.typography.labelLarge)
+                // AI Provider (Commented out cloud for now)
+                /*
+                Text(stringResource(R.string.plan_ai_source_label), style = MaterialTheme.typography.labelLarge)
                 Row(modifier = Modifier.fillMaxWidth()) {
                     FilterChip(
                         selected = aiProvider == PlanRepository.AI_PROVIDER_LOCAL,
                         onClick = { viewModel.aiProvider.value = PlanRepository.AI_PROVIDER_LOCAL },
-                        label = { Text("محلي (خصوصية)") },
+                        label = { Text(stringResource(R.string.plan_source_local)) },
                         leadingIcon = { Icon(Icons.Default.Psychology, null, modifier = Modifier.size(18.dp)) },
                         modifier = Modifier.padding(end = 8.dp)
                     )
                     FilterChip(
                         selected = aiProvider == PlanRepository.AI_PROVIDER_CLOUD,
                         onClick = { viewModel.aiProvider.value = PlanRepository.AI_PROVIDER_CLOUD },
-                        label = { Text("سحابي (سرعة)") },
+                        label = { Text(stringResource(R.string.plan_source_cloud)) },
                         leadingIcon = { Icon(Icons.Default.Cloud, null, modifier = Modifier.size(18.dp)) }
                     )
                 }
 
                 if (aiProvider == PlanRepository.AI_PROVIDER_CLOUD) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("اختر الشركة المزودة", style = MaterialTheme.typography.labelLarge)
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        FilterChip(
+                            selected = cloudProvider == PlanRepository.CLOUD_PROVIDER_GEMINI,
+                            onClick = { viewModel.cloudProvider.value = PlanRepository.CLOUD_PROVIDER_GEMINI },
+                            label = { Text("Google Gemini") },
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        FilterChip(
+                            selected = cloudProvider == PlanRepository.CLOUD_PROVIDER_OPENAI,
+                            onClick = { viewModel.cloudProvider.value = PlanRepository.CLOUD_PROVIDER_OPENAI },
+                            label = { Text("OpenAI (GPT)") }
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = apiKey,
@@ -121,23 +142,121 @@ fun PlanBuilderScreen(
                         shape = RoundedCornerShape(12.dp)
                     )
                 }
+                */
+                Text("المحرك النشط: ذكاء اصطناعي محلي (خصوصية تامة)", 
+                    style = MaterialTheme.typography.bodyMedium, 
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium)
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = { viewModel.buildPlan() },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            enabled = uiState !is PlanUIState.Loading
-        ) {
-            if (uiState is PlanUIState.Loading) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-            } else {
-                Icon(Icons.Default.Assignment, null)
-                Spacer(Modifier.width(8.dp))
-                Text("بناء خطة التعافي")
+        if (!isModelDownloaded) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (downloadStatus.isRunning) 
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                    else 
+                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        if (downloadStatus.isRunning) Icons.Default.Download else Icons.Default.Download, 
+                        null, 
+                        tint = if (downloadStatus.isRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    
+                    if (downloadStatus.isRunning) {
+                        Text("جاري تنزيل محرك الذكاء الاصطناعي...", fontWeight = FontWeight.Bold)
+                        Text("${downloadStatus.progress}%", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                        
+                        Spacer(Modifier.height(4.dp))
+                        
+                        // Detailed stats
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "${downloadStatus.downloadedMB} MB / ${downloadStatus.totalMB} MB",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.width(16.dp))
+                            Text(
+                                text = "المتبقي: ${downloadStatus.remainingMB} MB",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Spacer(Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            progress = downloadStatus.progress / 100f,
+                            modifier = Modifier.fillMaxWidth().height(8.dp),
+                            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text("حجم المحرك حوالي 1.2 جيجابايت. يمكنك إغلاق التطبيق وسيكتمل التنزيل في الخلفية.", 
+                            style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                        
+                        Spacer(Modifier.height(16.dp))
+                        
+                        OutlinedButton(
+                            onClick = { viewModel.cancelDownload() },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Icon(Icons.Default.Download, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("إيقاف التنزيل (إلغاء)")
+                        }
+                    } else if (downloadStatus.isFailed) {
+                        Text("فشل التنزيل", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                        Text(downloadStatus.reason ?: "خطأ غير معروف", style = MaterialTheme.typography.bodySmall)
+                        Spacer(Modifier.height(16.dp))
+                        Button(onClick = { viewModel.downloadModel() }) {
+                            Text("إعادة المحاولة")
+                        }
+                    } else {
+                        Text("محرك الذكاء الاصطناعي غير موجود", fontWeight = FontWeight.Bold)
+                        Text("يجب تنزيل قاعدة البيانات (1.2 جيجابايت) لتعمل الميزة بخصوصية تامة.", 
+                            style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                        Spacer(Modifier.height(16.dp))
+                        Button(
+                            onClick = { viewModel.downloadModel() },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text("تنزيل المحرك الآن")
+                        }
+                    }
+                    
+                    if (!downloadStatus.isRunning) {
+                        TextButton(onClick = { viewModel.checkModelStatus() }) {
+                            Text("تم التنزيل؟ اضغط للتحديث")
+                        }
+                    }
+                }
+            }
+        } else {
+            Button(
+                onClick = { viewModel.buildPlan() },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                enabled = uiState !is PlanUIState.Loading
+            ) {
+                if (uiState is PlanUIState.Loading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                } else {
+                    Icon(Icons.Default.Assignment, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.plan_build_button))
+                }
             }
         }
 
@@ -156,7 +275,7 @@ fun PlanBuilderScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("خطة التعافي المخصصة", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.plan_custom_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             IconButton(onClick = { exportLauncher.launch("Sirat_Recovery_Plan.pdf") }) {
                                 Icon(Icons.Default.PictureAsPdf, "Export PDF", tint = MaterialTheme.colorScheme.primary)
                             }

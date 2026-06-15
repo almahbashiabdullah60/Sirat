@@ -18,6 +18,9 @@ android {
         versionName = "2.4.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Ensure large heap for AI model inference
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -74,7 +77,9 @@ dependencies {
     implementation(libs.hiddenapibypass)
     implementation(project(":patternlock"))
 
-
+    implementation(libs.mediapipe.tasks.genai)
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.gson)
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

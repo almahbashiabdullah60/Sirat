@@ -287,6 +287,21 @@
     <string name="save_behavior">Save</string>
     <string name="behavior_history_title">Analysis for %1$s</string>
     <string name="no_behavior_recorded">No behavior recorded for this day.</string>
+
+    <!-- Plan Builder -->
+    <string name="plan_settings_title">Plan Builder Settings</string>
+    <string name="plan_language_label">Plan Language</string>
+    <string name="plan_religion_label">Religion (Optional)</string>
+    <string name="plan_religion_placeholder">e.g. Islam</string>
+    <string name="plan_ai_source_label">AI Source</string>
+    <string name="plan_source_local">Local (Privacy)</string>
+    <string name="plan_source_cloud">Cloud (Speed)</string>
+    <string name="plan_build_button">Build Recovery Plan</string>
+    <string name="plan_custom_title">Custom Recovery Plan</string>
+    <string name="plan_export_pdf">Plan exported successfully</string>
+    <string name="plan_export_failed">Export failed</string>
+    <string name="plan_generating">Generating your custom plan...</string>
+    <string name="plan_no_data">Not enough behavioral data to analyze.</string>
 </resources>
 
 

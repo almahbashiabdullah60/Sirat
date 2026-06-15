@@ -7,6 +7,7 @@ import android.util.Log
 import com.atyafcode.sirat.core.utils.LogUtils
 import com.atyafcode.sirat.data.repository.AppLockRepository
 import com.atyafcode.sirat.data.repository.BehaviorRepository
+import com.atyafcode.sirat.data.repository.PlanRepository
 import com.atyafcode.sirat.data.repository.PreferencesRepository
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import rikka.sui.Sui
@@ -18,6 +19,9 @@ class AppLockApplication : Application() {
         private set
 
     lateinit var behaviorRepository: BehaviorRepository
+        private set
+
+    lateinit var planRepository: PlanRepository
         private set
 
     override fun attachBaseContext(base: Context?) {
@@ -57,6 +61,7 @@ class AppLockApplication : Application() {
         try {
             appLockRepository = AppLockRepository(this)
             behaviorRepository = BehaviorRepository(this)
+            planRepository = PlanRepository(this)
             initializeSui()
             Log.d(TAG, "Application components initialized successfully")
         } catch (e: Exception) {

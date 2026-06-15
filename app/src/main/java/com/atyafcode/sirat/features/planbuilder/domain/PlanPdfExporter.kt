@@ -2,10 +2,10 @@ package com.atyafcode.sirat.features.planbuilder.domain
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
+import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import java.io.OutputStream
@@ -30,7 +30,7 @@ class PlanPdfExporter(private val context: Context) {
             
             // Simple multi-line text drawing for Arabic
             val staticLayout = StaticLayout.Builder.obtain(planText, 0, planText.length, textPaint, width.toInt())
-                .setAlignment(android.view.Layout.Alignment.ALIGN_NORMAL)
+                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
                 .setLineSpacing(0f, 1.2f)
                 .setIncludePad(true)
                 .build()

@@ -14,6 +14,7 @@ import androidx.core.net.toUri
 import com.atyafcode.sirat.AppLockApplication
 import com.atyafcode.sirat.data.repository.AppLockRepository
 import com.atyafcode.sirat.data.repository.BehaviorRepository
+import com.atyafcode.sirat.data.repository.PlanRepository
 
 /**
  * Provides vibration feedback with proper error handling and API level compatibility.
@@ -119,4 +120,7 @@ fun Context.appLockRepository(): AppLockRepository =
 
 fun Context.behaviorRepository(): BehaviorRepository =
     (applicationContext as AppLockApplication).behaviorRepository
+
+fun Context.planRepository(): PlanRepository =
+    (applicationContext as AppLockApplication).planRepository
 

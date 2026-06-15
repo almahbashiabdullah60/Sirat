@@ -216,6 +216,21 @@
     <string name="save_behavior">حفظ</string>
     <string name="behavior_history_title">تحليل يوم %1$s</string>
     <string name="no_behavior_recorded">لا توجد بيانات مسجلة لهذا اليوم.</string>
+
+    <!-- Plan Builder -->
+    <string name="plan_settings_title">إعدادات بناء الخطة</string>
+    <string name="plan_language_label">لغة الخطة</string>
+    <string name="plan_religion_label">الديانة (اختياري)</string>
+    <string name="plan_religion_placeholder">مثلاً: الإسلام</string>
+    <string name="plan_ai_source_label">مصدر الذكاء الاصطناعي</string>
+    <string name="plan_source_local">محلي (خصوصية)</string>
+    <string name="plan_source_cloud">سحابي (سرعة)</string>
+    <string name="plan_build_button">بناء خطة التعافي</string>
+    <string name="plan_custom_title">خطة التعافي المخصصة</string>
+    <string name="plan_export_pdf">تصدير الخطة بنجاح</string>
+    <string name="plan_export_failed">فشل التصدير</string>
+    <string name="plan_generating">جاري بناء خطتك المخصصة...</string>
+    <string name="plan_no_data">لا توجد بيانات سلوكية كافية للتحليل.</string>
 </resources>
 
 

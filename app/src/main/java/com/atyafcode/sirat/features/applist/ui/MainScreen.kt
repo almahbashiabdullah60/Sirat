@@ -59,6 +59,7 @@ import com.atyafcode.sirat.core.utils.isAccessibilityServiceEnabled
 import com.atyafcode.sirat.core.utils.openAccessibilitySettings
 import com.atyafcode.sirat.data.repository.BackendImplementation
 import com.atyafcode.sirat.features.behavior.ui.BehaviorScreen
+import com.atyafcode.sirat.features.planbuilder.ui.PlanBuilderScreen
 import com.atyafcode.sirat.ui.components.DonateModalBottomSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -370,6 +371,10 @@ fun MainScreen(
 
                 MainTab.BEHAVIOR -> {
                     BehaviorScreen()
+                }
+
+                MainTab.PLAN -> {
+                    PlanBuilderScreen()
                 }
 
                 else -> {
