@@ -207,7 +207,7 @@
     <string name="nav_apps">التطبيقات</string>
     <string name="nav_behavior">تحليل السلوك</string>
     <string name="nav_plan">بناء خطة</string>
-    <string name="nav_reminders">التذكيرات</string>
+    <string name="nav_reminders">طبيب صراط</string>
 
     <!-- Behavior Log -->
     <string name="add_behavior_log">إضافة سجل سلوك</string>

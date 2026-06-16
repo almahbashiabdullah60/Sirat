@@ -58,6 +58,9 @@ import com.atyafcode.sirat.core.utils.hasUsagePermission
 import com.atyafcode.sirat.core.utils.isAccessibilityServiceEnabled
 import com.atyafcode.sirat.core.utils.openAccessibilitySettings
 import com.atyafcode.sirat.data.repository.BackendImplementation
+import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.rounded.Psychology
+import com.atyafcode.sirat.features.chat.ui.ChatScreen
 import com.atyafcode.sirat.features.behavior.ui.BehaviorScreen
 import com.atyafcode.sirat.features.planbuilder.ui.PlanBuilderScreen
 import com.atyafcode.sirat.ui.components.DonateModalBottomSheet
@@ -74,7 +77,7 @@ private enum class MainTab(
     APPS("apps", R.string.nav_apps, Icons.Outlined.Apps, Icons.Default.Apps),
     BEHAVIOR("behavior", R.string.nav_behavior, Icons.Outlined.BarChart, Icons.Default.BarChart),
     PLAN("plan", R.string.nav_plan, Icons.Outlined.Assignment, Icons.Default.Assignment),
-    REMINDERS("reminders", R.string.nav_reminders, Icons.Outlined.Notifications, Icons.Default.Notifications)
+    REMINDERS("reminders", R.string.nav_reminders, Icons.Outlined.Psychology, Icons.Rounded.Psychology)
 }
 
 @SuppressLint("LocalContextGetResourceValueCall")
@@ -375,6 +378,10 @@ fun MainScreen(
 
                 MainTab.PLAN -> {
                     PlanBuilderScreen()
+                }
+
+                MainTab.REMINDERS -> {
+                    ChatScreen()
                 }
 
                 else -> {

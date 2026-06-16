@@ -65,6 +65,14 @@ class PlanRepository(private val context: Context) {
         return prefs.getString(KEY_RELIGION, "") ?: ""
     }
 
+    fun setOpenRouterModel(model: String) {
+        prefs.edit().putString(KEY_OPENROUTER_MODEL, model).apply()
+    }
+
+    fun getOpenRouterModel(): String {
+        return prefs.getString(KEY_OPENROUTER_MODEL, "google/gemini-2.0-flash-exp:free") ?: "google/gemini-2.0-flash-exp:free"
+    }
+
     fun setPlanLanguage(language: String) {
         prefs.edit().putString(KEY_PLAN_LANGUAGE, language).apply()
     }
@@ -98,6 +106,7 @@ class PlanRepository(private val context: Context) {
         private const val KEY_RELIGION = "religion"
         private const val KEY_PLAN_LANGUAGE = "plan_language"
         private const val KEY_CLOUD_PROVIDER = "cloud_provider"
+        private const val KEY_OPENROUTER_MODEL = "openrouter_model"
         private const val KEY_DOWNLOAD_ID = "download_id"
         private const val KEY_MODEL_COMPLETED = "model_completed"
 
@@ -106,5 +115,6 @@ class PlanRepository(private val context: Context) {
 
         const val CLOUD_PROVIDER_GEMINI = "google"
         const val CLOUD_PROVIDER_OPENAI = "openai"
+        const val CLOUD_PROVIDER_OPENROUTER = "openrouter"
     }
 }

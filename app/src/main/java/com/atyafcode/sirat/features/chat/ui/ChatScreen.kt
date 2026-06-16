@@ -6,12 +6,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
@@ -37,7 +40,11 @@ fun ChatScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding() // Handles keyboard lifting for the entire screen
+    ) {
         // Chat History
         LazyColumn(
             state = listState,
@@ -45,7 +52,7 @@ fun ChatScreen(
                 .weight(1f)
                 .fillMaxWidth(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(messages) { message ->
                 ChatBubble(message)
@@ -53,18 +60,7 @@ fun ChatScreen(
             
             if (uiState is ChatUIState.Loading) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                        Card(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                "جاري التفكير...",
-                                modifier = Modifier.padding(8.dp),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
+                    LoadingBubble()
                 }
             }
         }
@@ -74,33 +70,35 @@ fun ChatScreen(
             Text(
                 text = (uiState as ChatUIState.Error).message,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.bodySmall
             )
         }
 
         // Input Field
         Surface(
-            tonalElevation = 2.dp,
-            shadowElevation = 8.dp
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 3.dp
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp)
-                    .navigationBarsPadding()
-                    .imePadding(),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.Bottom
             ) {
                 TextField(
                     value = inputText,
                     onValueChange = { inputText = it },
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("تحدث مع الطبيب...") },
-                    shape = RoundedCornerShape(24.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    maxLines = 4,
                     colors = TextFieldDefaults.colors(
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     )
                 )
                 
@@ -115,14 +113,49 @@ fun ChatScreen(
                         }
                     },
                     enabled = uiState !is ChatUIState.Loading,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            if (inputText.isNotBlank()) MaterialTheme.colorScheme.primary 
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                            CircleShape
+                        ),
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        contentColor = if (inputText.isNotBlank()) MaterialTheme.colorScheme.onPrimary 
+                                     else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "إرسال")
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun LoadingBubble() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            Icons.Default.Psychology, 
+            null, 
+            modifier = Modifier.size(20.dp).alpha(0.6f),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(8.dp))
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)),
+            shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp)
+        ) {
+            Text(
+                "جاري التفكير...",
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+            )
         }
     }
 }
@@ -134,36 +167,41 @@ fun ChatBubble(message: ChatMessage) {
     val textColor = if (message.isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
     
     val shape = if (message.isUser) {
-        RoundedCornerShape(16.dp, 16.dp, 0.dp, 16.dp)
+        RoundedCornerShape(20.dp, 20.dp, 4.dp, 20.dp)
     } else {
-        RoundedCornerShape(16.dp, 16.dp, 16.dp, 0.dp)
+        RoundedCornerShape(20.dp, 20.dp, 20.dp, 4.dp)
     }
 
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = alignment
     ) {
-        Column(
-            horizontalAlignment = if (message.isUser) Alignment.End else Alignment.Start
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = if (message.isUser) Arrangement.End else Arrangement.Start
         ) {
-            Text(
-                text = if (message.isUser) "أنت" else "طبيب صراط",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-            )
+            if (!message.isUser) {
+                Icon(
+                    Icons.Default.Psychology, 
+                    null, 
+                    modifier = Modifier.padding(bottom = 4.dp).size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+
             Box(
                 modifier = Modifier
                     .widthIn(max = 280.dp)
                     .clip(shape)
                     .background(bubbleColor)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 Text(
                     text = message.text,
                     color = textColor,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        lineHeight = 22.sp
+                        lineHeight = 24.sp
                     )
                 )
             }

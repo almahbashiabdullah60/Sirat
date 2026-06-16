@@ -232,6 +232,27 @@ class LocalAIProvider(private val context: Context) {
         }
     }
 
+    /**
+     * Generates a chat response. MediaPipe's LlmInference doesn't have a built-in stateful chat API 
+     * in the basic GenAI Tasks yet (it's primarily single-shot), so we simulate chat by appending 
+     * the history to the prompt.
+     */
+    suspend fun generateChatResponse(history: String, userMessage: String): String {
+        // Significantly simplified prompt for Gemma 2B to prevent hallucinations
+        val systemPrompt = """
+            Persona: Support Coach.
+            Goal: Recovery advice. 
+            Language: Arabic.
+            Constraint: Keep it short (max 2 sentences).
+            Context: $history
+            User: $userMessage
+            Assistant:
+        """.trimIndent()
+        
+        val response = generateResponse(systemPrompt)
+        return if (response.isBlank() || response.length < 5) "المحرك المحلي يواجه صعوبة حالياً. يرجى تفعيل المحرك السحابي (OpenRouter) للحصول على جودة أفضل." else response
+    }
+
     fun close() {
         llmInference?.close()
         llmInference = null

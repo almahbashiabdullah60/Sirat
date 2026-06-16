@@ -9,6 +9,7 @@ import com.atyafcode.sirat.data.repository.PlanRepository
 import com.atyafcode.sirat.features.planbuilder.domain.CloudAIProvider
 import com.atyafcode.sirat.features.planbuilder.domain.DownloadStatus
 import com.atyafcode.sirat.features.planbuilder.domain.LocalAIProvider
+import com.atyafcode.sirat.features.planbuilder.domain.OpenRouterModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +41,9 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
     private val _downloadStatus = MutableStateFlow(DownloadStatus())
     val downloadStatus: StateFlow<DownloadStatus> = _downloadStatus
 
+    private val _openRouterModels = MutableStateFlow<List<OpenRouterModel>>(emptyList())
+    val openRouterModels: StateFlow<List<OpenRouterModel>> = _openRouterModels
+
     private var downloadPollingJob: Job? = null
     private var generationJob: Job? = null
 
@@ -48,11 +52,26 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
     val aiProvider = MutableStateFlow(planRepo.getAIProvider())
     val cloudProvider = MutableStateFlow(planRepo.getCloudProvider())
     val apiKey = MutableStateFlow(planRepo.getApiKey())
+    val selectedModel = MutableStateFlow(planRepo.getOpenRouterModel())
+
+    // Behavioral Goals State
+    val goalType = MutableStateFlow("quit") // "quit" or "commit"
+    val selectedBehavior = MutableStateFlow("")
+    
+    val availableBehaviors = MutableStateFlow<List<String>>(emptyList())
 
     init {
         val savedPlan = planRepo.getPlan()
         if (!savedPlan.isNullOrBlank()) {
             _uiState.value = PlanUIState.Success(savedPlan)
+        }
+
+        // Setup dynamic behaviors based on initial state
+        updateBehaviors()
+        
+        // Fetch models if OpenRouter is selected
+        if (apiKey.value.isNotBlank()) {
+            refreshModels()
         }
         
         // Robust check for ongoing downloads
@@ -85,8 +104,8 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun buildPlan() {
-        if (!_isModelDownloaded.value) {
-            _uiState.value = PlanUIState.Error("يرجى تنزيل محرك الذكاء الاصطناعي أولاً")
+        if (aiProvider.value == PlanRepository.AI_PROVIDER_LOCAL && !_isModelDownloaded.value) {
+            _uiState.value = PlanUIState.Error("يرجى تنزيل محرك الذكاء الاصطناعي أولاً أو استخدام المحرك السحابي")
             return
         }
         
@@ -94,32 +113,72 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
         generationJob = viewModelScope.launch {
             _uiState.value = PlanUIState.Loading
             
-            // Force local provider
-            aiProvider.value = PlanRepository.AI_PROVIDER_LOCAL
-
             // Save current settings
             planRepo.setPlanLanguage(planLanguage.value)
             planRepo.setReligion(religion.value)
-            planRepo.setAIProvider(PlanRepository.AI_PROVIDER_LOCAL)
+            planRepo.setAIProvider(aiProvider.value)
+            planRepo.setCloudProvider(cloudProvider.value)
+            planRepo.setApiKey(apiKey.value)
+            planRepo.setOpenRouterModel(selectedModel.value)
 
             val prompt = constructPrompt()
             
             val result = try {
-                if (localAI.initialize()) {
-                    localAI.generateResponse(prompt)
+                if (aiProvider.value == PlanRepository.AI_PROVIDER_LOCAL) {
+                    if (localAI.initialize()) {
+                        localAI.generateResponse(prompt)
+                    } else {
+                        "فشل في تهيئة الذكاء الاصطناعي المحلي. تأكد من وجود مساحة كافية في الذاكرة (RAM)."
+                    }
                 } else {
-                    "فشل في تهيئة الذكاء الاصطناعي المحلي. تأكد من وجود مساحة كافية في الذاكرة (RAM)."
+                    if (apiKey.value.isBlank()) {
+                        "يرجى إدخال مفتاح API للمحرك السحابي"
+                    } else {
+                        cloudAI.generateResponse(
+                            provider = cloudProvider.value,
+                            apiKey = apiKey.value,
+                            prompt = prompt,
+                            model = selectedModel.value
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 "خطأ غير متوقع: ${e.localizedMessage}"
             }
 
-            if (result.contains("فشل") || result.contains("خطأ")) {
-                _uiState.value = PlanUIState.Error(result)
+            if (result.contains("فشل") || result.contains("خطأ") || result.isBlank()) {
+                _uiState.value = PlanUIState.Error(result.ifBlank { "تلقى التطبيق رداً فارغاً من المحرك. حاول مرة أخرى." })
             } else {
                 planRepo.savePlan(result)
                 _uiState.value = PlanUIState.Success(result)
             }
+        }
+    }
+
+    fun refreshModels() {
+        viewModelScope.launch {
+            if (apiKey.value.isNotBlank()) {
+                _openRouterModels.value = cloudAI.fetchOpenRouterModels(apiKey.value)
+            }
+        }
+    }
+
+    fun updateBehaviors() {
+        val type = goalType.value
+        val rel = religion.value.lowercase()
+        
+        val list = if (type == "quit") {
+            listOf("التدخين", "المخدرات", "الإباحية", "العادة السرية", "إدمان الهاتف", "تضييع الوقت")
+        } else {
+            if (rel.contains("إسلام") || rel.contains("islam")) {
+                listOf("الصلاة في المسجد", "صلاة الفجر", "الأذكار", "التسبيح", "قراءة القرآن", "بر الوالدين", "صدقة")
+            } else {
+                listOf("الرياضة اليومية", "القراءة", "الاستيقاظ مبكراً", "تنظيم الوقت", "العمل التطوعي")
+            }
+        }
+        availableBehaviors.value = list
+        if (!list.contains(selectedBehavior.value)) {
+            selectedBehavior.value = list.firstOrNull() ?: ""
         }
     }
 
@@ -130,20 +189,24 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
             "التاريخ: ${it.date}, التكرار: ${it.count}, السبب: ${it.reason}"
         }
 
+        val typeText = if (goalType.value == "quit") "التخلص من سلوك: " else "الالتزام بسلوك: "
+        val targetBehavior = selectedBehavior.value
+
         return """
             لغة الخطة المطلوبة: ${if (planLanguage.value == "ar") "العربية" else "الإنجليزية"}
             ديانة المستخدم: ${religion.value}
+            الهدف الأساسي: $typeText $targetBehavior
             
-            سجلات السلوك لآخر 30 يوم:
+            سجلات السلوك لآخر 15 يوم:
             $behaviorSummary
             
             بناءً على هذه البيانات، قم ببناء خطة تعافي مخصصة وعملية تتضمن:
-            1. تحليل لأنماط السلوك ونقاط الضعف.
-            2. خطوات عملية يومية للإقلاع عن هذا السلوك.
+            1. تحليل لأنماط السلوك ونقاط الضعف المتعلقة بـ ($targetBehavior).
+            2. خطوات عملية يومية محددة لـ ($targetBehavior).
             3. نصائح روحية ودينية بناءً على ديانة المستخدم المذكورة أعلاه لتقوية الإرادة.
-            4. بدائل صحية مقترحة للأوقات التي يزداد فيها السلوك.
+            4. بدائل صحية مقترحة.
             
-            اجعل الخطة مشجعة، احترافية، وسهلة التنفيذ.
+            اجعل الخطة مشجعة، احترافية، وسهلة التنفيذ، ومفصلة قدر الإمكان.
         """.trimIndent()
     }
 

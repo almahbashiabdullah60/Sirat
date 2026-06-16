@@ -3,16 +3,13 @@ package com.atyafcode.sirat.features.planbuilder.ui
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assignment
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +38,12 @@ fun PlanBuilderScreen(
     val aiProvider by viewModel.aiProvider.collectAsState()
     val cloudProvider by viewModel.cloudProvider.collectAsState()
     val apiKey by viewModel.apiKey.collectAsState()
+    val selectedModel by viewModel.selectedModel.collectAsState()
+    val openRouterModels by viewModel.openRouterModels.collectAsState()
+    
+    val goalType by viewModel.goalType.collectAsState()
+    val selectedBehavior by viewModel.selectedBehavior.collectAsState()
+    val availableBehaviors by viewModel.availableBehaviors.collectAsState()
 
     val pdfExporter = remember { PlanPdfExporter(context) }
     val exportLauncher = rememberLauncherForActivityResult(
@@ -88,7 +91,10 @@ fun PlanBuilderScreen(
                 // Religion
                 OutlinedTextField(
                     value = religion,
-                    onValueChange = { viewModel.religion.value = it },
+                    onValueChange = { 
+                        viewModel.religion.value = it
+                        viewModel.updateBehaviors()
+                    },
                     label = { Text(stringResource(R.string.plan_religion_label)) },
                     placeholder = { Text(stringResource(R.string.plan_religion_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
@@ -96,9 +102,64 @@ fun PlanBuilderScreen(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
+                
+                // Goal and Behavior Selection
+                Text("حدد هدفك المباشر", style = MaterialTheme.typography.labelLarge)
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    FilterChip(
+                        selected = goalType == "quit",
+                        onClick = { 
+                            viewModel.goalType.value = "quit"
+                            viewModel.updateBehaviors()
+                        },
+                        label = { Text("تخلص من سلوك") },
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    FilterChip(
+                        selected = goalType == "commit",
+                        onClick = { 
+                            viewModel.goalType.value = "commit"
+                            viewModel.updateBehaviors()
+                        },
+                        label = { Text("التزام بسلوك") }
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                var behaviorExpanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
+                    expanded = behaviorExpanded,
+                    onExpandedChange = { behaviorExpanded = !behaviorExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedBehavior,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("اختر السلوك المستهدف") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = behaviorExpanded) },
+                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = behaviorExpanded,
+                        onDismissRequest = { behaviorExpanded = false }
+                    ) {
+                        availableBehaviors.forEach { behavior ->
+                            DropdownMenuItem(
+                                text = { Text(behavior) },
+                                onClick = {
+                                    viewModel.selectedBehavior.value = behavior
+                                    behaviorExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
 
-                // AI Provider (Commented out cloud for now)
-                /*
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // AI Provider Selection
                 Text(stringResource(R.string.plan_ai_source_label), style = MaterialTheme.typography.labelLarge)
                 Row(modifier = Modifier.fillMaxWidth()) {
                     FilterChip(
@@ -116,43 +177,89 @@ fun PlanBuilderScreen(
                     )
                 }
 
-                if (aiProvider == PlanRepository.AI_PROVIDER_CLOUD) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("اختر الشركة المزودة", style = MaterialTheme.typography.labelLarge)
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        FilterChip(
-                            selected = cloudProvider == PlanRepository.CLOUD_PROVIDER_GEMINI,
-                            onClick = { viewModel.cloudProvider.value = PlanRepository.CLOUD_PROVIDER_GEMINI },
-                            label = { Text("Google Gemini") },
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                        FilterChip(
-                            selected = cloudProvider == PlanRepository.CLOUD_PROVIDER_OPENAI,
-                            onClick = { viewModel.cloudProvider.value = PlanRepository.CLOUD_PROVIDER_OPENAI },
-                            label = { Text("OpenAI (GPT)") }
-                        )
-                    }
+                AnimatedVisibility(visible = aiProvider == PlanRepository.AI_PROVIDER_CLOUD) {
+                    Column {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("إعدادات المحرك السحابي", style = MaterialTheme.typography.labelLarge)
+                        
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            FilterChip(
+                                selected = cloudProvider == PlanRepository.CLOUD_PROVIDER_OPENROUTER,
+                                onClick = { 
+                                    viewModel.cloudProvider.value = PlanRepository.CLOUD_PROVIDER_OPENROUTER
+                                    viewModel.refreshModels()
+                                },
+                                label = { Text("OpenRouter (مجاني/قوي)") },
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                        }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = apiKey,
-                        onValueChange = { viewModel.apiKey.value = it },
-                        label = { Text("API Key") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = apiKey,
+                            onValueChange = { 
+                                viewModel.apiKey.value = it
+                                if (it.length > 10) viewModel.refreshModels()
+                            },
+                            label = { Text("OpenRouter API Key") },
+                            placeholder = { Text("sk-or-v1-...") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+
+                        if (cloudProvider == PlanRepository.CLOUD_PROVIDER_OPENROUTER) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            var modelExpanded by remember { mutableStateOf(false) }
+                            
+                            ExposedDropdownMenuBox(
+                                expanded = modelExpanded,
+                                onExpandedChange = { modelExpanded = !modelExpanded }
+                            ) {
+                                OutlinedTextField(
+                                    value = selectedModel,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("اختر الموديل") },
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
+                                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                
+                                ExposedDropdownMenu(
+                                    expanded = modelExpanded,
+                                    onDismissRequest = { modelExpanded = false }
+                                ) {
+                                    if (openRouterModels.isEmpty()) {
+                                        DropdownMenuItem(
+                                            text = { Text("جاري جلب الموديلات.. أو أدخل الـ Key") },
+                                            onClick = { modelExpanded = false }
+                                        )
+                                    }
+                                    openRouterModels.forEach { model ->
+                                        DropdownMenuItem(
+                                            text = { 
+                                                Column {
+                                                    Text(model.name)
+                                                    Text(model.id, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                }
+                                            },
+                                            onClick = {
+                                                viewModel.selectedModel.value = model.id
+                                                modelExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                */
-                Text("المحرك النشط: ذكاء اصطناعي محلي (خصوصية تامة)", 
-                    style = MaterialTheme.typography.bodyMedium, 
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium)
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (!isModelDownloaded) {
+        if (aiProvider == PlanRepository.AI_PROVIDER_LOCAL && !isModelDownloaded) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -164,81 +271,31 @@ fun PlanBuilderScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        if (downloadStatus.isRunning) Icons.Default.Download else Icons.Default.Download, 
-                        null, 
-                        tint = if (downloadStatus.isRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                    )
+                    Icon(Icons.Default.Download, null, tint = if (downloadStatus.isRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
                     Spacer(Modifier.height(8.dp))
                     
                     if (downloadStatus.isRunning) {
                         Text("جاري تنزيل محرك الذكاء الاصطناعي...", fontWeight = FontWeight.Bold)
                         Text("${downloadStatus.progress}%", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-                        
-                        Spacer(Modifier.height(4.dp))
-                        
-                        // Detailed stats
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "${downloadStatus.downloadedMB} MB / ${downloadStatus.totalMB} MB",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.width(16.dp))
-                            Text(
-                                text = "المتبقي: ${downloadStatus.remainingMB} MB",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
                         Spacer(Modifier.height(8.dp))
                         LinearProgressIndicator(
                             progress = downloadStatus.progress / 100f,
                             modifier = Modifier.fillMaxWidth().height(8.dp),
                             strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                         )
-                        Spacer(Modifier.height(8.dp))
-                        Text("حجم المحرك حوالي 1.2 جيجابايت. يمكنك إغلاق التطبيق وسيكتمل التنزيل في الخلفية.", 
-                            style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
-                        
                         Spacer(Modifier.height(16.dp))
-                        
-                        OutlinedButton(
-                            onClick = { viewModel.cancelDownload() },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Icon(Icons.Default.Download, null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("إيقاف التنزيل (إلغاء)")
-                        }
-                    } else if (downloadStatus.isFailed) {
-                        Text("فشل التنزيل", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
-                        Text(downloadStatus.reason ?: "خطأ غير معروف", style = MaterialTheme.typography.bodySmall)
-                        Spacer(Modifier.height(16.dp))
-                        Button(onClick = { viewModel.downloadModel() }) {
-                            Text("إعادة المحاولة")
+                        OutlinedButton(onClick = { viewModel.cancelDownload() }, modifier = Modifier.fillMaxWidth()) {
+                            Text("إلغاء التنزيل")
                         }
                     } else {
-                        Text("محرك الذكاء الاصطناعي غير موجود", fontWeight = FontWeight.Bold)
-                        Text("يجب تنزيل قاعدة البيانات (1.2 جيجابايت) لتعمل الميزة بخصوصية تامة.", 
-                            style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                        Text("المحرك المحلي غير موجود", fontWeight = FontWeight.Bold)
+                        Text("يتطلب 1.2 جيجابايت للعمل بخصوصية تامة.", style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
                         Spacer(Modifier.height(16.dp))
-                        Button(
-                            onClick = { viewModel.downloadModel() },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Text("تنزيل المحرك الآن")
+                        Button(onClick = { viewModel.downloadModel() }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
+                            Text("تنزيل الآن")
                         }
-                    }
-                    
-                    if (!downloadStatus.isRunning) {
-                        TextButton(onClick = { viewModel.checkModelStatus() }) {
-                            Text("تم التنزيل؟ اضغط للتحديث")
+                        TextButton(onClick = { viewModel.aiProvider.value = PlanRepository.AI_PROVIDER_CLOUD }) {
+                            Text("أو استخدم المحرك السحابي (جودة أعلى)")
                         }
                     }
                 }
@@ -264,27 +321,33 @@ fun PlanBuilderScreen(
 
         when (uiState) {
             is PlanUIState.Success -> {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                Column {
+                    Button(
+                        onClick = { exportLauncher.launch("Sirat_Recovery_Plan.pdf") },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Icon(Icons.Default.PictureAsPdf, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("تنزيل الخطة كملف PDF")
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
                             Text(stringResource(R.string.plan_custom_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            IconButton(onClick = { exportLauncher.launch("Sirat_Recovery_Plan.pdf") }) {
-                                Icon(Icons.Default.PictureAsPdf, "Export PDF", tint = MaterialTheme.colorScheme.primary)
-                            }
+                            Divider(modifier = Modifier.padding(vertical = 8.dp))
+                            Text(
+                                text = (uiState as PlanUIState.Success).plan,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
-                        Text(
-                            text = (uiState as PlanUIState.Success).plan,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
                     }
                 }
             }
@@ -292,12 +355,11 @@ fun PlanBuilderScreen(
                 Text(
                     text = (uiState as PlanUIState.Error).message,
                     color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
+                    textAlign = TextAlign.Center
                 )
             }
-            else -> {
-                // Idle or handled by loading button
-            }
+            else -> {}
         }
         
         Spacer(modifier = Modifier.height(32.dp))
