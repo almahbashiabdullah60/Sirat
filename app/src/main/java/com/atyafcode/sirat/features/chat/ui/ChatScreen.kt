@@ -60,7 +60,7 @@ fun ChatScreen(
             
             if (uiState is ChatUIState.Loading) {
                 item {
-                    LoadingBubble()
+                    LoadingBubble((uiState as ChatUIState.Loading).message)
                 }
             }
         }
@@ -133,7 +133,7 @@ fun ChatScreen(
 }
 
 @Composable
-fun LoadingBubble() {
+fun LoadingBubble(message: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
@@ -151,7 +151,7 @@ fun LoadingBubble() {
             shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp)
         ) {
             Text(
-                "جاري التفكير...",
+                message,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)

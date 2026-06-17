@@ -9,6 +9,7 @@ import com.atyafcode.sirat.data.repository.PlanRepository
 import com.atyafcode.sirat.features.planbuilder.domain.CloudAIProvider
 import com.atyafcode.sirat.features.planbuilder.domain.LocalAIProvider
 import com.atyafcode.sirat.features.planbuilder.domain.OpenAIMessage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -22,7 +23,7 @@ data class ChatMessage(
 
 sealed class ChatUIState {
     object Idle : ChatUIState()
-    object Loading : ChatUIState()
+    data class Loading(val message: String = "جاري التفكير...") : ChatUIState()
     data class Error(val message: String) : ChatUIState()
 }
 
@@ -53,7 +54,22 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         _messages.value = _messages.value + userMsg
         
         viewModelScope.launch {
-            _uiState.value = ChatUIState.Loading
+            _uiState.value = ChatUIState.Loading("جاري الاتصال بالطبيب الذكي...")
+            
+            val statusJob = launch {
+                val loadingMessages = listOf(
+                    "الطبيب يقرأ سجلاتك...",
+                    "جاري تحليل المشكلة...",
+                    "جاري استحضار النصيحة الروحية...",
+                    "الطبيب يكتب الرد الآن..."
+                )
+                var index = 0
+                while (true) {
+                    delay(3000)
+                    _uiState.value = ChatUIState.Loading(loadingMessages[index % loadingMessages.size])
+                    index++
+                }
+            }
             
             try {
                 val aiProvider = planRepo.getAIProvider()
@@ -104,6 +120,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: Exception) {
                 _uiState.value = ChatUIState.Error("خطأ: ${e.localizedMessage}")
+            } finally {
+                statusJob.cancel()
             }
         }
     }

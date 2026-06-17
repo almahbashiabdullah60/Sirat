@@ -311,7 +311,11 @@ fun PlanBuilderScreen(
                 enabled = uiState !is PlanUIState.Loading
             ) {
                 if (uiState is PlanUIState.Loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Text((uiState as PlanUIState.Loading).message, style = MaterialTheme.typography.bodySmall)
+                    }
                 } else {
                     Icon(Icons.Default.Assignment, null)
                     Spacer(Modifier.width(8.dp))

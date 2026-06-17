@@ -19,7 +19,7 @@ import java.time.LocalDate
 
 sealed class PlanUIState {
     object Idle : PlanUIState()
-    object Loading : PlanUIState()
+    data class Loading(val message: String = "جاري الاتصال بالمحرك الذكي...") : PlanUIState()
     data class Success(val plan: String) : PlanUIState()
     data class Error(val message: String) : PlanUIState()
 }
@@ -111,8 +111,24 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
         
         generationJob?.cancel()
         generationJob = viewModelScope.launch {
-            _uiState.value = PlanUIState.Loading
+            _uiState.value = PlanUIState.Loading("جاري تحليل بياناتك...")
             
+            val statusJob = launch {
+                val loadingMessages = listOf(
+                    "جاري تحليل سجلات السلوك لآخر 15 يوم...",
+                    "جاري صياغة الخطوات العملية المناسبة لك...",
+                    "جاري استحضار النصائح الروحية...",
+                    "جاري تنسيق الخطة لتكون مختصرة ومركزة...",
+                    "المحرك السحابي يضع اللمسات الأخيرة..."
+                )
+                var index = 0
+                while (true) {
+                    delay(4000)
+                    _uiState.value = PlanUIState.Loading(loadingMessages[index % loadingMessages.size])
+                    index++
+                }
+            }
+
             // Save current settings
             planRepo.setPlanLanguage(planLanguage.value)
             planRepo.setReligion(religion.value)
@@ -146,6 +162,7 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
                 "خطأ غير متوقع: ${e.localizedMessage}"
             }
 
+            statusJob.cancel()
             if (result.contains("فشل") || result.contains("خطأ") || result.isBlank()) {
                 _uiState.value = PlanUIState.Error(result.ifBlank { "تلقى التطبيق رداً فارغاً من المحرك. حاول مرة أخرى." })
             } else {
