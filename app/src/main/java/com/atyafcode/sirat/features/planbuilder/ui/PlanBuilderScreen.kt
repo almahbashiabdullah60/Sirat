@@ -213,7 +213,10 @@ fun PlanBuilderScreen(
                             
                             ExposedDropdownMenuBox(
                                 expanded = modelExpanded,
-                                onExpandedChange = { modelExpanded = !modelExpanded }
+                                onExpandedChange = { 
+                                    modelExpanded = !modelExpanded 
+                                    if (modelExpanded) viewModel.refreshModels()
+                                }
                             ) {
                                 OutlinedTextField(
                                     value = selectedModel,

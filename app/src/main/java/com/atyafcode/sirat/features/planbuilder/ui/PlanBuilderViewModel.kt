@@ -155,10 +155,20 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    fun refreshModels() {
+    private var lastFetchedKey: String? = null
+
+    fun refreshModels(force: Boolean = false) {
+        if (!force && apiKey.value == lastFetchedKey && _openRouterModels.value.isNotEmpty()) {
+            return // البيانات موجودة بالفعل لنفس المفتاح، لا داعي للجلب مرة أخرى
+        }
+        
         viewModelScope.launch {
             if (apiKey.value.isNotBlank()) {
-                _openRouterModels.value = cloudAI.fetchOpenRouterModels(apiKey.value)
+                val models = cloudAI.fetchOpenRouterModels(apiKey.value)
+                if (models.isNotEmpty()) {
+                    _openRouterModels.value = models
+                    lastFetchedKey = apiKey.value
+                }
             }
         }
     }
@@ -200,13 +210,18 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
             سجلات السلوك لآخر 15 يوم:
             $behaviorSummary
             
-            بناءً على هذه البيانات، قم ببناء خطة تعافي مخصصة وعملية تتضمن:
-            1. تحليل لأنماط السلوك ونقاط الضعف المتعلقة بـ ($targetBehavior).
-            2. خطوات عملية يومية محددة لـ ($targetBehavior).
-            3. نصائح روحية ودينية بناءً على ديانة المستخدم المذكورة أعلاه لتقوية الإرادة.
-            4. بدائل صحية مقترحة.
+            بناءً على هذه البيانات، قم ببناء خطة تعافي مخصصة، عملية جداً، ومختصرة للغاية (Maximum 2-3 pages).
+            يجب أن تتضمن الخطة الأقسام التالية بتركيز شديد:
+            1. تحليل سريع (نقطتان فقط) لأنماط السلوك.
+            2. أهم 5 خطوات عملية يومية للتنفيذ الفوري.
+            3. نصيحة روحية/دينية واحدة قوية.
+            4. أهم البدائل الصحية المقترحة (3 بدائل فقط).
             
-            اجعل الخطة مشجعة، احترافية، وسهلة التنفيذ، ومفصلة قدر الإمكان.
+            تعليمات التنسيق:
+            - استخدم لغة مباشرة وعملية (أفعال أمر).
+            - تجنب المقدمات الطويلة والعبارات الإنشائية.
+            - يجب أن تكون الخطة كاملة ومفيدة ولكن في أقل عدد ممكن من الكلمات.
+            - الهدف أن تكون الخطة "مختصرة ومركزة" (Executive Summary style).
         """.trimIndent()
     }
 
