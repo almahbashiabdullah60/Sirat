@@ -34,7 +34,8 @@ fun ChatScreen(
 
     var inputText by remember { mutableStateOf("") }
 
-    LaunchedEffect(messages.size) {
+    // Scroll to bottom when messages change or keyboard appears
+    LaunchedEffect(messages.size, uiState) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
         }
@@ -43,7 +44,7 @@ fun ChatScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .imePadding() // Handles keyboard lifting for the entire screen
+            .imePadding() // يرفع المحتوى بأكمله مع الكيبورد بشكل صحيح
     ) {
         // Chat History
         LazyColumn(
@@ -76,6 +77,8 @@ fun ChatScreen(
         }
 
         // Input Field
+        // ملاحظة: لا نستخدم navigationBarsPadding() هنا لأن الـ Scaffold الأب
+        // في MainScreen يُطبّق innerPadding الذي يشمل ارتفاع NavigationBar بالفعل
         Surface(
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 3.dp
