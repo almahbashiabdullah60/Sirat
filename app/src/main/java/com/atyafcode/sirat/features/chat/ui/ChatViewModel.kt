@@ -1,5 +1,6 @@
 package com.atyafcode.sirat.features.chat.ui
 
+import com.atyafcode.sirat.R
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +24,7 @@ data class ChatMessage(
 
 sealed class ChatUIState {
     object Idle : ChatUIState()
-    data class Loading(val message: String = "جاري التفكير...") : ChatUIState()
+    data class Loading(val message: String) : ChatUIState()
     data class Error(val message: String) : ChatUIState()
 }
 
@@ -41,9 +42,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<ChatUIState> = _uiState
 
     init {
-        // Initial welcome message from the AI doctor
+        // Initial welcome message from the AI assistant
         _messages.value = listOf(
-            ChatMessage("أهلاً بك. أنا طبيب صراط الذكي، رفيقك في رحلة التعافي والانضباط. كيف يمكنني مساعدتك اليوم؟", false)
+            ChatMessage(getApplication<Application>().getString(R.string.chat_welcome_message), false)
         )
     }
 
@@ -54,14 +55,14 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         _messages.value = _messages.value + userMsg
         
         viewModelScope.launch {
-            _uiState.value = ChatUIState.Loading("جاري الاتصال بالطبيب الذكي...")
+            _uiState.value = ChatUIState.Loading(getApplication<Application>().getString(R.string.chat_status_connecting))
             
             val statusJob = launch {
                 val loadingMessages = listOf(
-                    "الطبيب يقرأ سجلاتك...",
-                    "جاري تحليل المشكلة...",
-                    "جاري استحضار النصيحة الروحية...",
-                    "الطبيب يكتب الرد الآن..."
+                    getApplication<Application>().getString(R.string.chat_status_reading_logs),
+                    getApplication<Application>().getString(R.string.chat_status_analyzing),
+                    getApplication<Application>().getString(R.string.chat_status_spiritual),
+                    getApplication<Application>().getString(R.string.chat_status_writing)
                 )
                 var index = 0
                 while (true) {
@@ -79,29 +80,29 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (aiProvider == PlanRepository.AI_PROVIDER_LOCAL) {
                     if (localAI.initialize()) {
-                        val context = constructBehaviorContext()
+                        val behaviorContext = constructBehaviorContext()
                         val history = _messages.value.takeLast(10).joinToString("\n") { 
                             if (it.isUser) "User: ${it.text}" else "Assistant: ${it.text}" 
                         }
                         
-                        val fullContext = "$context\n\nRecent History:\n$history"
+                        val fullContext = "$behaviorContext\n\nRecent History:\n$history"
                         val response = localAI.generateChatResponse(fullContext, text)
                         
                         _messages.value = _messages.value + ChatMessage(response, false)
                         _uiState.value = ChatUIState.Idle
                     } else {
-                        _uiState.value = ChatUIState.Error("فشل في تهيئة المحرك الذكي. تأكد من وجود مساحة كافية.")
+                        _uiState.value = ChatUIState.Error(getApplication<Application>().getString(R.string.chat_error_init_failed))
                     }
                 } else {
                     // Cloud Mode (OpenRouter)
                     if (apiKey.isBlank()) {
-                        _uiState.value = ChatUIState.Error("يرجى إدخال API Key في تبويبة بناء الخطة")
+                        _uiState.value = ChatUIState.Error(getApplication<Application>().getString(R.string.chat_error_no_api_key))
                         return@launch
                     }
 
-                    val context = constructBehaviorContext()
+                    val behaviorContext = constructBehaviorContext()
                     val cloudMessages = mutableListOf<OpenAIMessage>()
-                    cloudMessages.add(OpenAIMessage("system", "You are Sirat AI Doctor. Professional, empathetic recovery coach. Use Arabic. Context: $context"))
+                    cloudMessages.add(OpenAIMessage("system", "You are Sirat AI Assistant. Professional, empathetic recovery coach. Use Arabic. Context: $behaviorContext"))
                     
                     // Add last 5 messages for history
                     _messages.value.takeLast(6).forEach {
@@ -119,7 +120,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     _uiState.value = ChatUIState.Idle
                 }
             } catch (e: Exception) {
-                _uiState.value = ChatUIState.Error("خطأ: ${e.localizedMessage}")
+                _uiState.value = ChatUIState.Error(getApplication<Application>().getString(R.string.plan_error_unexpected, e.localizedMessage ?: ""))
             } finally {
                 statusJob.cancel()
             }
@@ -128,12 +129,12 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun constructBehaviorContext(): String {
         val last15DaysLogs = behaviorRepo.getLogsForRange(LocalDate.now().minusDays(15), LocalDate.now())
-        val behaviorSummary = if (last15DaysLogs.isEmpty()) "لا توجد سجلات سلوك مسجلة حالياً." 
+        val behaviorSummary = if (last15DaysLogs.isEmpty()) getApplication<Application>().getString(R.string.chat_no_logs) 
         else last15DaysLogs.joinToString("\n") { 
             "التاريخ: ${it.date}, التكرار: ${it.count}, السبب: ${it.reason}"
         }
 
-        return "سجلات السلوك الأخيرة للمستخدم:\n$behaviorSummary"
+        return getApplication<Application>().getString(R.string.chat_context_summary, behaviorSummary)
     }
 
     override fun onCleared() {

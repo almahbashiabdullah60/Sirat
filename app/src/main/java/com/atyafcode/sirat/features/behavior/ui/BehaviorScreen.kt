@@ -76,7 +76,7 @@ fun BehaviorScreen() {
             val success = exportManager.exportToCsv(uri)
             Toast.makeText(
                 context,
-                if (success) "تم التصدير بنجاح" else "فشل التصدير",
+                if (success) context.getString(R.string.plan_export_pdf_success) else context.getString(R.string.plan_export_failed),
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -89,9 +89,9 @@ fun BehaviorScreen() {
             val result = exportManager.importFromCsv(uri)
             if (result.isSuccess) {
                 refreshKey++
-                Toast.makeText(context, "تم استيراد ${result.getOrNull()} سجلات", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.behavior_import_success, result.getOrNull() ?: 0), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "فشل الاستيراد: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.behavior_import_failed, result.exceptionOrNull()?.message ?: ""), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -167,7 +167,7 @@ fun BehaviorScreen() {
             ) {
                 Icon(Icons.Default.FileUpload, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("استيراد", fontSize = 12.sp)
+                Text(stringResource(R.string.behavior_import), fontSize = 12.sp)
             }
             Spacer(Modifier.width(8.dp))
             TextButton(
@@ -176,7 +176,7 @@ fun BehaviorScreen() {
             ) {
                 Icon(Icons.Default.FileDownload, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("تصدير", fontSize = 12.sp)
+                Text(stringResource(R.string.behavior_export), fontSize = 12.sp)
             }
         }
 
@@ -186,9 +186,9 @@ fun BehaviorScreen() {
                 .padding(bottom = 16.dp)
         ) {
             val periods = listOf(
-                AnalysisPeriod.WEEKLY to "أسبوعي",
-                AnalysisPeriod.MONTHLY to "شهري",
-                AnalysisPeriod.YEARLY to "سنوي"
+                AnalysisPeriod.WEEKLY to stringResource(R.string.behavior_period_weekly),
+                AnalysisPeriod.MONTHLY to stringResource(R.string.behavior_period_monthly),
+                AnalysisPeriod.YEARLY to stringResource(R.string.behavior_period_yearly)
             )
             periods.forEachIndexed { index, (period, label) ->
                 SegmentedButton(
@@ -202,9 +202,9 @@ fun BehaviorScreen() {
 
         Text(
             text = when(selectedPeriod) {
-                AnalysisPeriod.WEEKLY -> "الإحصائيات الأسبوعية"
-                AnalysisPeriod.MONTHLY -> "إحصائيات الشهر"
-                AnalysisPeriod.YEARLY -> "الإحصائيات السنوية"
+                AnalysisPeriod.WEEKLY -> stringResource(R.string.behavior_stats_weekly)
+                AnalysisPeriod.MONTHLY -> stringResource(R.string.behavior_stats_monthly)
+                AnalysisPeriod.YEARLY -> stringResource(R.string.behavior_stats_yearly)
             },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
@@ -390,7 +390,15 @@ private fun CalendarGrid(
     val days = (1..daysInMonth).toList()
     val emptyDaysBefore = (0 until firstDayOfMonth).toList()
 
-    val dayNames = listOf("ح", "ن", "ث", "ر", "خ", "ج", "س")
+    val dayNames = listOf(
+        stringResource(R.string.behavior_day_sun),
+        stringResource(R.string.behavior_day_mon),
+        stringResource(R.string.behavior_day_tue),
+        stringResource(R.string.behavior_day_wed),
+        stringResource(R.string.behavior_day_thu),
+        stringResource(R.string.behavior_day_fri),
+        stringResource(R.string.behavior_day_sat)
+    )
 
     Column {
         Row(modifier = Modifier.fillMaxWidth()) {

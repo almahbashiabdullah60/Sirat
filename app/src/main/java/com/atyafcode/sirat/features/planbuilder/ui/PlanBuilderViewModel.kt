@@ -3,6 +3,7 @@ package com.atyafcode.sirat.features.planbuilder.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.atyafcode.sirat.R
 import com.atyafcode.sirat.core.utils.behaviorRepository
 import com.atyafcode.sirat.core.utils.planRepository
 import com.atyafcode.sirat.data.repository.PlanRepository
@@ -105,21 +106,21 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
 
     fun buildPlan() {
         if (aiProvider.value == PlanRepository.AI_PROVIDER_LOCAL && !_isModelDownloaded.value) {
-            _uiState.value = PlanUIState.Error("يرجى تنزيل محرك الذكاء الاصطناعي أولاً أو استخدام المحرك السحابي")
+            _uiState.value = PlanUIState.Error(getApplication<Application>().getString(R.string.plan_error_local_engine))
             return
         }
         
         generationJob?.cancel()
         generationJob = viewModelScope.launch {
-            _uiState.value = PlanUIState.Loading("جاري تحليل بياناتك...")
+            _uiState.value = PlanUIState.Loading(getApplication<Application>().getString(R.string.chat_loading_message))
             
             val statusJob = launch {
                 val loadingMessages = listOf(
-                    "جاري تحليل سجلات السلوك لآخر 15 يوم...",
-                    "جاري صياغة الخطوات العملية المناسبة لك...",
-                    "جاري استحضار النصائح الروحية...",
-                    "جاري تنسيق الخطة لتكون مختصرة ومركزة...",
-                    "المحرك السحابي يضع اللمسات الأخيرة..."
+                    getApplication<Application>().getString(R.string.main_screen_ai_analysis_logs),
+                    getApplication<Application>().getString(R.string.main_screen_ai_crafting_steps),
+                    getApplication<Application>().getString(R.string.main_screen_ai_spiritual_tips),
+                    getApplication<Application>().getString(R.string.main_screen_ai_formatting),
+                    getApplication<Application>().getString(R.string.main_screen_ai_final_touches)
                 )
                 var index = 0
                 while (true) {
@@ -144,11 +145,11 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
                     if (localAI.initialize()) {
                         localAI.generateResponse(prompt)
                     } else {
-                        "فشل في تهيئة الذكاء الاصطناعي المحلي. تأكد من وجود مساحة كافية في الذاكرة (RAM)."
+                        getApplication<Application>().getString(R.string.plan_error_init_local)
                     }
                 } else {
                     if (apiKey.value.isBlank()) {
-                        "يرجى إدخال مفتاح API للمحرك السحابي"
+                        getApplication<Application>().getString(R.string.plan_error_no_api_key)
                     } else {
                         cloudAI.generateResponse(
                             provider = cloudProvider.value,
@@ -159,12 +160,14 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
                     }
                 }
             } catch (e: Exception) {
-                "خطأ غير متوقع: ${e.localizedMessage}"
+                getApplication<Application>().getString(R.string.plan_error_unexpected, e.localizedMessage ?: "")
             }
 
             statusJob.cancel()
-            if (result.contains("فشل") || result.contains("خطأ") || result.isBlank()) {
-                _uiState.value = PlanUIState.Error(result.ifBlank { "تلقى التطبيق رداً فارغاً من المحرك. حاول مرة أخرى." })
+            if (result.contains("فشل") || result.contains("خطأ") || result.isBlank() || 
+                result == getApplication<Application>().getString(R.string.plan_error_init_local) ||
+                result == getApplication<Application>().getString(R.string.plan_error_no_api_key)) {
+                _uiState.value = PlanUIState.Error(result.ifBlank { getApplication<Application>().getString(R.string.plan_error_empty_response) })
             } else {
                 planRepo.savePlan(result)
                 _uiState.value = PlanUIState.Success(result)
@@ -204,7 +207,8 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
             }
         }
         availableBehaviors.value = list
-        if (!list.contains(selectedBehavior.value)) {
+        // Don't auto-set behavior if it's already set or empty
+        if (selectedBehavior.value.isEmpty()) {
             selectedBehavior.value = list.firstOrNull() ?: ""
         }
     }
@@ -212,15 +216,17 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
     private fun constructPrompt(): String {
         // Take only last 15 days of logs to reduce prompt size and memory pressure
         val last15DaysLogs = behaviorRepo.getLogsForRange(LocalDate.now().minusDays(15), LocalDate.now())
-        val behaviorSummary = last15DaysLogs.joinToString("\n") { 
+        val behaviorSummary = if (last15DaysLogs.isEmpty()) getApplication<Application>().getString(R.string.chat_no_logs)
+        else last15DaysLogs.joinToString("\n") { 
             "التاريخ: ${it.date}, التكرار: ${it.count}, السبب: ${it.reason}"
         }
 
-        val typeText = if (goalType.value == "quit") "التخلص من سلوك: " else "الالتزام بسلوك: "
+        val typeText = if (goalType.value == "quit") getApplication<Application>().getString(R.string.plan_goal_quit) + ": " 
+                       else getApplication<Application>().getString(R.string.plan_goal_commit) + ": "
         val targetBehavior = selectedBehavior.value
 
         return """
-            لغة الخطة المطلوبة: ${if (planLanguage.value == "ar") "العربية" else "الإنجليزية"}
+            لغة الخطة المطلوبة: ${if (planLanguage.value == "ar") "العربية" else "English"}
             ديانة المستخدم: ${religion.value}
             الهدف الأساسي: $typeText $targetBehavior
             

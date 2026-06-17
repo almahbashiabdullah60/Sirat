@@ -278,7 +278,53 @@
     <string name="nav_apps">Apps</string>
     <string name="nav_behavior">Behavior</string>
     <string name="nav_plan">Plan</string>
-    <string name="nav_reminders">Sirat AI Doctor</string>
+    <string name="nav_reminders">Sirat Assistant</string>
+
+    <!-- Chat Screen -->
+    <string name="chat_input_placeholder">Talk to the assistant...</string>
+    <string name="chat_send_cd">Send</string>
+    <string name="chat_loading_message">Connecting to assistant...</string>
+
+    <!-- Plan Builder Extension -->
+    <string name="plan_target_behavior_label">Target Behavior</string>
+    <string name="plan_target_behavior_placeholder">e.g. Browsing social media for hours</string>
+    <string name="plan_goal_selection_title">Select your primary goal</string>
+    <string name="plan_goal_quit">Quit a behavior</string>
+    <string name="plan_goal_commit">Commit to a behavior</string>
+    <string name="plan_ai_settings_cloud">Cloud AI Settings</string>
+    <string name="plan_ai_model_label">Select Model</string>
+    <string name="plan_ai_model_loading">Fetching models... or enter API key</string>
+    <string name="plan_download_title">Downloading AI Engine...</string>
+    <string name="plan_download_local_not_found">Local engine not found</string>
+    <string name="plan_download_local_desc">Requires 1.2GB for full privacy.</string>
+    <string name="plan_download_now">Download Now</string>
+    <string name="plan_download_cancel">Cancel Download</string>
+    <string name="plan_use_cloud">Or use Cloud Engine (Higher quality)</string>
+    <string name="plan_export_pdf_button">Download Plan as PDF</string>
+    <string name="main_screen_dev_tab_title">This tab is currently under development</string>
+    <string name="main_screen_menu_cd">Menu</string>
+    <string name="main_screen_download_ai_model">Downloading AI Engine...</string>
+    <string name="main_screen_ai_analysis_logs">Analyzing behavior logs for the last 15 days...</string>
+    <string name="main_screen_ai_crafting_steps">Crafting practical steps for you...</string>
+    <string name="main_screen_ai_spiritual_tips">Bringing spiritual tips...</string>
+    <string name="main_screen_ai_formatting">Formatting the plan to be concise...</string>
+    <string name="main_screen_ai_final_touches">Adding final touches...</string>
+    <string name="chat_loading_initial">Thinking...</string>
+    <string name="chat_welcome_message">Welcome. I am Sirat AI Assistant, your companion on the journey of recovery and discipline. How can I help you today?</string>
+    <string name="chat_status_connecting">Connecting to Smart Assistant...</string>
+    <string name="chat_status_reading_logs">Assistant is reading your logs...</string>
+    <string name="chat_status_analyzing">Analyzing the issue...</string>
+    <string name="chat_status_spiritual">Bringing spiritual advice...</string>
+    <string name="chat_status_writing">Assistant is writing the response...</string>
+    <string name="chat_error_init_failed">Failed to initialize Smart Engine. Ensure there is enough space.</string>
+    <string name="chat_error_no_api_key">Please enter an API Key in the Plan Builder tab</string>
+    <string name="chat_no_logs">No behavior logs recorded currently.</string>
+    <string name="chat_context_summary">Recent behavior logs for the user:\n%1$s</string>
+    <string name="plan_error_local_engine">Please download the AI engine first or use the Cloud engine</string>
+    <string name="plan_error_init_local">Failed to initialize local AI. Ensure there is enough RAM.</string>
+    <string name="plan_error_no_api_key">Please enter an API key for the Cloud engine</string>
+    <string name="plan_error_unexpected">Unexpected error: %1$s</string>
+    <string name="plan_error_empty_response">The app received an empty response from the engine. Try again.</string>
 
     <!-- Behavior Log -->
     <string name="add_behavior_log">Add Behavior Log</string>
@@ -286,7 +332,24 @@
     <string name="behavior_reason">Reason (Optional)</string>
     <string name="save_behavior">Save</string>
     <string name="behavior_history_title">Analysis for %1$s</string>
-    <string name="no_behavior_recorded">No behavior recorded for this day.</string>
+    <string name="behavior_import">Import</string>
+    <string name="behavior_export">Export</string>
+    <string name="behavior_period_weekly">Weekly</string>
+    <string name="behavior_period_monthly">Monthly</string>
+    <string name="behavior_period_yearly">Yearly</string>
+    <string name="behavior_stats_weekly">Weekly Stats</string>
+    <string name="behavior_stats_monthly">Monthly Stats</string>
+    <string name="behavior_stats_yearly">Yearly Stats</string>
+    <string name="behavior_day_sun">S</string>
+    <string name="behavior_day_mon">M</string>
+    <string name="behavior_day_tue">T</string>
+    <string name="behavior_day_wed">W</string>
+    <string name="behavior_day_thu">T</string>
+    <string name="behavior_day_fri">F</string>
+    <string name="behavior_day_sat">S</string>
+    <string name="behavior_import_success">Imported %1$d records</string>
+    <string name="behavior_import_failed">Import failed: %1$s</string>
+    <string name="no_behavior_recorded">No behavior recorded for this day</string>
 
     <!-- Plan Builder -->
     <string name="plan_settings_title">Plan Builder Settings</string>
@@ -298,7 +361,7 @@
     <string name="plan_source_cloud">Cloud (Speed)</string>
     <string name="plan_build_button">Build Recovery Plan</string>
     <string name="plan_custom_title">Custom Recovery Plan</string>
-    <string name="plan_export_pdf">Plan exported successfully</string>
+    <string name="plan_export_pdf_success">Plan exported successfully</string>
     <string name="plan_export_failed">Export failed</string>
     <string name="plan_generating">Generating your custom plan...</string>
     <string name="plan_no_data">Not enough behavioral data to analyze.</string>

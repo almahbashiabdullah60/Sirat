@@ -22,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.atyafcode.sirat.R
 
 @Composable
 fun ChatScreen(
@@ -93,7 +95,7 @@ fun ChatScreen(
                     value = inputText,
                     onValueChange = { inputText = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("تحدث مع الطبيب...") },
+                    placeholder = { Text(stringResource(R.string.chat_input_placeholder)) },
                     shape = RoundedCornerShape(28.dp),
                     maxLines = 4,
                     colors = TextFieldDefaults.colors(
@@ -128,7 +130,7 @@ fun ChatScreen(
                                      else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "إرسال")
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.chat_send_cd))
                 }
             }
         }

@@ -207,7 +207,54 @@
     <string name="nav_apps">التطبيقات</string>
     <string name="nav_behavior">تحليل السلوك</string>
     <string name="nav_plan">بناء خطة</string>
-    <string name="nav_reminders">طبيب صراط</string>
+    <string name="nav_reminders">مساعد صراط</string>
+
+    <!-- Chat Screen -->
+    <string name="chat_input_placeholder">تحدث مع المساعد...</string>
+    <string name="chat_send_cd">إرسال</string>
+    <string name="chat_loading_message">جاري الاتصال بالمساعد...</string>
+
+    <!-- Plan Builder Extension -->
+    <string name="plan_target_behavior_label">السلوك المستهدف</string>
+    <string name="plan_target_behavior_placeholder">مثلاً: تصفح مواقع التواصل لساعات</string>
+    <string name="plan_goal_selection_title">اختر هدفك الأساسي</string>
+    <string name="plan_goal_quit">تخلص من سلوك</string>
+    <string name="plan_goal_commit">التزام بسلوك</string>
+    <string name="plan_ai_settings_cloud">إعدادات المحرك السحابي</string>
+    <string name="plan_ai_model_label">اختر الموديل</string>
+    <string name="plan_ai_model_loading">جاري جلب الموديلات.. أو أدخل الـ Key</string>
+    <string name="plan_download_title">جاري تنزيل محرك الذكاء الاصطناعي...</string>
+    <string name="plan_download_local_not_found">المحرك المحلي غير موجود</string>
+    <string name="plan_download_local_desc">يتطلب 1.2 جيجابايت للعمل بخصوصية تامة.</string>
+    <string name="plan_download_now">تنزيل الآن</string>
+    <string name="plan_download_cancel">إلغاء التنزيل</string>
+    <string name="plan_use_cloud">أو استخدم المحرك السحابي (جودة أعلى)</string>
+    <string name="plan_export_pdf_button">تنزيل الخطة كملف PDF</string>
+    <string name="main_screen_dev_tab_title">هذه التبويبة قيد التطوير حالياً</string>
+    <string name="main_screen_menu_cd">القائمة</string>
+    <string name="main_screen_download_ai_model">جاري تنزيل المحرك الذكي...</string>
+    <string name="main_screen_ai_analysis_logs">جاري تحليل سجلات السلوك لآخر 15 يوم...</string>
+    <string name="main_screen_ai_crafting_steps">جاري صياغة الخطوات العملية المناسبة لك...</string>
+    <string name="main_screen_ai_spiritual_tips">جاري استحضار النصائح الروحية...</string>
+    <string name="main_screen_ai_formatting">جاري تنسيق الخطة لتكون مختصرة ومركزة...</string>
+    <string name="main_screen_ai_final_touches">جاري وضع اللمسات الأخيرة...</string>
+    <string name="chat_loading_initial">جاري التفكير...</string>
+    <string name="chat_welcome_message">أهلاً بك. أنا مساعد صراط الذكي، رفيقك في رحلة التعافي والانضباط. كيف يمكنني مساعدتك اليوم؟</string>
+    <string name="chat_status_connecting">جاري الاتصال بالمساعد الذكي...</string>
+    <string name="chat_status_reading_logs">المساعد يقرأ سجلاتك...</string>
+    <string name="chat_status_analyzing">جاري تحليل المشكلة...</string>
+    <string name="chat_status_spiritual">جاري استحضار النصيحة الروحية...</string>
+    <string name="chat_status_writing">المساعد يكتب الرد الآن...</string>
+    <string name="chat_error_init_failed">فشل في تهيئة المحرك الذكي. تأكد من وجود مساحة كافية.</string>
+    <string name="chat_error_no_api_key">يرجى إدخال API Key في تبويبة بناء الخطة</string>
+    <string name="chat_no_logs">لا توجد سجلات سلوك مسجلة حالياً.</string>
+    <string name="chat_context_summary">سجلات السلوك الأخيرة للمستخدم:\n%1$s</string>
+    <string name="plan_error_local_engine">يرجى تنزيل محرك الذكاء الاصطناعي أولاً أو استخدام المحرك السحابي</string>
+    <string name="plan_error_init_local">فشل في تهيئة الذكاء الاصطناعي المحلي. تأكد من وجود مساحة كافية في الذاكرة (RAM).</string>
+    <string name="plan_error_no_api_key">يرجى إدخال مفتاح API للمحرك السحابي</string>
+    <string name="plan_error_unexpected">خطأ غير متوقع: %1$s</string>
+    <string name="plan_error_empty_response">تلقى التطبيق رداً فارغاً من المحرك. حاول مرة أخرى.</string>
+    <string name="permission_warning_title_suffix"> مطلوب</string>
 
     <!-- Behavior Log -->
     <string name="add_behavior_log">إضافة سجل سلوك</string>
@@ -215,7 +262,23 @@
     <string name="behavior_reason">السبب (اختياري)</string>
     <string name="save_behavior">حفظ</string>
     <string name="behavior_history_title">تحليل يوم %1$s</string>
-    <string name="no_behavior_recorded">لا توجد بيانات مسجلة لهذا اليوم.</string>
+    <string name="behavior_import">استيراد</string>
+    <string name="behavior_export">تصدير</string>
+    <string name="behavior_period_weekly">أسبوعي</string>
+    <string name="behavior_period_monthly">شهري</string>
+    <string name="behavior_period_yearly">سنوي</string>
+    <string name="behavior_stats_weekly">الإحصائيات الأسبوعية</string>
+    <string name="behavior_stats_monthly">إحصائيات الشهر</string>
+    <string name="behavior_stats_yearly">الإحصائيات السنوية</string>
+    <string name="behavior_day_sun">ح</string>
+    <string name="behavior_day_mon">ن</string>
+    <string name="behavior_day_tue">ث</string>
+    <string name="behavior_day_wed">ر</string>
+    <string name="behavior_day_thu">خ</string>
+    <string name="behavior_day_fri">ج</string>
+    <string name="behavior_import_success">تم استيراد %1$d سجلات</string>
+    <string name="behavior_import_failed">فشل الاستيراد: %1$s</string>
+    <string name="no_behavior_recorded">لا يوجد سلوك مسجل لهذا اليوم</string>
 
     <!-- Plan Builder -->
     <string name="plan_settings_title">إعدادات بناء الخطة</string>
@@ -227,7 +290,7 @@
     <string name="plan_source_cloud">سحابي (سرعة)</string>
     <string name="plan_build_button">بناء خطة التعافي</string>
     <string name="plan_custom_title">خطة التعافي المخصصة</string>
-    <string name="plan_export_pdf">تصدير الخطة بنجاح</string>
+    <string name="plan_export_pdf_success">تم تصدير الخطة بنجاح</string>
     <string name="plan_export_failed">فشل التصدير</string>
     <string name="plan_generating">جاري بناء خطتك المخصصة...</string>
     <string name="plan_no_data">لا توجد بيانات سلوكية كافية للتحليل.</string>

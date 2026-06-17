@@ -46,12 +46,15 @@ fun PlanBuilderScreen(
     val availableBehaviors by viewModel.availableBehaviors.collectAsState()
 
     val pdfExporter = remember { PlanPdfExporter(context) }
+    val exportSuccessMessage = stringResource(R.string.plan_export_pdf_success)
+    val exportFailedMessage = stringResource(R.string.plan_export_failed)
+    
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/pdf")
     ) { uri ->
         if (uri != null && uiState is PlanUIState.Success) {
             val success = pdfExporter.exportToPdf(uri, (uiState as PlanUIState.Success).plan)
-            Toast.makeText(context, if (success) "تم تصدير الخطة بنجاح" else "فشل التصدير", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, if (success) exportSuccessMessage else exportFailedMessage, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -76,13 +79,13 @@ fun PlanBuilderScreen(
                     FilterChip(
                         selected = planLanguage == "ar",
                         onClick = { viewModel.planLanguage.value = "ar" },
-                        label = { Text("العربية") },
+                        label = { Text(stringResource(R.string.language_arabic)) },
                         modifier = Modifier.padding(end = 8.dp)
                     )
                     FilterChip(
                         selected = planLanguage == "en",
                         onClick = { viewModel.planLanguage.value = "en" },
-                        label = { Text("English") }
+                        label = { Text(stringResource(R.string.language_english)) }
                     )
                 }
 
@@ -104,7 +107,7 @@ fun PlanBuilderScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Goal and Behavior Selection
-                Text("حدد هدفك المباشر", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.plan_goal_selection_title), style = MaterialTheme.typography.labelLarge)
                 Row(modifier = Modifier.fillMaxWidth()) {
                     FilterChip(
                         selected = goalType == "quit",
@@ -112,7 +115,7 @@ fun PlanBuilderScreen(
                             viewModel.goalType.value = "quit"
                             viewModel.updateBehaviors()
                         },
-                        label = { Text("تخلص من سلوك") },
+                        label = { Text(stringResource(R.string.plan_goal_quit)) },
                         modifier = Modifier.padding(end = 8.dp)
                     )
                     FilterChip(
@@ -121,41 +124,20 @@ fun PlanBuilderScreen(
                             viewModel.goalType.value = "commit"
                             viewModel.updateBehaviors()
                         },
-                        label = { Text("التزام بسلوك") }
+                        label = { Text(stringResource(R.string.plan_goal_commit)) }
                     )
                 }
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                var behaviorExpanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = behaviorExpanded,
-                    onExpandedChange = { behaviorExpanded = !behaviorExpanded }
-                ) {
-                    OutlinedTextField(
-                        value = selectedBehavior,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("اختر السلوك المستهدف") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = behaviorExpanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    ExposedDropdownMenu(
-                        expanded = behaviorExpanded,
-                        onDismissRequest = { behaviorExpanded = false }
-                    ) {
-                        availableBehaviors.forEach { behavior ->
-                            DropdownMenuItem(
-                                text = { Text(behavior) },
-                                onClick = {
-                                    viewModel.selectedBehavior.value = behavior
-                                    behaviorExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
+                OutlinedTextField(
+                    value = selectedBehavior,
+                    onValueChange = { viewModel.selectedBehavior.value = it },
+                    label = { Text(stringResource(R.string.plan_target_behavior_label)) },
+                    placeholder = { Text(stringResource(R.string.plan_target_behavior_placeholder)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -180,7 +162,7 @@ fun PlanBuilderScreen(
                 AnimatedVisibility(visible = aiProvider == PlanRepository.AI_PROVIDER_CLOUD) {
                     Column {
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("إعدادات المحرك السحابي", style = MaterialTheme.typography.labelLarge)
+                        Text(stringResource(R.string.plan_ai_settings_cloud), style = MaterialTheme.typography.labelLarge)
                         
                         Row(modifier = Modifier.fillMaxWidth()) {
                             FilterChip(
@@ -189,7 +171,7 @@ fun PlanBuilderScreen(
                                     viewModel.cloudProvider.value = PlanRepository.CLOUD_PROVIDER_OPENROUTER
                                     viewModel.refreshModels()
                                 },
-                                label = { Text("OpenRouter (مجاني/قوي)") },
+                                label = { Text("OpenRouter (Open Source/Powerful)") },
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         }
@@ -222,7 +204,7 @@ fun PlanBuilderScreen(
                                     value = selectedModel,
                                     onValueChange = {},
                                     readOnly = true,
-                                    label = { Text("اختر الموديل") },
+                                    label = { Text(stringResource(R.string.plan_ai_model_label)) },
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
                                     modifier = Modifier.menuAnchor().fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp)
@@ -234,7 +216,7 @@ fun PlanBuilderScreen(
                                 ) {
                                     if (openRouterModels.isEmpty()) {
                                         DropdownMenuItem(
-                                            text = { Text("جاري جلب الموديلات.. أو أدخل الـ Key") },
+                                            text = { Text(stringResource(R.string.plan_ai_model_loading)) },
                                             onClick = { modelExpanded = false }
                                         )
                                     }
@@ -278,7 +260,7 @@ fun PlanBuilderScreen(
                     Spacer(Modifier.height(8.dp))
                     
                     if (downloadStatus.isRunning) {
-                        Text("جاري تنزيل محرك الذكاء الاصطناعي...", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.plan_download_title), fontWeight = FontWeight.Bold)
                         Text("${downloadStatus.progress}%", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.height(8.dp))
                         LinearProgressIndicator(
@@ -288,17 +270,17 @@ fun PlanBuilderScreen(
                         )
                         Spacer(Modifier.height(16.dp))
                         OutlinedButton(onClick = { viewModel.cancelDownload() }, modifier = Modifier.fillMaxWidth()) {
-                            Text("إلغاء التنزيل")
+                            Text(stringResource(R.string.plan_download_cancel))
                         }
                     } else {
-                        Text("المحرك المحلي غير موجود", fontWeight = FontWeight.Bold)
-                        Text("يتطلب 1.2 جيجابايت للعمل بخصوصية تامة.", style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                        Text(stringResource(R.string.plan_download_local_not_found), fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.plan_download_local_desc), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
                         Spacer(Modifier.height(16.dp))
                         Button(onClick = { viewModel.downloadModel() }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
-                            Text("تنزيل الآن")
+                            Text(stringResource(R.string.plan_download_now))
                         }
                         TextButton(onClick = { viewModel.aiProvider.value = PlanRepository.AI_PROVIDER_CLOUD }) {
-                            Text("أو استخدم المحرك السحابي (جودة أعلى)")
+                            Text(stringResource(R.string.plan_use_cloud))
                         }
                     }
                 }
@@ -337,7 +319,7 @@ fun PlanBuilderScreen(
                     ) {
                         Icon(Icons.Default.PictureAsPdf, null)
                         Spacer(Modifier.width(8.dp))
-                        Text("تنزيل الخطة كملف PDF")
+                        Text(stringResource(R.string.plan_export_pdf_button))
                     }
                     
                     Spacer(modifier = Modifier.height(16.dp))

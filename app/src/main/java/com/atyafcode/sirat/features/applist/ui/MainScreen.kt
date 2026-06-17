@@ -65,6 +65,7 @@ import com.atyafcode.sirat.features.behavior.ui.BehaviorScreen
 import com.atyafcode.sirat.features.planbuilder.ui.PlanBuilderScreen
 import com.atyafcode.sirat.ui.components.DonateModalBottomSheet
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 
@@ -103,6 +104,9 @@ fun MainScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var firstMissingPermission by remember { mutableStateOf<MissingPermission?>(null) }
     var selectedTab by remember { mutableStateOf(MainTab.APPS) }
+
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         val appLockRepository = context.appLockRepository()
@@ -169,223 +173,243 @@ fun MainScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surface,
-        topBar = {
-            MediumTopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Medium,
-                        fontFamily = FontFamily.SansSerif
-                    )
-                },
-                actions = {
-                    Surface(
-                        onClick = {
-                            appLockRepository.setProtectEnabled(!applockEnabled)
-                            applockEnabled = !applockEnabled
-                        },
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (applockEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Icon(
-                                imageVector = if (applockEnabled) Icons.Default.Shield else Icons.Outlined.Shield,
-                                contentDescription = stringResource(R.string.main_screen_app_protection_cd),
-                                modifier = Modifier.size(18.dp),
-                                tint = if (applockEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                text = if (applockEnabled) stringResource(R.string.status_on) else stringResource(R.string.status_off),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = if (applockEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Screen.Settings.route) {
-                                launchSingleTop = true
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(R.string.main_screen_settings_cd),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Screen.TriggerExclusions.route) {
-                                launchSingleTop = true
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Block,
-                            contentDescription = stringResource(R.string.trigger_exclusions_title),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Screen.AntiUninstall.route) {
-                                launchSingleTop = true
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Lock,
-                            contentDescription = stringResource(R.string.anti_uninstall_title),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior
-            )
-        },
-        floatingActionButton = {
-            if (selectedTab == MainTab.APPS && !isLoading) {
-                FloatingActionButton(
-                    onClick = { showAddAppsSheet = true },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.main_screen_search_cd)
-                    )
-                }
-            }
-        },
-        bottomBar = {
-            NavigationBar {
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    stringResource(R.string.app_name),
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                HorizontalDivider()
                 MainTab.entries.forEach { tab ->
-                    NavigationBarItem(
+                    NavigationDrawerItem(
+                        label = { Text(stringResource(tab.titleResId)) },
                         selected = selectedTab == tab,
-                        onClick = { selectedTab = tab },
+                        onClick = {
+                            selectedTab = tab
+                            scope.launch { drawerState.close() }
+                        },
                         icon = {
                             Icon(
-                                imageVector = if (selectedTab == tab) tab.selectedIcon else tab.icon,
-                                contentDescription = stringResource(tab.titleResId)
+                                if (selectedTab == tab) tab.selectedIcon else tab.icon,
+                                contentDescription = null
                             )
                         },
-                        label = { Text(stringResource(tab.titleResId)) }
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
                 }
             }
         }
-    ) { innerPadding ->
-        Column(
+    ) {
+        Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            when (selectedTab) {
-                MainTab.APPS -> {
-                    firstMissingPermission?.let { missingPerm ->
-                        PermissionWarningBanner(
-                            missingPermission = missingPerm,
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            containerColor = MaterialTheme.colorScheme.surface,
+            topBar = {
+                MediumTopAppBar(
+                    title = {
+                        Text(
+                            stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = FontFamily.SansSerif
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.main_screen_menu_cd))
+                        }
+                    },
+                    actions = {
+                        Surface(
                             onClick = {
-                                when (missingPerm) {
-                                    MissingPermission.OVERLAY -> {
-                                        context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
-                                            data = "package:${context.packageName}".toUri()
-                                        })
-                                    }
-
-                                    MissingPermission.ACCESSIBILITY -> {
-                                        openAccessibilitySettings(context)
-                                    }
-
-                                    MissingPermission.USAGE_STATS -> {
-                                        context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-                                    }
-
-                                    MissingPermission.SHIZUKU -> {
-                                        try {
-                                            if (Shizuku.isPreV11()) {
-                                                Toast.makeText(
-                                                    context,
-                                                    context.getString(R.string.main_screen_shizuku_manual_permission_toast),
-                                                    Toast.LENGTH_LONG
-                                                ).show()
-                                            } else {
-                                                Shizuku.requestPermission(423)
-                                            }
-                                        } catch (_: Exception) {
-                                            Toast.makeText(
-                                                context,
-                                                context.getString(R.string.main_screen_shizuku_not_available_toast),
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                        }
-                                    }
-
-                                    MissingPermission.DEVICE_ADMIN -> {
-                                        val component =
-                                            ComponentName(context, DeviceAdmin::class.java)
-                                        val intent =
-                                            Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-                                                putExtra(
-                                                    DevicePolicyManager.EXTRA_DEVICE_ADMIN,
-                                                    component
-                                                )
-                                                putExtra(
-                                                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                                                    context.getString(R.string.main_screen_device_admin_explanation)
-                                                )
-                                            }
-                                        context.startActivity(intent)
-                                    }
+                                appLockRepository.setProtectEnabled(!applockEnabled)
+                                applockEnabled = !applockEnabled
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            color = if (applockEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (applockEnabled) Icons.Default.Shield else Icons.Outlined.Shield,
+                                    contentDescription = stringResource(R.string.main_screen_app_protection_cd),
+                                    modifier = Modifier.size(18.dp),
+                                    tint = if (applockEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    text = if (applockEnabled) stringResource(R.string.status_on) else stringResource(R.string.status_off),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = if (applockEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = {
+                                navController.navigate(Screen.Settings.route) {
+                                    launchSingleTop = true
                                 }
                             }
-                        )
-                    }
-                    if (isLoading) {
-                        LoadingContent(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                        )
-                    } else {
-                        ProtectedAppsDashboard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            lockedApps = lockedApps,
-                            onUnlockApp = { appInfo ->
-                                mainViewModel.unlockApp(appInfo.packageName)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = stringResource(R.string.main_screen_settings_cd),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                navController.navigate(Screen.TriggerExclusions.route) {
+                                    launchSingleTop = true
+                                }
                             }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Block,
+                                contentDescription = stringResource(R.string.trigger_exclusions_title),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                navController.navigate(Screen.AntiUninstall.route) {
+                                    launchSingleTop = true
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Lock,
+                                contentDescription = stringResource(R.string.anti_uninstall_title),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    },
+                    scrollBehavior = scrollBehavior
+                )
+            },
+            floatingActionButton = {
+                if (selectedTab == MainTab.APPS && !isLoading) {
+                    FloatingActionButton(
+                        onClick = { showAddAppsSheet = true },
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.main_screen_search_cd)
                         )
                     }
                 }
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                when (selectedTab) {
+                    MainTab.APPS -> {
+                        firstMissingPermission?.let { missingPerm ->
+                            PermissionWarningBanner(
+                                missingPermission = missingPerm,
+                                onClick = {
+                                    when (missingPerm) {
+                                        MissingPermission.OVERLAY -> {
+                                            context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                                                data = "package:${context.packageName}".toUri()
+                                            })
+                                        }
 
-                MainTab.BEHAVIOR -> {
-                    BehaviorScreen()
-                }
+                                        MissingPermission.ACCESSIBILITY -> {
+                                            openAccessibilitySettings(context)
+                                        }
 
-                MainTab.PLAN -> {
-                    PlanBuilderScreen()
-                }
+                                        MissingPermission.USAGE_STATS -> {
+                                            context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                                        }
 
-                MainTab.REMINDERS -> {
-                    ChatScreen()
-                }
+                                        MissingPermission.SHIZUKU -> {
+                                            try {
+                                                if (Shizuku.isPreV11()) {
+                                                    Toast.makeText(
+                                                        context,
+                                                        context.getString(R.string.main_screen_shizuku_manual_permission_toast),
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                } else {
+                                                    Shizuku.requestPermission(423)
+                                                }
+                                            } catch (_: Exception) {
+                                                Toast.makeText(
+                                                    context,
+                                                    context.getString(R.string.main_screen_shizuku_not_available_toast),
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        }
 
-                else -> {
-                    EmptyTabPlaceholder(tab = selectedTab)
+                                        MissingPermission.DEVICE_ADMIN -> {
+                                            val component =
+                                                ComponentName(context, DeviceAdmin::class.java)
+                                            val intent =
+                                                Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+                                                    putExtra(
+                                                        DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                                                        component
+                                                    )
+                                                    putExtra(
+                                                        DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                                        context.getString(R.string.main_screen_device_admin_explanation)
+                                                    )
+                                                }
+                                            context.startActivity(intent)
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        if (isLoading) {
+                            LoadingContent(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                            )
+                        } else {
+                            ProtectedAppsDashboard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                lockedApps = lockedApps,
+                                onUnlockApp = { appInfo ->
+                                    mainViewModel.unlockApp(appInfo.packageName)
+                                }
+                            )
+                        }
+                    }
+
+                    MainTab.BEHAVIOR -> {
+                        BehaviorScreen()
+                    }
+
+                    MainTab.PLAN -> {
+                        PlanBuilderScreen()
+                    }
+
+                    MainTab.REMINDERS -> {
+                        ChatScreen()
+                    }
+
+                    else -> {
+                        EmptyTabPlaceholder(tab = selectedTab)
+                    }
                 }
             }
         }
@@ -450,7 +474,7 @@ private fun EmptyTabPlaceholder(tab: MainTab) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "هذه التبويبة قيد التطوير حالياً",
+            text = stringResource(R.string.main_screen_dev_tab_title),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
