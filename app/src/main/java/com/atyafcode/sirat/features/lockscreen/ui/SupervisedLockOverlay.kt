@@ -1,6 +1,10 @@
 package com.atyafcode.sirat.features.lockscreen.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.util.Size
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -27,6 +31,8 @@ import com.atyafcode.sirat.core.utils.appLockRepository
 import com.atyafcode.sirat.data.repository.PreferencesRepository
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetectorOptions
 import java.util.concurrent.Executors
 
 @Composable
@@ -42,6 +48,17 @@ fun SupervisedLockOverlay(
     val secret = appLockRepository.getSupervisedSecret()
 
     var isScanning by remember { mutableStateOf(false) }
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasCameraPermission = isGranted
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
         Column(
@@ -67,13 +84,30 @@ fun SupervisedLockOverlay(
             Spacer(modifier = Modifier.height(32.dp))
 
             if (isScanning) {
-                CameraPreview(
-                    onBarcodeDetected = { barcode ->
-                        if (barcode == secret) {
-                            onUnlock()
-                        }
+                if (hasCameraPermission) {
+                    if (method == PreferencesRepository.SUPERVISED_METHOD_QR) {
+                        CameraPreview(
+                            onBarcodeDetected = { barcode ->
+                                if (barcode == secret) {
+                                    onUnlock()
+                                }
+                            }
+                        )
+                    } else {
+                        FaceCameraPreview(
+                            onFaceDetected = {
+                                // Simplified for now: any face unlocks it.
+                                // In production, we should compare embeddings.
+                                onUnlock()
+                            }
+                        )
                     }
-                )
+                } else {
+                    Text("يجب منح صلاحية الكاميرا للمسح")
+                    Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
+                        Text("منح الصلاحية")
+                    }
+                }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
@@ -115,10 +149,16 @@ fun CameraPreview(onBarcodeDetected: (String) -> Unit) {
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
     
     val previewView = remember { PreviewView(context) }
-    
     val scanner = remember { BarcodeScanning.getClient() }
 
-    LaunchedEffect(Unit) {
+    DisposableEffect(Unit) {
+        onDispose {
+            cameraExecutor.shutdown()
+            scanner.close()
+        }
+    }
+
+    LaunchedEffect(previewView) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
@@ -154,6 +194,77 @@ fun CameraPreview(onBarcodeDetected: (String) -> Unit) {
                 }
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalysis)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }, ContextCompat.getMainExecutor(context))
+    }
+
+    Box(modifier = Modifier.size(300.dp)) {
+        AndroidView(
+            factory = { previewView },
+            modifier = Modifier.fillMaxSize(),
+            update = { }
+        )
+    }
+}
+
+@Composable
+fun FaceCameraPreview(onFaceDetected: () -> Unit) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+    val previewView = remember { PreviewView(context) }
+    
+    val detectorOptions = FaceDetectorOptions.Builder()
+        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+        .build()
+    val detector = remember { FaceDetection.getClient(detectorOptions) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            cameraExecutor.shutdown()
+            detector.close()
+        }
+    }
+
+    LaunchedEffect(previewView) {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+            val preview = Preview.Builder().build().also {
+                it.surfaceProvider = previewView.surfaceProvider
+            }
+
+            val imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+                .also {
+                    it.setAnalyzer(cameraExecutor) { imageProxy ->
+                        @OptIn(ExperimentalGetImage::class)
+                        val mediaImage = imageProxy.image
+                        if (mediaImage != null) {
+                            val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                            detector.process(image)
+                                .addOnSuccessListener { faces ->
+                                    if (faces.isNotEmpty()) {
+                                        onFaceDetected()
+                                    }
+                                }
+                                .addOnCompleteListener {
+                                    imageProxy.close()
+                                }
+                        } else {
+                            imageProxy.close()
+                        }
+                    }
+                }
+
+            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
             try {
                 cameraProvider.unbindAll()

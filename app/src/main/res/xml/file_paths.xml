@@ -4,6 +4,10 @@
         name="logs"
         path="." />
 
+    <cache-path
+        name="images"
+        path="images" />
+
     <files-path
         name="audit_logs"
         path="." />

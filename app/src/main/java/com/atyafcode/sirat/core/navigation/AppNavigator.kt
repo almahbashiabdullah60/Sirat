@@ -8,6 +8,7 @@ import androidx.biometric.BiometricPrompt
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -24,12 +25,12 @@ import com.atyafcode.sirat.features.appintro.ui.AppIntroScreen
 import com.atyafcode.sirat.features.applist.ui.MainScreen
 import com.atyafcode.sirat.features.lockscreen.ui.AlphanumericPasswordOverlayScreen
 import com.atyafcode.sirat.features.lockscreen.ui.PinPasswordOverlayScreen
-import com.atyafcode.sirat.features.lockscreen.ui.PatternLockScreen
+import com.atyafcode.sirat.features.lockscreen.ui.SupervisedLockOverlay
 import com.atyafcode.sirat.features.setpassword.ui.AlphanumericSetPasswordScreen
-import com.atyafcode.sirat.features.setpassword.ui.PatternSetPasswordScreen
 import com.atyafcode.sirat.features.setpassword.ui.SetPasswordScreen
 import com.atyafcode.sirat.features.settings.ui.SettingsScreen
 import com.atyafcode.sirat.features.triggerexclusions.ui.TriggerExclusionsScreen
+import com.atyafcode.sirat.features.aisettings.ui.AISettingsScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController, startDestination: String) {
@@ -58,9 +59,6 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
 
         composable(Screen.ChangePassword.route) {
             when (application.appLockRepository.getLockType()) {
-                PreferencesRepository.LOCK_TYPE_PATTERN -> {
-                    PatternSetPasswordScreen(navController, false)
-                }
                 PreferencesRepository.LOCK_TYPE_PASSWORD -> {
                     AlphanumericSetPasswordScreen(navController, false)
                 }
@@ -70,12 +68,17 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
             }
         }
 
-        composable(Screen.SetPasswordPattern.route) {
-            PatternSetPasswordScreen(navController, isFirstTimeSetup = true)
-        }
-
         composable(Screen.SetPasswordAlphanumeric.route) {
             AlphanumericSetPasswordScreen(navController, isFirstTimeSetup = true)
+        }
+
+        composable(Screen.SupervisedMethodChoice.route) {
+            com.atyafcode.sirat.features.setpassword.ui.SupervisedMethodChoiceScreen(navController)
+        }
+
+        composable(Screen.SupervisedSetup.route + "/{method}") { backStackEntry ->
+            val method = backStackEntry.arguments?.getString("method") ?: "qr"
+            com.atyafcode.sirat.features.setpassword.ui.SupervisedSetupScreen(navController, method)
         }
 
         composable(Screen.Main.route) {
@@ -88,22 +91,6 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
 
             if (activity != null) {
                 when (lockType) {
-                    PreferencesRepository.LOCK_TYPE_PATTERN -> {
-                        PatternLockScreen(
-                            fromMainActivity = true,
-                            onPatternAttempt = { pattern ->
-                                val isValid = application.appLockRepository.validatePattern(pattern)
-                                if (isValid) {
-                                    handleAuthenticationSuccess(navController)
-                                }
-                                isValid
-                            },
-                            onBiometricAuth = {
-                                handleBiometricAuthentication(activity, navController)
-                            }
-                        )
-                    }
-
                     PreferencesRepository.LOCK_TYPE_PASSWORD -> {
                         AlphanumericPasswordOverlayScreen(
                             showBiometricButton = application.appLockRepository.isBiometricAuthEnabled(),
@@ -113,6 +100,18 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
                             },
                             onAuthSuccess = {
                                 handleAuthenticationSuccess(navController)
+                            }
+                        )
+                    }
+
+                    PreferencesRepository.LOCK_TYPE_SUPERVISED -> {
+                        SupervisedLockOverlay(
+                            lockedAppName = context.getString(R.string.this_app),
+                            onUnlock = {
+                                handleAuthenticationSuccess(navController)
+                            },
+                            onExit = {
+                                activity.finish()
                             }
                         )
                     }
@@ -143,6 +142,10 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
 
         composable(Screen.AntiUninstall.route) {
             AntiUninstallScreen(navController)
+        }
+
+        composable(Screen.AISettings.route) {
+            AISettingsScreen(navController)
         }
     }
 }
@@ -221,4 +224,3 @@ private fun navigateToMain(navController: NavHostController) {
 private const val TAG = "AppNavHost"
 private const val ANIMATION_DURATION = 400
 private const val SCALE_INITIAL = 0.9f
-

@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material.icons.outlined.BarChart
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.Forum
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Warning
@@ -78,7 +80,8 @@ private enum class MainTab(
     APPS("apps", R.string.nav_apps, Icons.Outlined.Apps, Icons.Default.Apps),
     BEHAVIOR("behavior", R.string.nav_behavior, Icons.Outlined.BarChart, Icons.Default.BarChart),
     PLAN("plan", R.string.nav_plan, Icons.Outlined.Assignment, Icons.Default.Assignment),
-    REMINDERS("reminders", R.string.nav_reminders, Icons.Outlined.Psychology, Icons.Rounded.Psychology)
+    REMINDERS("reminders", R.string.nav_reminders, Icons.Outlined.Psychology, Icons.Rounded.Psychology),
+    AI_SETTINGS("ai_settings", R.string.ai_settings_title, Icons.Outlined.Settings, Icons.Default.Settings)
 }
 
 @SuppressLint("LocalContextGetResourceValueCall")
@@ -189,8 +192,13 @@ fun MainScreen(
                         label = { Text(stringResource(tab.titleResId)) },
                         selected = selectedTab == tab,
                         onClick = {
-                            selectedTab = tab
-                            scope.launch { drawerState.close() }
+                            if (tab == MainTab.AI_SETTINGS) {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(Screen.AISettings.route)
+                            } else {
+                                selectedTab = tab
+                                scope.launch { drawerState.close() }
+                            }
                         },
                         icon = {
                             Icon(
@@ -400,11 +408,19 @@ fun MainScreen(
                     }
 
                     MainTab.PLAN -> {
-                        PlanBuilderScreen()
+                        PlanBuilderScreen(
+                            onNavigateToSettings = {
+                                navController.navigate(Screen.AISettings.route)
+                            }
+                        )
                     }
 
                     MainTab.REMINDERS -> {
-                        ChatScreen()
+                        ChatScreen(
+                            onNavigateToSettings = {
+                                navController.navigate(Screen.AISettings.route)
+                            }
+                        )
                     }
 
                     else -> {

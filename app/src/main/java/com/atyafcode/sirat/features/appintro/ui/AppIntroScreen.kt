@@ -178,7 +178,7 @@ fun AppIntroScreen(navController: NavController) {
 
     val onFinishCallback = {
         AppIntroManager.markIntroAsCompleted(context)
-        navController.navigate(Screen.SetPassword.route) {
+        navController.navigate(Screen.SupervisedMethodChoice.route) {
             popUpTo(Screen.AppIntro.route) { inclusive = true }
         }
     }

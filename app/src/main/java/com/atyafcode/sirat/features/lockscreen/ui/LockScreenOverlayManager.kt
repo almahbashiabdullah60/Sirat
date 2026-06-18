@@ -9,6 +9,7 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.*
@@ -85,14 +86,14 @@ class LockScreenOverlayManager(private val context: Context):
                             isValid
                         }
 
-                        val onPatternAttemptCallback = { pattern: String ->
-                            val isValid = appLockRepository.validatePattern(pattern)
-                            if (isValid) {
-                                onUnlock()
-                                removeOverlay()
-                            }
-                            isValid
-                        }
+                        // val onPatternAttemptCallback = { pattern: String ->
+                        //     val isValid = appLockRepository.validatePattern(pattern)
+                        //     if (isValid) {
+                        //         onUnlock()
+                        //         removeOverlay()
+                        //     }
+                        //     isValid
+                        // }
 
                         BackHandler {
                             onExit()
@@ -102,17 +103,17 @@ class LockScreenOverlayManager(private val context: Context):
                         val lockType = appLockRepository.getLockType()
 
                         when (lockType) {
-                            PreferencesRepository.LOCK_TYPE_PATTERN -> {
-                                PatternLockScreen(
-                                    fromMainActivity = false,
-                                    showCloseButton = true,
-                                    onClose = {
-                                        onExit()
+                            PreferencesRepository.LOCK_TYPE_SUPERVISED -> {
+                                SupervisedLockOverlay(
+                                    lockedAppName = appName,
+                                    onUnlock = {
+                                        onUnlock()
                                         removeOverlay()
                                     },
-                                    lockedAppName = appName,
-                                    triggeringPackageName = triggeringPackageName,
-                                    onPatternAttempt = onPatternAttemptCallback
+                                    onExit = {
+                                        onExit()
+                                        removeOverlay()
+                                    }
                                 )
                             }
 

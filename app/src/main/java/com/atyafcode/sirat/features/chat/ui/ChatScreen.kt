@@ -27,7 +27,8 @@ import com.atyafcode.sirat.R
 
 @Composable
 fun ChatScreen(
-    viewModel: ChatViewModel = viewModel()
+    viewModel: ChatViewModel = viewModel(),
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val messages by viewModel.messages.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -70,12 +71,18 @@ fun ChatScreen(
 
         // Error Message
         if (uiState is ChatUIState.Error) {
-            Text(
-                text = (uiState as ChatUIState.Error).message,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                style = MaterialTheme.typography.bodySmall
-            )
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                Text(
+                    text = (uiState as ChatUIState.Error).message,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                if ((uiState as ChatUIState.Error).message.contains(stringResource(R.string.chat_error_no_api_key))) {
+                    TextButton(onClick = onNavigateToSettings) {
+                        Text(stringResource(R.string.ai_settings_title))
+                    }
+                }
+            }
         }
 
         // Input Field

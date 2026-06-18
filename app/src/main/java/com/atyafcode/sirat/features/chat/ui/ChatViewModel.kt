@@ -128,13 +128,24 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun constructBehaviorContext(): String {
+        val religion = planRepo.getReligion()
+        val language = if (planRepo.getPlanLanguage() == "ar") "العربية" else "English"
+        
         val last15DaysLogs = behaviorRepo.getLogsForRange(LocalDate.now().minusDays(15), LocalDate.now())
         val behaviorSummary = if (last15DaysLogs.isEmpty()) getApplication<Application>().getString(R.string.chat_no_logs) 
         else last15DaysLogs.joinToString("\n") { 
             "التاريخ: ${it.date}, التكرار: ${it.count}, السبب: ${it.reason}"
         }
 
-        return getApplication<Application>().getString(R.string.chat_context_summary, behaviorSummary)
+        return """
+            User Religion: $religion
+            Preferred Language: $language
+            
+            Behavior Logs (Last 15 days):
+            $behaviorSummary
+            
+            Instructions: Analyze the behavior and talk to the user based on these settings.
+        """.trimIndent()
     }
 
     override fun onCleared() {

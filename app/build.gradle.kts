@@ -75,7 +75,16 @@ dependencies {
     implementation(libs.refine.runtime)
     compileOnly(project(":hidden-api"))
     implementation(libs.hiddenapibypass)
-    implementation(project(":patternlock"))
+    // implementation(project(":patternlock"))
+
+    implementation(libs.zxing.android.embedded)
+    implementation(libs.zxing.core)
+    implementation(libs.mlkit.barcode.scanning)
+    implementation(libs.mlkit.face.detection)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
 
     implementation(libs.mediapipe.tasks.genai)
     implementation(libs.retrofit.core)

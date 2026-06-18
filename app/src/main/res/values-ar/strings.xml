@@ -294,6 +294,10 @@
     <string name="plan_export_failed">فشل التصدير</string>
     <string name="plan_generating">جاري بناء خطتك المخصصة...</string>
     <string name="plan_no_data">لا توجد بيانات سلوكية كافية للتحليل.</string>
+
+    <!-- AI Settings Screen -->
+    <string name="ai_settings_title">إعدادات مساعد الذكاء الاصطناعي</string>
+    <string name="save_settings">حفظ الإعدادات</string>
 </resources>
 
 

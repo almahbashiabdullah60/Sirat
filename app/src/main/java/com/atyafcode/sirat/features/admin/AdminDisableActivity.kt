@@ -34,7 +34,7 @@ import com.atyafcode.sirat.data.repository.AppLockRepository
 import com.atyafcode.sirat.data.repository.PreferencesRepository
 import com.atyafcode.sirat.features.lockscreen.ui.KeypadSection
 import com.atyafcode.sirat.features.lockscreen.ui.PasswordIndicators
-import com.atyafcode.sirat.features.lockscreen.ui.PatternLockScreen
+// import com.atyafcode.sirat.features.lockscreen.ui.PatternLockScreen
 import com.atyafcode.sirat.ui.theme.AppLockTheme
 
 class AdminDisableActivity : ComponentActivity() {
@@ -67,44 +67,6 @@ class AdminDisableActivity : ComponentActivity() {
                 Scaffold { padding ->
                     val lockType = appLockRepository.getLockType()
                     when (lockType) {
-                        PreferencesRepository.LOCK_TYPE_PATTERN -> {
-                            AdminDisablePatternScreen(
-                                modifier = Modifier.padding(padding),
-                                onPatternVerified = {
-                                    val deviceAdmin = DeviceAdmin()
-                                    deviceAdmin.setPasswordVerified(this@AdminDisableActivity, true)
-
-                                    Toast.makeText(
-                                        this@AdminDisableActivity,
-                                        R.string.password_verified_admin,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    appLockRepository.setAntiUninstallEnabled(false)
-                                    finish()
-                                },
-                                validatePattern = { inputPattern ->
-                                    appLockRepository.validatePattern(inputPattern)
-                                        .also { isValid ->
-                                            if (!isValid) {
-                                                Toast.makeText(
-                                                    this@AdminDisableActivity,
-                                                    R.string.incorrect_pattern_try_again,
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            }
-                                        }
-                                },
-                                onCancel = {
-                                    val deviceAdmin = DeviceAdmin()
-                                    deviceAdmin.setPasswordVerified(
-                                        this@AdminDisableActivity,
-                                        false
-                                    )
-                                    finish()
-                                }
-                            )
-                        }
-
                         PreferencesRepository.LOCK_TYPE_PASSWORD -> {
                             AdminDisablePasswordScreen(
                                 modifier = Modifier.padding(padding),
@@ -357,57 +319,4 @@ fun AdminDisablePasswordScreen(
     }
 }
 
-@Composable
-fun AdminDisablePatternScreen(
-    modifier: Modifier = Modifier,
-    onPatternVerified: () -> Unit,
-    onCancel: () -> Unit,
-    validatePattern: (String) -> Boolean
-) {
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Text(
-                text = stringResource(R.string.unlock_to_disable_admin),
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            PatternLockScreen(
-                modifier = Modifier.weight(1f),
-                fromMainActivity = false,
-                lockedAppName = null,
-                triggeringPackageName = null,
-                onPatternAttempt = { pattern ->
-                    val isValid = validatePattern(pattern)
-                    if (isValid) {
-                        onPatternVerified()
-                    }
-                    isValid
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            TextButton(
-                onClick = onCancel,
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                Text(stringResource(R.string.cancel_button))
-            }
-        }
-    }
-}
 

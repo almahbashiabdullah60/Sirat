@@ -3,7 +3,6 @@ package com.atyafcode.sirat.features.planbuilder.ui
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,25 +20,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.atyafcode.sirat.R
-import com.atyafcode.sirat.data.repository.PlanRepository
 import com.atyafcode.sirat.features.planbuilder.domain.PlanPdfExporter
+import com.atyafcode.sirat.core.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanBuilderScreen(
-    viewModel: PlanBuilderViewModel = viewModel()
+    viewModel: PlanBuilderViewModel = viewModel(),
+    onNavigateToSettings: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
-    val isModelDownloaded by viewModel.isModelDownloaded.collectAsState()
-    val downloadStatus by viewModel.downloadStatus.collectAsState()
-    val planLanguage by viewModel.planLanguage.collectAsState()
-    val religion by viewModel.religion.collectAsState()
-    val aiProvider by viewModel.aiProvider.collectAsState()
-    val cloudProvider by viewModel.cloudProvider.collectAsState()
-    val apiKey by viewModel.apiKey.collectAsState()
-    val selectedModel by viewModel.selectedModel.collectAsState()
-    val openRouterModels by viewModel.openRouterModels.collectAsState()
     
     val goalType by viewModel.goalType.collectAsState()
     val selectedBehavior by viewModel.selectedBehavior.collectAsState()
@@ -65,49 +56,19 @@ fun PlanBuilderScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Goal and Behavior Selection
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(stringResource(R.string.plan_settings_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Language
-                Text(stringResource(R.string.plan_language_label), style = MaterialTheme.typography.labelLarge)
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    FilterChip(
-                        selected = planLanguage == "ar",
-                        onClick = { viewModel.planLanguage.value = "ar" },
-                        label = { Text(stringResource(R.string.language_arabic)) },
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    FilterChip(
-                        selected = planLanguage == "en",
-                        onClick = { viewModel.planLanguage.value = "en" },
-                        label = { Text(stringResource(R.string.language_english)) }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Religion
-                OutlinedTextField(
-                    value = religion,
-                    onValueChange = { 
-                        viewModel.religion.value = it
-                        viewModel.updateBehaviors()
-                    },
-                    label = { Text(stringResource(R.string.plan_religion_label)) },
-                    placeholder = { Text(stringResource(R.string.plan_religion_placeholder)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                Text(
+                    stringResource(R.string.plan_goal_selection_title), 
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Goal and Behavior Selection
-                Text(stringResource(R.string.plan_goal_selection_title), style = MaterialTheme.typography.labelLarge)
                 Row(modifier = Modifier.fillMaxWidth()) {
                     FilterChip(
                         selected = goalType == "quit",
@@ -128,7 +89,7 @@ fun PlanBuilderScreen(
                     )
                 }
                 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 
                 OutlinedTextField(
                     value = selectedBehavior,
@@ -140,169 +101,36 @@ fun PlanBuilderScreen(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // AI Provider Selection
-                Text(stringResource(R.string.plan_ai_source_label), style = MaterialTheme.typography.labelLarge)
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    FilterChip(
-                        selected = aiProvider == PlanRepository.AI_PROVIDER_LOCAL,
-                        onClick = { viewModel.aiProvider.value = PlanRepository.AI_PROVIDER_LOCAL },
-                        label = { Text(stringResource(R.string.plan_source_local)) },
-                        leadingIcon = { Icon(Icons.Default.Psychology, null, modifier = Modifier.size(18.dp)) },
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    FilterChip(
-                        selected = aiProvider == PlanRepository.AI_PROVIDER_CLOUD,
-                        onClick = { viewModel.aiProvider.value = PlanRepository.AI_PROVIDER_CLOUD },
-                        label = { Text(stringResource(R.string.plan_source_cloud)) },
-                        leadingIcon = { Icon(Icons.Default.Cloud, null, modifier = Modifier.size(18.dp)) }
-                    )
-                }
-
-                AnimatedVisibility(visible = aiProvider == PlanRepository.AI_PROVIDER_CLOUD) {
-                    Column {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(stringResource(R.string.plan_ai_settings_cloud), style = MaterialTheme.typography.labelLarge)
-                        
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            FilterChip(
-                                selected = cloudProvider == PlanRepository.CLOUD_PROVIDER_OPENROUTER,
-                                onClick = { 
-                                    viewModel.cloudProvider.value = PlanRepository.CLOUD_PROVIDER_OPENROUTER
-                                    viewModel.refreshModels()
-                                },
-                                label = { Text("OpenRouter (Open Source/Powerful)") },
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = apiKey,
-                            onValueChange = { 
-                                viewModel.apiKey.value = it
-                                if (it.length > 10) viewModel.refreshModels()
-                            },
-                            label = { Text("OpenRouter API Key") },
-                            placeholder = { Text("sk-or-v1-...") },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-
-                        if (cloudProvider == PlanRepository.CLOUD_PROVIDER_OPENROUTER) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            var modelExpanded by remember { mutableStateOf(false) }
-                            
-                            ExposedDropdownMenuBox(
-                                expanded = modelExpanded,
-                                onExpandedChange = { 
-                                    modelExpanded = !modelExpanded 
-                                    if (modelExpanded) viewModel.refreshModels()
-                                }
-                            ) {
-                                OutlinedTextField(
-                                    value = selectedModel,
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text(stringResource(R.string.plan_ai_model_label)) },
-                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
-                                    modifier = Modifier.menuAnchor().fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                
-                                ExposedDropdownMenu(
-                                    expanded = modelExpanded,
-                                    onDismissRequest = { modelExpanded = false }
-                                ) {
-                                    if (openRouterModels.isEmpty()) {
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(R.string.plan_ai_model_loading)) },
-                                            onClick = { modelExpanded = false }
-                                        )
-                                    }
-                                    openRouterModels.forEach { model ->
-                                        DropdownMenuItem(
-                                            text = { 
-                                                Column {
-                                                    Text(model.name)
-                                                    Text(model.id, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                                }
-                                            },
-                                            onClick = {
-                                                viewModel.selectedModel.value = model.id
-                                                modelExpanded = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
+                
+                TextButton(
+                    onClick = onNavigateToSettings,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Icon(Icons.Default.Settings, null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.ai_settings_title))
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (aiProvider == PlanRepository.AI_PROVIDER_LOCAL && !isModelDownloaded) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (downloadStatus.isRunning) 
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                    else 
-                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.Download, null, tint = if (downloadStatus.isRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
-                    Spacer(Modifier.height(8.dp))
-                    
-                    if (downloadStatus.isRunning) {
-                        Text(stringResource(R.string.plan_download_title), fontWeight = FontWeight.Bold)
-                        Text("${downloadStatus.progress}%", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-                        Spacer(Modifier.height(8.dp))
-                        LinearProgressIndicator(
-                            progress = downloadStatus.progress / 100f,
-                            modifier = Modifier.fillMaxWidth().height(8.dp),
-                            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
-                        )
-                        Spacer(Modifier.height(16.dp))
-                        OutlinedButton(onClick = { viewModel.cancelDownload() }, modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(R.string.plan_download_cancel))
-                        }
-                    } else {
-                        Text(stringResource(R.string.plan_download_local_not_found), fontWeight = FontWeight.Bold)
-                        Text(stringResource(R.string.plan_download_local_desc), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
-                        Spacer(Modifier.height(16.dp))
-                        Button(onClick = { viewModel.downloadModel() }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
-                            Text(stringResource(R.string.plan_download_now))
-                        }
-                        TextButton(onClick = { viewModel.aiProvider.value = PlanRepository.AI_PROVIDER_CLOUD }) {
-                            Text(stringResource(R.string.plan_use_cloud))
-                        }
-                    }
+        Button(
+            onClick = { viewModel.buildPlan() },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            enabled = uiState !is PlanUIState.Loading
+        ) {
+            if (uiState is PlanUIState.Loading) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                    Spacer(Modifier.width(12.dp))
+                    Text((uiState as PlanUIState.Loading).message, style = MaterialTheme.typography.bodySmall)
                 }
-            }
-        } else {
-            Button(
-                onClick = { viewModel.buildPlan() },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                enabled = uiState !is PlanUIState.Loading
-            ) {
-                if (uiState is PlanUIState.Loading) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
-                        Spacer(Modifier.width(12.dp))
-                        Text((uiState as PlanUIState.Loading).message, style = MaterialTheme.typography.bodySmall)
-                    }
-                } else {
-                    Icon(Icons.Default.Assignment, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.plan_build_button))
-                }
+            } else {
+                Icon(Icons.Default.Assignment, null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.plan_build_button))
             }
         }
 
@@ -341,12 +169,20 @@ fun PlanBuilderScreen(
                 }
             }
             is PlanUIState.Error -> {
-                Text(
-                    text = (uiState as PlanUIState.Error).message,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp),
-                    textAlign = TextAlign.Center
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = (uiState as PlanUIState.Error).message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    if ((uiState as PlanUIState.Error).message.contains(stringResource(R.string.plan_error_no_api_key)) || 
+                        (uiState as PlanUIState.Error).message.contains(stringResource(R.string.plan_error_local_engine))) {
+                        Button(onClick = onNavigateToSettings) {
+                            Text(stringResource(R.string.ai_settings_title))
+                        }
+                    }
+                }
             }
             else -> {}
         }

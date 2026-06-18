@@ -46,6 +46,7 @@ import com.atyafcode.sirat.core.utils.isAccessibilityServiceEnabled
 import com.atyafcode.sirat.core.utils.openAccessibilitySettings
 import com.atyafcode.sirat.data.repository.AppLockRepository
 import com.atyafcode.sirat.data.repository.BackendImplementation
+import com.atyafcode.sirat.data.repository.PreferencesRepository
 import com.atyafcode.sirat.features.admin.AdminDisableActivity
 import com.atyafcode.sirat.services.ShizukuAppLockService
 import com.atyafcode.sirat.services.UsageLockService
@@ -332,6 +333,14 @@ fun SettingsScreen(
                             title = stringResource(R.string.settings_screen_change_pin_title),
                             subtitle = stringResource(R.string.settings_screen_change_pin_desc),
                             onClick = { navController.navigate(Screen.ChangePassword.route) }
+                        ),
+                        ActionSettingItem(
+                            icon = Icons.Default.SupervisorAccount,
+                            title = if (appLockRepository.getLockType() == PreferencesRepository.LOCK_TYPE_SUPERVISED) 
+                                "الوضع الحالي: قفل المشرف" 
+                            else "الوضع الحالي: قفل شخصي",
+                            subtitle = "اضغط للتغيير بين القفل الشخصي وقفل المشرف",
+                            onClick = { navController.navigate(Screen.SupervisedMethodChoice.route) }
                         ),
                         ActionSettingItem(
                             icon = Timer,

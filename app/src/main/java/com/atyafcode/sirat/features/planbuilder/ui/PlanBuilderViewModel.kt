@@ -8,9 +8,7 @@ import com.atyafcode.sirat.core.utils.behaviorRepository
 import com.atyafcode.sirat.core.utils.planRepository
 import com.atyafcode.sirat.data.repository.PlanRepository
 import com.atyafcode.sirat.features.planbuilder.domain.CloudAIProvider
-import com.atyafcode.sirat.features.planbuilder.domain.DownloadStatus
 import com.atyafcode.sirat.features.planbuilder.domain.LocalAIProvider
-import com.atyafcode.sirat.features.planbuilder.domain.OpenRouterModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,29 +34,11 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
     private val _uiState = MutableStateFlow<PlanUIState>(PlanUIState.Idle)
     val uiState: StateFlow<PlanUIState> = _uiState
 
-    private val _isModelDownloaded = MutableStateFlow(localAI.isModelDownloaded() && planRepo.isModelCompleted())
-    val isModelDownloaded: StateFlow<Boolean> = _isModelDownloaded
-
-    private val _downloadStatus = MutableStateFlow(DownloadStatus())
-    val downloadStatus: StateFlow<DownloadStatus> = _downloadStatus
-
-    private val _openRouterModels = MutableStateFlow<List<OpenRouterModel>>(emptyList())
-    val openRouterModels: StateFlow<List<OpenRouterModel>> = _openRouterModels
-
-    private var downloadPollingJob: Job? = null
     private var generationJob: Job? = null
-
-    val planLanguage = MutableStateFlow(planRepo.getPlanLanguage())
-    val religion = MutableStateFlow(planRepo.getReligion())
-    val aiProvider = MutableStateFlow(planRepo.getAIProvider())
-    val cloudProvider = MutableStateFlow(planRepo.getCloudProvider())
-    val apiKey = MutableStateFlow(planRepo.getApiKey())
-    val selectedModel = MutableStateFlow(planRepo.getOpenRouterModel())
 
     // Behavioral Goals State
     val goalType = MutableStateFlow("quit") // "quit" or "commit"
     val selectedBehavior = MutableStateFlow("")
-    
     val availableBehaviors = MutableStateFlow<List<String>>(emptyList())
 
     init {
@@ -66,46 +46,14 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
         if (!savedPlan.isNullOrBlank()) {
             _uiState.value = PlanUIState.Success(savedPlan)
         }
-
-        // Setup dynamic behaviors based on initial state
         updateBehaviors()
-        
-        // Fetch models if OpenRouter is selected
-        if (apiKey.value.isNotBlank()) {
-            refreshModels()
-        }
-        
-        // Robust check for ongoing downloads
-        viewModelScope.launch {
-            val savedId = planRepo.getDownloadId()
-            android.util.Log.d("SiratAI", "ViewModel Init: Saved ID = $savedId")
-            
-            // Strictly check for completion
-            val completed = localAI.isModelDownloaded() && planRepo.isModelCompleted()
-            _isModelDownloaded.value = completed
-            android.util.Log.d("SiratAI", "Is Model Fully Downloaded: $completed")
-
-            if (!completed) {
-                // Look for active download regardless of savedId
-                val currentStatus = localAI.getDownloadStatus(savedId)
-                android.util.Log.d("SiratAI", "Current Status: isRunning=${currentStatus.isRunning}, id=${currentStatus.id}")
-                
-                if (currentStatus.isRunning) {
-                    _downloadStatus.value = currentStatus
-                    planRepo.setDownloadId(currentStatus.id)
-                    startDownloadPolling(currentStatus.id)
-                } else if (currentStatus.isFailed) {
-                    _downloadStatus.value = currentStatus
-                } else if (!localAI.isModelDownloaded()) {
-                    // Not downloading and file doesn't exist/too small
-                    planRepo.setModelCompleted(false)
-                }
-            }
-        }
     }
 
     fun buildPlan() {
-        if (aiProvider.value == PlanRepository.AI_PROVIDER_LOCAL && !_isModelDownloaded.value) {
+        val aiProvider = planRepo.getAIProvider()
+        val isModelDownloaded = localAI.isModelDownloaded() && planRepo.isModelCompleted()
+        
+        if (aiProvider == PlanRepository.AI_PROVIDER_LOCAL && !isModelDownloaded) {
             _uiState.value = PlanUIState.Error(getApplication<Application>().getString(R.string.plan_error_local_engine))
             return
         }
@@ -130,32 +78,28 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
                 }
             }
 
-            // Save current settings
-            planRepo.setPlanLanguage(planLanguage.value)
-            planRepo.setReligion(religion.value)
-            planRepo.setAIProvider(aiProvider.value)
-            planRepo.setCloudProvider(cloudProvider.value)
-            planRepo.setApiKey(apiKey.value)
-            planRepo.setOpenRouterModel(selectedModel.value)
-
             val prompt = constructPrompt()
             
             val result = try {
-                if (aiProvider.value == PlanRepository.AI_PROVIDER_LOCAL) {
+                if (aiProvider == PlanRepository.AI_PROVIDER_LOCAL) {
                     if (localAI.initialize()) {
                         localAI.generateResponse(prompt)
                     } else {
                         getApplication<Application>().getString(R.string.plan_error_init_local)
                     }
                 } else {
-                    if (apiKey.value.isBlank()) {
+                    val apiKey = planRepo.getApiKey()
+                    val cloudProvider = planRepo.getCloudProvider()
+                    val selectedModel = planRepo.getOpenRouterModel()
+                    
+                    if (apiKey.isBlank()) {
                         getApplication<Application>().getString(R.string.plan_error_no_api_key)
                     } else {
                         cloudAI.generateResponse(
-                            provider = cloudProvider.value,
-                            apiKey = apiKey.value,
+                            provider = cloudProvider,
+                            apiKey = apiKey,
                             prompt = prompt,
-                            model = selectedModel.value
+                            model = selectedModel
                         )
                     }
                 }
@@ -175,27 +119,9 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    private var lastFetchedKey: String? = null
-
-    fun refreshModels(force: Boolean = false) {
-        if (!force && apiKey.value == lastFetchedKey && _openRouterModels.value.isNotEmpty()) {
-            return // البيانات موجودة بالفعل لنفس المفتاح، لا داعي للجلب مرة أخرى
-        }
-        
-        viewModelScope.launch {
-            if (apiKey.value.isNotBlank()) {
-                val models = cloudAI.fetchOpenRouterModels(apiKey.value)
-                if (models.isNotEmpty()) {
-                    _openRouterModels.value = models
-                    lastFetchedKey = apiKey.value
-                }
-            }
-        }
-    }
-
     fun updateBehaviors() {
         val type = goalType.value
-        val rel = religion.value.lowercase()
+        val rel = planRepo.getReligion().lowercase()
         
         val list = if (type == "quit") {
             listOf("التدخين", "المخدرات", "الإباحية", "العادة السرية", "إدمان الهاتف", "تضييع الوقت")
@@ -207,14 +133,12 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
             }
         }
         availableBehaviors.value = list
-        // Don't auto-set behavior if it's already set or empty
         if (selectedBehavior.value.isEmpty()) {
             selectedBehavior.value = list.firstOrNull() ?: ""
         }
     }
 
     private fun constructPrompt(): String {
-        // Take only last 15 days of logs to reduce prompt size and memory pressure
         val last15DaysLogs = behaviorRepo.getLogsForRange(LocalDate.now().minusDays(15), LocalDate.now())
         val behaviorSummary = if (last15DaysLogs.isEmpty()) getApplication<Application>().getString(R.string.chat_no_logs)
         else last15DaysLogs.joinToString("\n") { 
@@ -224,10 +148,12 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
         val typeText = if (goalType.value == "quit") getApplication<Application>().getString(R.string.plan_goal_quit) + ": " 
                        else getApplication<Application>().getString(R.string.plan_goal_commit) + ": "
         val targetBehavior = selectedBehavior.value
+        val religion = planRepo.getReligion()
+        val language = if (planRepo.getPlanLanguage() == "ar") "العربية" else "English"
 
         return """
-            لغة الخطة المطلوبة: ${if (planLanguage.value == "ar") "العربية" else "English"}
-            ديانة المستخدم: ${religion.value}
+            لغة الخطة المطلوبة: $language
+            ديانة المستخدم: $religion
             الهدف الأساسي: $typeText $targetBehavior
             
             سجلات السلوك لآخر 15 يوم:
@@ -248,66 +174,9 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
         """.trimIndent()
     }
 
-    fun downloadModel() {
-        val id = localAI.downloadModel()
-        if (id >= 0) {
-            planRepo.setDownloadId(id)
-            planRepo.setModelCompleted(false)
-            startDownloadPolling(id)
-        } else if (id == -2L) {
-            // Already downloaded
-            checkModelStatus()
-        }
-        _uiState.value = PlanUIState.Idle // Clear any errors
-    }
-
-    fun cancelDownload() {
-        val id = planRepo.getDownloadId()
-        if (id != -1L) {
-            localAI.cancelDownload(id)
-            planRepo.setDownloadId(-1L)
-            _downloadStatus.value = DownloadStatus()
-            downloadPollingJob?.cancel()
-        }
-    }
-
-    private fun startDownloadPolling(id: Long) {
-        downloadPollingJob?.cancel()
-        downloadPollingJob = viewModelScope.launch {
-            while (true) {
-                val status = localAI.getDownloadStatus(id)
-                _downloadStatus.value = status
-                
-                if (status.isCompleted) {
-                    _isModelDownloaded.value = true
-                    planRepo.setModelCompleted(true)
-                    planRepo.setDownloadId(-1L) // Clear it
-                    break
-                }
-                
-                if (status.isFailed) {
-                    planRepo.setDownloadId(-1L)
-                    break
-                }
-                
-                if (!status.isRunning && !status.isCompleted && !status.isFailed) {
-                    // Download might have been canceled or lost
-                    break
-                }
-
-                delay(1000) // Poll every second
-            }
-        }
-    }
-
-    fun checkModelStatus() {
-        _isModelDownloaded.value = localAI.isModelDownloaded()
-    }
-
     override fun onCleared() {
         super.onCleared()
         localAI.close()
         generationJob?.cancel()
-        downloadPollingJob?.cancel()
     }
 }

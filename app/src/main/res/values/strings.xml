@@ -365,6 +365,10 @@
     <string name="plan_export_failed">Export failed</string>
     <string name="plan_generating">Generating your custom plan...</string>
     <string name="plan_no_data">Not enough behavioral data to analyze.</string>
+
+    <!-- AI Settings Screen -->
+    <string name="ai_settings_title">AI Assistant Settings</string>
+    <string name="save_settings">Save Settings</string>
 </resources>
 
 

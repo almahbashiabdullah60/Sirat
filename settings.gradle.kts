@@ -23,4 +23,4 @@ rootProject.name = "Sirat"
 include(":app")
 include(":appintro")
 include(":hidden-api")
-include(":patternlock")
+// include(":patternlock")

@@ -55,7 +55,7 @@ fun SupervisedMethodChoiceScreen(navController: NavController) {
                 title = "قفل المشرف (QR Code)",
                 description = "يتم توليد رمز لا تعرفه، ويفتحه المشرف عبر مسح الكود.",
                 icon = Icons.Default.QrCode,
-                onClick = { /* TODO: Navigate to Supervised Setup with QR */ }
+                onClick = { navController.navigate(Screen.SupervisedSetup.route + "/qr") }
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -64,7 +64,7 @@ fun SupervisedMethodChoiceScreen(navController: NavController) {
                 title = "قفل المشرف (الوجه)",
                 description = "يفتح التطبيق فقط عند التعرف على وجه المشرف.",
                 icon = Icons.Default.Face,
-                onClick = { /* TODO: Navigate to Supervised Setup with Face */ }
+                onClick = { navController.navigate(Screen.SupervisedSetup.route + "/face") }
             )
         }
     }

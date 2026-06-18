@@ -55,7 +55,48 @@ class PreferencesRepository(context: Context) {
     }
 
     fun getLockType(): String {
-        return settingsPrefs.getString(KEY_LOCK_TYPE, LOCK_TYPE_PIN) ?: LOCK_TYPE_PIN
+        val type = settingsPrefs.getString(KEY_LOCK_TYPE, LOCK_TYPE_PIN) ?: LOCK_TYPE_PIN
+        return if (type == LOCK_TYPE_PATTERN) LOCK_TYPE_PIN else type
+    }
+
+    fun setLockGenerationType(isRandom: Boolean) {
+        settingsPrefs.edit { putBoolean(KEY_LOCK_GENERATION_TYPE, isRandom) }
+    }
+
+    fun isLockGenerationRandom(): Boolean {
+        return settingsPrefs.getBoolean(KEY_LOCK_GENERATION_TYPE, false)
+    }
+
+    fun setPinLength(length: Int) {
+        settingsPrefs.edit { putInt(KEY_PIN_LENGTH, length) }
+    }
+
+    fun getPinLength(): Int {
+        return settingsPrefs.getInt(KEY_PIN_LENGTH, 4)
+    }
+
+    fun setPasswordLength(length: Int) {
+        settingsPrefs.edit { putInt(KEY_PASSWORD_LENGTH, length) }
+    }
+
+    fun getPasswordLength(): Int {
+        return settingsPrefs.getInt(KEY_PASSWORD_LENGTH, 8)
+    }
+
+    fun setSupervisedSecret(secret: String) {
+        appLockPrefs.edit(commit = true) { putString(KEY_SUPERVISED_SECRET, secret) }
+    }
+
+    fun getSupervisedSecret(): String? {
+        return appLockPrefs.getString(KEY_SUPERVISED_SECRET, null)
+    }
+
+    fun setSupervisedMethod(method: String) {
+        settingsPrefs.edit { putString(KEY_SUPERVISED_METHOD, method) }
+    }
+
+    fun getSupervisedMethod(): String {
+        return settingsPrefs.getString(KEY_SUPERVISED_METHOD, SUPERVISED_METHOD_QR) ?: SUPERVISED_METHOD_QR
     }
 
     fun setBiometricAuthEnabled(enabled: Boolean) {
@@ -191,6 +232,11 @@ class PreferencesRepository(context: Context) {
         private const val KEY_SHOW_SYSTEM_APPS = "show_system_apps"
         private const val KEY_LOCK_TYPE = "lock_type"
         private const val KEY_APP_LANGUAGE = "app_language"
+        private const val KEY_LOCK_GENERATION_TYPE = "lock_generation_type"
+        private const val KEY_PIN_LENGTH = "pin_length"
+        private const val KEY_PASSWORD_LENGTH = "password_length"
+        private const val KEY_SUPERVISED_SECRET = "supervised_secret"
+        private const val KEY_SUPERVISED_METHOD = "supervised_method"
 
         private const val DEFAULT_PROTECT_ENABLED = true
         private const val DEFAULT_UNLOCK_DURATION = 0
@@ -198,6 +244,10 @@ class PreferencesRepository(context: Context) {
         const val LOCK_TYPE_PIN = "pin"
         const val LOCK_TYPE_PATTERN = "pattern"
         const val LOCK_TYPE_PASSWORD = "password"
+        const val LOCK_TYPE_SUPERVISED = "supervised"
+
+        const val SUPERVISED_METHOD_QR = "qr"
+        const val SUPERVISED_METHOD_FACE = "face"
     }
 }
 

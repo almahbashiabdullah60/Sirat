@@ -57,6 +57,17 @@ class AppLockRepository(private val context: Context) {
     fun validatePattern(inputPattern: String): Boolean =
         preferencesRepository.validatePattern(inputPattern)
 
+    fun setLockGenerationType(isRandom: Boolean) = preferencesRepository.setLockGenerationType(isRandom)
+    fun isLockGenerationRandom(): Boolean = preferencesRepository.isLockGenerationRandom()
+    fun setPinLength(length: Int) = preferencesRepository.setPinLength(length)
+    fun getPinLength(): Int = preferencesRepository.getPinLength()
+    fun setPasswordLength(length: Int) = preferencesRepository.setPasswordLength(length)
+    fun getPasswordLength(): Int = preferencesRepository.getPasswordLength()
+    fun setSupervisedSecret(secret: String) = preferencesRepository.setSupervisedSecret(secret)
+    fun getSupervisedSecret(): String? = preferencesRepository.getSupervisedSecret()
+    fun setSupervisedMethod(method: String) = preferencesRepository.setSupervisedMethod(method)
+    fun getSupervisedMethod(): String = preferencesRepository.getSupervisedMethod()
+
     fun setLockType(lockType: String) = preferencesRepository.setLockType(lockType)
     fun getLockType(): String = preferencesRepository.getLockType()
 

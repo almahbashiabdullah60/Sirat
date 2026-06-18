@@ -168,16 +168,7 @@ class PasswordOverlayActivity : FragmentActivity() {
             isValid
         }
 
-        val onPatternAttemptCallback = { pattern: String ->
-            val isValid = appLockRepository.validatePattern(pattern)
-            if (isValid) {
-                lockedPackageNameFromIntent?.let { pkgName ->
-                    AppLockManager.unlockApp(pkgName)
-                    finishAfterTransition()
-                }
-            }
-            isValid
-        }
+        // val onPatternAttemptCallback = ...
 
         setContent {
             AppLockTheme {
@@ -186,13 +177,18 @@ class PasswordOverlayActivity : FragmentActivity() {
                 ) { innerPadding ->
                     val lockType = appLockRepository.getLockType()
                     when (lockType) {
-                        PreferencesRepository.LOCK_TYPE_PATTERN -> {
-                            PatternLockScreen(
-                                modifier = Modifier.padding(innerPadding),
-                                fromMainActivity = false,
+                        PreferencesRepository.LOCK_TYPE_SUPERVISED -> {
+                            SupervisedLockOverlay(
                                 lockedAppName = appName,
-                                triggeringPackageName = triggeringPackageNameFromIntent,
-                                onPatternAttempt = onPatternAttemptCallback
+                                onUnlock = {
+                                    lockedPackageNameFromIntent?.let { pkgName ->
+                                        AppLockManager.unlockApp(pkgName)
+                                        finishAfterTransition()
+                                    }
+                                },
+                                onExit = {
+                                    finish()
+                                }
                             )
                         }
 
