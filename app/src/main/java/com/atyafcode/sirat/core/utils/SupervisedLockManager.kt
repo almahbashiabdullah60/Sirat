@@ -18,7 +18,4 @@ object SupervisedLockManager {
             null
         }
     }
-
-    // Logic for Face Embeddings would go here.
-    // For now, we will focus on QR as it's simpler to implement first.
 }

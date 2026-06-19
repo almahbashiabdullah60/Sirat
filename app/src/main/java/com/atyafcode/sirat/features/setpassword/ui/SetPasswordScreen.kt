@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -71,8 +72,14 @@ fun SetPasswordScreen(
 
     BackHandler {
         if (isFirstTimeSetup) {
-            Toast.makeText(context, R.string.set_pin_to_continue_toast, Toast.LENGTH_SHORT).show()
+            // If first time, allow going back to Method Choice instead of being stuck
+            if (navController.previousBackStackEntry != null) {
+                navController.popBackStack()
+            } else {
+                Toast.makeText(context, R.string.set_pin_to_continue_toast, Toast.LENGTH_SHORT).show()
+            }
         } else {
+            // Normal settings change, always allow back
             if (navController.previousBackStackEntry != null) {
                 navController.popBackStack()
             } else {
@@ -162,7 +169,7 @@ fun SetPasswordScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("توليد عشوائي", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.random_generation_label), style = MaterialTheme.typography.bodyLarge)
                     Switch(
                         checked = isRandomMode,
                         onCheckedChange = { 
@@ -179,11 +186,11 @@ fun SetPasswordScreen(
                 if (isRandomMode) {
                     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("طول الرمز: ${pinLength.toInt()}", modifier = Modifier.weight(1f))
+                            Text(stringResource(R.string.pin_length_label, pinLength.toInt()), modifier = Modifier.weight(1f))
                             IconButton(onClick = {
                                 passwordState = SecurityGenerator.generateRandomPin(pinLength.toInt())
                             }) {
-                                Icon(Icons.Default.Refresh, contentDescription = "تحديث")
+                                Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh_code_cd))
                             }
                         }
                         Slider(
@@ -205,15 +212,31 @@ fun SetPasswordScreen(
                                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                                 textAlign = TextAlign.Center,
-                                letterSpacing = 8.sp
+                                letterSpacing = 8.sp,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                         
                         Button(
+                            onClick = { 
+                                val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                val clip = android.content.ClipData.newPlainText("Sirat PIN", passwordState)
+                                clipboardManager.setPrimaryClip(clip)
+                                Toast.makeText(context, R.string.code_copied_toast, Toast.LENGTH_SHORT).show()
+                            },
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                        ) {
+                            Icon(Icons.Default.ContentCopy, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.copy_code_button))
+                        }
+
+                        Button(
                             onClick = { isConfirmationMode = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("استخدام هذا الرمز")
+                            Text(stringResource(R.string.use_this_code))
                         }
                     }
                 }
@@ -229,7 +252,8 @@ fun SetPasswordScreen(
                         else -> stringResource(R.string.create_new_pin_label)
                     },
                     style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 if (showMismatchError) {
@@ -258,7 +282,8 @@ fun SetPasswordScreen(
                     },
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.alpha(0.8f),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.weight(1f))

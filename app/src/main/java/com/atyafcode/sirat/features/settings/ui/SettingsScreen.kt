@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Security
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -336,14 +337,14 @@ fun SettingsScreen(
                         ),
                         ActionSettingItem(
                             icon = Icons.Default.SupervisorAccount,
-                            title = if (appLockRepository.getLockType() == PreferencesRepository.LOCK_TYPE_SUPERVISED) 
-                                "الوضع الحالي: قفل المشرف" 
-                            else "الوضع الحالي: قفل شخصي",
-                            subtitle = "اضغط للتغيير بين القفل الشخصي وقفل المشرف",
+                            title = stringResource(R.string.settings_supervised_title),
+                            subtitle = if (appLockRepository.getLockType() == PreferencesRepository.LOCK_TYPE_SUPERVISED) 
+                                stringResource(R.string.settings_supervised_mode_on) 
+                            else stringResource(R.string.settings_supervised_mode_off),
                             onClick = { navController.navigate(Screen.SupervisedMethodChoice.route) }
                         ),
                         ActionSettingItem(
-                            icon = Timer,
+                            icon = Icons.Default.Timer,
                             title = stringResource(R.string.settings_screen_unlock_duration_title),
                             subtitle = if (unlockTimeDuration > 0) {
                                 if (unlockTimeDuration > 10_000) "Until screen off"
@@ -481,10 +482,6 @@ fun SettingsScreen(
                     context = context,
                     shizukuPermissionLauncher = shizukuPermissionLauncher
                 )
-            }
-
-            item {
-                LinksSection()
             }
         }
     }
@@ -1098,101 +1095,4 @@ fun AccessibilityDialog(
     )
 }
 
-@Composable
-fun LinksSection() {
-    val context = LocalContext.current
-
-    Column {
-        SectionTitle(text = "Links")
-
-        Column {
-            SettingsCard(index = 0, listSize = 3) {
-                LinkItem(
-                    title = "Discord Community",
-                    icon = Discord,
-                    onClick = {
-                        val intent = Intent(
-                            Intent.ACTION_VIEW,
-                            "https://discord.gg/46wCMRVAre".toUri()
-                        )
-                        context.startActivity(intent)
-                    }
-                )
-            }
-
-            SettingsCard(index = 1, listSize = 3) {
-                LinkItem(
-                    title = "Source Code",
-                    icon = Icons.Outlined.Code,
-                    onClick = {
-                        val intent = Intent(
-                            Intent.ACTION_VIEW,
-                            "https://github.com/aload0/AppLock".toUri()
-                        )
-                        context.startActivity(intent)
-                    }
-                )
-            }
-
-            SettingsCard(index = 2, listSize = 3) {
-                LinkItem(
-                    title = "Report Issue",
-                    icon = Icons.Outlined.BugReport,
-                    onClick = {
-                        val intent = Intent(
-                            Intent.ACTION_VIEW,
-                            "https://github.com/aload0/AppLock/issues".toUri()
-                        )
-                        context.startActivity(intent)
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun LinkItem(
-    title: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
-    ListItem(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(vertical = 2.dp, horizontal = 4.dp),
-        headlineContent = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium
-            )
-        },
-        leadingContent = {
-            Box(
-                modifier = Modifier.size(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.secondary
-                )
-            }
-        },
-        trailingContent = {
-            Box(
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                    contentDescription = null
-                )
-            }
-        },
-        colors = ListItemDefaults.colors(
-            containerColor = Color.Transparent
-        )
-    )
-}
 

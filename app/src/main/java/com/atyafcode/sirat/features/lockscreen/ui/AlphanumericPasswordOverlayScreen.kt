@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -41,7 +42,8 @@ fun AlphanumericPasswordOverlayScreen(
     triggeringPackageName: String? = null,
     onPasswordAttempt: ((password: String) -> Boolean)? = null
 ) {
-    val appLockRepository = LocalContext.current.appLockRepository()
+    val context = LocalContext.current
+    val appLockRepository = context.appLockRepository()
     var passwordState by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }

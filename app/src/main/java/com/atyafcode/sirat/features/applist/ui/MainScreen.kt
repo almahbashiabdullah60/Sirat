@@ -16,8 +16,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material.icons.outlined.BarChart
@@ -26,8 +35,7 @@ import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.rounded.Forum
-import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.Psychology
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -79,7 +87,7 @@ private enum class MainTab(
 ) {
     APPS("apps", R.string.nav_apps, Icons.Outlined.Apps, Icons.Default.Apps),
     BEHAVIOR("behavior", R.string.nav_behavior, Icons.Outlined.BarChart, Icons.Default.BarChart),
-    PLAN("plan", R.string.nav_plan, Icons.Outlined.Assignment, Icons.Default.Assignment),
+    PLAN("plan", R.string.nav_plan, Icons.AutoMirrored.Outlined.Assignment, Icons.AutoMirrored.Filled.Assignment),
     REMINDERS("reminders", R.string.nav_reminders, Icons.Outlined.Psychology, Icons.Rounded.Psychology),
     AI_SETTINGS("ai_settings", R.string.ai_settings_title, Icons.Outlined.Settings, Icons.Default.Settings)
 }
@@ -148,33 +156,7 @@ fun MainScreen(
 
     val appLockRepository = context.appLockRepository()
 
-    var showCommunityLink by remember { mutableStateOf(appLockRepository.isShowCommunityLink()) }
-
-    if (showCommunityLink) {
-        CommunityDialog(
-            onDismiss = {
-                appLockRepository.setCommunityLinkShown(true)
-                showCommunityLink = false
-            },
-            onJoin = {
-                appLockRepository.setCommunityLinkShown(true)
-                showCommunityLink = false
-                context.startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        "https://discord.gg/46wCMRVAre".toUri()
-                    )
-                )
-            }
-        )
-    }
-
-    var showDonateDialog by remember { mutableStateOf(appLockRepository.isShowDonateLink()) }
-    if (showDonateDialog && !showCommunityLink) {
-        DonateModalBottomSheet {
-            appLockRepository.setShowDonateLink(false); showDonateDialog = false
-        }
-    }
+    // Removed CommunityDialog and Donate dialog check from here as requested
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -209,6 +191,41 @@ fun MainScreen(
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
                 }
+
+                HorizontalDivider()
+
+                NavigationDrawerItem(
+                    label = { Text(stringResource(R.string.settings_screen_title)) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(Screen.Settings.route)
+                    },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+
+                NavigationDrawerItem(
+                    label = { Text(stringResource(R.string.trigger_exclusions_title)) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(Screen.TriggerExclusions.route)
+                    },
+                    icon = { Icon(Icons.Default.Block, contentDescription = null) },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+
+                NavigationDrawerItem(
+                    label = { Text(stringResource(R.string.anti_uninstall_title)) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(Screen.AntiUninstall.route)
+                    },
+                    icon = { Icon(Icons.Outlined.Lock, contentDescription = null) },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
             }
         }
     ) {
@@ -259,45 +276,6 @@ fun MainScreen(
                                     color = if (applockEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                        }
-                        IconButton(
-                            onClick = {
-                                navController.navigate(Screen.Settings.route) {
-                                    launchSingleTop = true
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = stringResource(R.string.main_screen_settings_cd),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        IconButton(
-                            onClick = {
-                                navController.navigate(Screen.TriggerExclusions.route) {
-                                    launchSingleTop = true
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Block,
-                                contentDescription = stringResource(R.string.trigger_exclusions_title),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        IconButton(
-                            onClick = {
-                                navController.navigate(Screen.AntiUninstall.route) {
-                                    launchSingleTop = true
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Lock,
-                                contentDescription = stringResource(R.string.anti_uninstall_title),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
                         }
                     },
                     scrollBehavior = scrollBehavior
@@ -838,54 +816,6 @@ private fun SelectableAppItem(
     )
 }
 
-@Composable
-private fun CommunityDialog(
-    onDismiss: () -> Unit,
-    onJoin: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        icon = {
-            Icon(
-                Icons.Rounded.Groups,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        },
-        title = {
-            Text(
-                text = stringResource(R.string.join_community),
-                style = MaterialTheme.typography.headlineSmall
-            )
-        },
-        text = {
-            Column(Modifier.fillMaxWidth(0.7f)) {
-                Text(
-                    text = stringResource(R.string.join_community_desc),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = onJoin) {
-                Icon(
-                    Icons.Rounded.Forum,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.join_discord))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = { onDismiss() }) {
-                Text(stringResource(R.string.maybe_later))
-            }
-        }
-    )
-}
 
 private enum class MissingPermission(val titleResId: Int, val descriptionResId: Int) {
     OVERLAY(

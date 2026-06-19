@@ -280,6 +280,47 @@
     <string name="nav_plan">Plan</string>
     <string name="nav_reminders">Sirat Assistant</string>
 
+    <!-- Supervised Lock -->
+    <string name="supervised_choice_title">Choose Protection Method</string>
+    <string name="supervised_choice_question">How do you want the supervisor to help?</string>
+    <string name="lock_personal_title">Personal Lock (Normal)</string>
+    <string name="lock_personal_desc">You set the PIN and unlock it yourself.</string>
+    <string name="lock_supervised_qr_title">Supervisor Lock (QR Code)</string>
+    <string name="lock_supervised_qr_desc">A hidden PIN is generated; the supervisor unlocks via QR scan.</string>
+    <string name="supervised_setup_title">Supervisor Setup</string>
+    <string name="supervised_setup_face_title">Face Recognition Setup</string>
+    <string name="supervised_setup_face_desc">The camera will be used to recognize the supervisor\'s face and store it as a fingerprint for unlocking.</string>
+    <string name="supervised_setup_face_start">Start Face Capture</string>
+    <string name="supervised_setup_face_success">Face fingerprint saved successfully! (Alpha)</string>
+    <string name="supervised_setup_face_instruction">Please place the supervisor\'s face in front of the camera</string>
+    <string name="supervised_setup_secret_label">This is your security key</string>
+    <string name="supervised_setup_qr_desc">Share this code with your supervisor. You will need to scan it to unlock apps.</string>
+    <string name="supervised_setup_share_button">Share Code</string>
+    <string name="supervised_setup_finish_button">Complete Setup</string>
+    <string name="supervised_setup_step1">Step 1: Share code with supervisor</string>
+    <string name="supervised_setup_step2">Step 2: Test Scanning</string>
+    <string name="supervised_setup_test_desc">Now, try scanning the code from the other device to ensure success.</string>
+    <string name="supervised_setup_verify_success">Verified successfully!</string>
+    <string name="supervised_lock_overlay_title">App Locked by Supervisor</string>
+    <string name="supervised_lock_open_camera">Open Camera to Scan</string>
+    <string name="supervised_lock_cancel_scan">Cancel Scan</string>
+    <string name="supervised_lock_camera_perm_required">Camera permission is required to scan</string>
+    <string name="supervised_lock_grant_perm">Grant Permission</string>
+    <string name="settings_supervised_mode_on">Current: Supervisor Lock</string>
+    <string name="settings_supervised_mode_off">Current: Personal Lock</string>
+    <string name="settings_supervised_change_desc">Tap to switch between personal and supervisor lock</string>
+    <string name="settings_supervised_title">Protection Mode</string>
+    <string name="settings_supervised_subtitle">Change how apps are unlocked</string>
+    <string name="random_generation_label">Random Generation</string>
+    <string name="pin_length_label">PIN Length: %1$d</string>
+    <string name="password_length_label">Password Length: %1$d</string>
+    <string name="use_this_code">Use this code</string>
+    <string name="refresh_code_cd">Refresh</string>
+    <string name="copy_code_button">Copy Code</string>
+    <string name="code_copied_toast">Code copied to clipboard</string>
+    <string name="paste_code_button">Paste</string>
+    <string name="nothing_to_paste_toast">Nothing in clipboard to paste</string>
+
     <!-- Chat Screen -->
     <string name="chat_input_placeholder">Talk to the assistant...</string>
     <string name="chat_send_cd">Send</string>

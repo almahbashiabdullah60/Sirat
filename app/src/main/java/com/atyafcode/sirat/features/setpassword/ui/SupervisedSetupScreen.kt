@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,12 +18,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import com.atyafcode.sirat.AppLockApplication
+import com.atyafcode.sirat.R
 import com.atyafcode.sirat.core.navigation.Screen
 import com.atyafcode.sirat.core.utils.SecurityGenerator
 import com.atyafcode.sirat.core.utils.SupervisedLockManager
@@ -56,8 +57,15 @@ fun SupervisedSetupScreen(navController: NavController, method: String) {
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("إعداد قفل المشرف") })
-        }
+            TopAppBar(
+                title = { Text(stringResource(R.string.supervised_setup_title)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -67,114 +75,91 @@ fun SupervisedSetupScreen(navController: NavController, method: String) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            if (method == "qr") {
-                if (step == 1) {
-                    Text("الخطوة 1: مشاركة الرمز مع المشرف", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    qrBitmap?.let { bitmap ->
+            if (step == 1) {
+                Text(
+                    text = stringResource(R.string.supervised_setup_step1), 
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                qrBitmap?.let { bitmap ->
+                    Surface(
+                        modifier = Modifier.size(250.dp),
+                        shape = MaterialTheme.shapes.medium,
+                        color = androidx.compose.ui.graphics.Color.White,
+                        shadowElevation = 4.dp
+                    ) {
                         Image(
                             bitmap = bitmap.asImageBitmap(),
                             contentDescription = "QR Code",
-                            modifier = Modifier.size(250.dp)
+                            modifier = Modifier.padding(16.dp)
                         )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Button(onClick = { shareQRCode(context, qrBitmap, secret) }) {
-                        Icon(Icons.Default.Share, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("مشاركة الكود")
-                    }
-                    
-                    Spacer(modifier = Modifier.weight(1f))
-                    
-                    Button(
-                        onClick = { step = 2 },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("التالي")
-                    }
-                } else {
-                    Text("الخطوة 2: تجربة المسح", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    Text("الآن، حاول مسح الكود من الجهاز الآخر للتأكد من نجاح العملية.")
-                    
-                    Spacer(modifier = Modifier.height(60.dp))
-                    
-                    if (hasCameraPermission) {
-                        com.atyafcode.sirat.features.lockscreen.ui.CameraPreview(
-                            onBarcodeDetected = { barcode ->
-                                if (barcode == secret) {
-                                    appLockRepository.setLockType(PreferencesRepository.LOCK_TYPE_SUPERVISED)
-                                    appLockRepository.setSupervisedSecret(secret)
-                                    appLockRepository.setSupervisedMethod(PreferencesRepository.SUPERVISED_METHOD_QR)
-                                    
-                                    Toast.makeText(context, "تم التحقق بنجاح!", Toast.LENGTH_SHORT).show()
-                                    navController.navigate(Screen.Main.route) {
-                                        popUpTo(Screen.AppIntro.route) { inclusive = true }
-                                    }
-                                }
-                            }
-                        )
-                    } else {
-                        Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
-                            Text("منح صلاحية الكاميرا للمسح")
-                        }
                     }
                 }
-            } else {
-                // Face setup
-                Text("إعداد التعرف على الوجه", style = MaterialTheme.typography.titleMedium)
+                
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                if (step == 1) {
-                    Icon(
-                        imageVector = Icons.Default.Face,
-                        contentDescription = null,
-                        modifier = Modifier.size(120.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    Text(
-                        text = "سيتم استخدام الكاميرا للتعرف على وجه المشرف وتخزينه كبصمة للفتح.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
-                    )
-                    
-                    Spacer(modifier = Modifier.weight(1f))
-                    
-                    Button(
-                        onClick = { step = 2 },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("ابدأ التقاط الوجه")
-                    }
-                } else {
-                    if (hasCameraPermission) {
-                        com.atyafcode.sirat.features.lockscreen.ui.FaceCameraPreview(
-                            onFaceDetected = {
+                Button(
+                    onClick = { shareQRCode(context, qrBitmap, secret) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.supervised_setup_share_button))
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.supervised_setup_qr_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                Button(
+                    onClick = { step = 2 },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.next_button))
+                }
+            } else {
+                Text(
+                    text = stringResource(R.string.supervised_setup_step2), 
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                Text(
+                    text = stringResource(R.string.supervised_setup_test_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                Spacer(modifier = Modifier.height(60.dp))
+                
+                if (hasCameraPermission) {
+                    com.atyafcode.sirat.features.lockscreen.ui.CameraPreview(
+                        onBarcodeDetected = { barcode ->
+                            if (barcode == secret) {
                                 appLockRepository.setLockType(PreferencesRepository.LOCK_TYPE_SUPERVISED)
                                 appLockRepository.setSupervisedSecret(secret)
-                                appLockRepository.setSupervisedMethod(PreferencesRepository.SUPERVISED_METHOD_FACE)
+                                appLockRepository.setSupervisedMethod(PreferencesRepository.SUPERVISED_METHOD_QR)
                                 
-                                Toast.makeText(context, "تم حفظ بصمة الوجه بنجاح!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.supervised_setup_verify_success), Toast.LENGTH_SHORT).show()
                                 navController.navigate(Screen.Main.route) {
                                     popUpTo(Screen.AppIntro.route) { inclusive = true }
                                 }
                             }
-                        )
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("يرجى وضع وجه المشرف أمام الكاميرا")
-                    } else {
-                        Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
-                            Text("منح صلاحية الكاميرا")
                         }
+                    )
+                } else {
+                    Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
+                        Text(stringResource(R.string.supervised_lock_grant_perm))
                     }
                 }
             }
@@ -199,10 +184,10 @@ private fun shareQRCode(context: android.content.Context, bitmap: Bitmap?, secre
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, contentUri)
-            putExtra(Intent.EXTRA_TEXT, "هذا هو رمز القفل الخاص بي في تطبيق صراط. الرمز: $secret")
+            putExtra(Intent.EXTRA_TEXT, context.getString(R.string.supervised_setup_qr_desc) + " Key: $secret")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(intent, "مشاركة الرمز"))
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.supervised_setup_share_button)))
     } catch (e: Exception) {
         e.printStackTrace()
     }

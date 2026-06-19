@@ -209,6 +209,47 @@
     <string name="nav_plan">بناء خطة</string>
     <string name="nav_reminders">مساعد صراط</string>
 
+    <!-- Supervised Lock -->
+    <string name="supervised_choice_title">اختر طريقة الحماية</string>
+    <string name="supervised_choice_question">كيف تريد أن يساعدك المشرف؟</string>
+    <string name="lock_personal_title">قفل شخصي (عادي)</string>
+    <string name="lock_personal_desc">أنت من تحدد الرمز وتفتحه بنفسك.</string>
+    <string name="lock_supervised_qr_title">قفل المشرف (QR Code)</string>
+    <string name="lock_supervised_qr_desc">يتم توليد رمز لا تعرفه، ويفتحه المشرف عبر مسح الكود.</string>
+    <string name="supervised_setup_title">إعداد قفل المشرف</string>
+    <string name="supervised_setup_face_title">إعداد التعرف على الوجه</string>
+    <string name="supervised_setup_face_desc">سيتم استخدام الكاميرا للتعرف على وجه المشرف وتخزينه كبصمة للفتح.</string>
+    <string name="supervised_setup_face_start">ابدأ التقاط الوجه</string>
+    <string name="supervised_setup_face_success">تم حفظ بصمة وجه المشرف بنجاح!</string>
+    <string name="supervised_setup_face_instruction">يرجى وضع وجه المشرف أمام الكاميرا</string>
+    <string name="supervised_setup_secret_label">هذا هو رمز الأمان الخاص بك</string>
+    <string name="supervised_setup_qr_desc">قم بمشاركة هذا الكود مع المشرف الخاص بك. ستحتاج لمسحه لفتح التطبيقات المقفلة.</string>
+    <string name="supervised_setup_share_button">مشاركة الكود</string>
+    <string name="supervised_setup_finish_button">إتمام الإعداد</string>
+    <string name="supervised_setup_step1">الخطوة 1: مشاركة الرمز مع المشرف</string>
+    <string name="supervised_setup_step2">الخطوة 2: تجربة المسح</string>
+    <string name="supervised_setup_test_desc">الآن، حاول مسح الكود من الجهاز الآخر للتأكد من نجاح العملية.</string>
+    <string name="supervised_setup_verify_success">تم التحقق بنجاح!</string>
+    <string name="supervised_lock_overlay_title">التطبيق مقفل بواسطة المشرف</string>
+    <string name="supervised_lock_open_camera">فتح الكاميرا لمسح الرمز</string>
+    <string name="supervised_lock_cancel_scan">إلغاء المسح</string>
+    <string name="supervised_lock_camera_perm_required">يجب منح صلاحية الكاميرا للمسح</string>
+    <string name="supervised_lock_grant_perm">منح الصلاحية</string>
+    <string name="settings_supervised_mode_on">الوضع الحالي: قفل المشرف</string>
+    <string name="settings_supervised_mode_off">الوضع الحالي: قفل شخصي</string>
+    <string name="settings_supervised_change_desc">اضغط للتغيير بين القفل الشخصي وقفل المشرف</string>
+    <string name="settings_supervised_title">وضع الحماية</string>
+    <string name="settings_supervised_subtitle">تغيير طريقة فتح التطبيقات</string>
+    <string name="random_generation_label">توليد عشوائي</string>
+    <string name="pin_length_label">طول الرمز: %1$d</string>
+    <string name="password_length_label">طول كلمة المرور: %1$d</string>
+    <string name="use_this_code">استخدام هذا الرمز</string>
+    <string name="refresh_code_cd">تحديث</string>
+    <string name="copy_code_button">نسخ الرمز</string>
+    <string name="code_copied_toast">تم نسخ الرمز إلى الحافظة</string>
+    <string name="paste_code_button">لصق</string>
+    <string name="nothing_to_paste_toast">لا يوجد نص في الحافظة للصقه</string>
+
     <!-- Chat Screen -->
     <string name="chat_input_placeholder">تحدث مع المساعد...</string>
     <string name="chat_send_cd">إرسال</string>

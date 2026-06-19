@@ -21,18 +21,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.atyafcode.sirat.AppLockApplication
+import com.atyafcode.sirat.R
 import com.atyafcode.sirat.core.utils.appLockRepository
 import com.atyafcode.sirat.data.repository.PreferencesRepository
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.face.FaceDetection
-import com.google.mlkit.vision.face.FaceDetectorOptions
 import java.util.concurrent.Executors
 
 @Composable
@@ -44,7 +44,6 @@ fun SupervisedLockOverlay(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val appLockRepository = context.appLockRepository()
-    val method = appLockRepository.getSupervisedMethod()
     val secret = appLockRepository.getSupervisedSecret()
 
     var isScanning by remember { mutableStateOf(false) }
@@ -67,10 +66,11 @@ fun SupervisedLockOverlay(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "التطبيق مقفل بواسطة المشرف",
+                text = stringResource(R.string.supervised_lock_overlay_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -85,34 +85,30 @@ fun SupervisedLockOverlay(
 
             if (isScanning) {
                 if (hasCameraPermission) {
-                    if (method == PreferencesRepository.SUPERVISED_METHOD_QR) {
-                        CameraPreview(
-                            onBarcodeDetected = { barcode ->
-                                if (barcode == secret) {
-                                    onUnlock()
-                                }
-                            }
-                        )
-                    } else {
-                        FaceCameraPreview(
-                            onFaceDetected = {
-                                // Simplified for now: any face unlocks it.
-                                // In production, we should compare embeddings.
+                    CameraPreview(
+                        onBarcodeDetected = { barcode ->
+                            if (barcode == secret) {
                                 onUnlock()
                             }
-                        )
-                    }
+                        }
+                    )
                 } else {
-                    Text("يجب منح صلاحية الكاميرا للمسح")
+                    Text(
+                        text = stringResource(R.string.supervised_lock_camera_perm_required),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                     Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
-                        Text("منح الصلاحية")
+                        Text(stringResource(R.string.supervised_lock_grant_perm))
                     }
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                Button(onClick = { isScanning = false }) {
-                    Text("إلغاء المسح")
+                Button(
+                    onClick = { isScanning = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.supervised_lock_cancel_scan))
                 }
             } else {
                 Icon(
@@ -128,7 +124,7 @@ fun SupervisedLockOverlay(
                     onClick = { isScanning = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(if (method == PreferencesRepository.SUPERVISED_METHOD_QR) "فتح الكاميرا لمسح الرمز" else "التحقق عبر الوجه")
+                    Text(stringResource(R.string.supervised_lock_open_camera))
                 }
             }
         }
@@ -137,7 +133,11 @@ fun SupervisedLockOverlay(
             onClick = onExit,
             modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
         ) {
-            Icon(Icons.Default.Close, contentDescription = "خروج")
+            Icon(
+                Icons.Default.Close, 
+                contentDescription = stringResource(R.string.cancel_button),
+                tint = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
@@ -210,72 +210,5 @@ fun CameraPreview(onBarcodeDetected: (String) -> Unit) {
             modifier = Modifier.fillMaxSize(),
             update = { }
         )
-    }
-}
-
-@Composable
-fun FaceCameraPreview(onFaceDetected: () -> Unit) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
-    val previewView = remember { PreviewView(context) }
-    
-    val detectorOptions = FaceDetectorOptions.Builder()
-        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-        .build()
-    val detector = remember { FaceDetection.getClient(detectorOptions) }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            cameraExecutor.shutdown()
-            detector.close()
-        }
-    }
-
-    LaunchedEffect(previewView) {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder().build().also {
-                it.surfaceProvider = previewView.surfaceProvider
-            }
-
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-                .also {
-                    it.setAnalyzer(cameraExecutor) { imageProxy ->
-                        @OptIn(ExperimentalGetImage::class)
-                        val mediaImage = imageProxy.image
-                        if (mediaImage != null) {
-                            val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                            detector.process(image)
-                                .addOnSuccessListener { faces ->
-                                    if (faces.isNotEmpty()) {
-                                        onFaceDetected()
-                                    }
-                                }
-                                .addOnCompleteListener {
-                                    imageProxy.close()
-                                }
-                        } else {
-                            imageProxy.close()
-                        }
-                    }
-                }
-
-            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-
-            try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalysis)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }, ContextCompat.getMainExecutor(context))
-    }
-
-    Box(modifier = Modifier.size(300.dp)) {
-        AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
     }
 }

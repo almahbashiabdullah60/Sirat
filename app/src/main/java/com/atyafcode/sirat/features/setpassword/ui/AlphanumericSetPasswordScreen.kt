@@ -59,7 +59,6 @@ fun AlphanumericSetPasswordScreen(
     var showInvalidOldPasswordError by remember { mutableStateOf(false) }
 
     val minLength = 8
-    val maxLength = 64
     val context = LocalContext.current
     val activity = context.findFragmentActivity()
     val appLockRepository = remember {
@@ -78,6 +77,8 @@ fun AlphanumericSetPasswordScreen(
         if (isFirstTimeSetup) {
             if (isConfirmationMode) {
                 isConfirmationMode = false
+            } else if (navController.previousBackStackEntry != null) {
+                navController.popBackStack()
             } else {
                 Toast.makeText(context, R.string.set_pin_to_continue_toast, Toast.LENGTH_SHORT).show()
             }
@@ -169,7 +170,7 @@ fun AlphanumericSetPasswordScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("توليد كلمة مرور عشوائية", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.random_generation_label), style = MaterialTheme.typography.bodyLarge)
                     Switch(
                         checked = isRandomMode,
                         onCheckedChange = { 
@@ -188,11 +189,11 @@ fun AlphanumericSetPasswordScreen(
                 if (isRandomMode) {
                     Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("طول كلمة المرور: ${passwordLength.toInt()}", modifier = Modifier.weight(1f))
+                            Text(stringResource(R.string.password_length_label, passwordLength.toInt()), modifier = Modifier.weight(1f))
                             IconButton(onClick = {
                                 passwordState = SecurityGenerator.generateRandomPassword(passwordLength.toInt())
                             }) {
-                                Icon(Icons.Default.Refresh, contentDescription = "تحديث")
+                                Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh_code_cd))
                             }
                         }
                         Slider(
@@ -207,7 +208,10 @@ fun AlphanumericSetPasswordScreen(
                         
                         Card(
                             modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         ) {
                             Text(
                                 text = passwordState,
@@ -221,7 +225,7 @@ fun AlphanumericSetPasswordScreen(
                             onClick = { submitPassword(passwordState) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("استخدام هذه الكلمة")
+                            Text(stringResource(R.string.use_this_code))
                         }
                         
                         Spacer(modifier = Modifier.height(16.dp))
@@ -244,7 +248,8 @@ fun AlphanumericSetPasswordScreen(
                         else -> stringResource(R.string.create_alphanumeric_password_label)
                     },
                     style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -276,7 +281,11 @@ fun AlphanumericSetPasswordScreen(
                         }
                     },
                     isError = showMismatchError || showLengthError || showMaxLengthError || showInvalidOldPasswordError,
-                    singleLine = true
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                    )
                 )
 
                 if (showMismatchError) {
