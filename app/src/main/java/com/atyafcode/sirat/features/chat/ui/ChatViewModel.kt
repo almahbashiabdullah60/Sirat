@@ -10,11 +10,12 @@ import com.atyafcode.sirat.data.repository.PlanRepository
 import com.atyafcode.sirat.features.planbuilder.domain.CloudAIProvider
 import com.atyafcode.sirat.features.planbuilder.domain.LocalAIProvider
 import com.atyafcode.sirat.features.planbuilder.domain.OpenAIMessage
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 data class ChatMessage(
     val text: String,
@@ -34,6 +35,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val planRepo = application.planRepository()
     private val localAI = LocalAIProvider(application)
     private val cloudAI = CloudAIProvider()
+    private val gson = Gson()
 
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages
@@ -41,11 +43,57 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow<ChatUIState>(ChatUIState.Idle)
     val uiState: StateFlow<ChatUIState> = _uiState
 
+    private val _allowPlanAccess = MutableStateFlow(false)
+    val allowPlanAccess: StateFlow<Boolean> = _allowPlanAccess
+
+    private val _allowBehaviorAccess = MutableStateFlow(false)
+    val allowBehaviorAccess: StateFlow<Boolean> = _allowBehaviorAccess
+
     init {
-        // Initial welcome message from the AI assistant
+        loadChatHistory()
+    }
+
+    private fun loadChatHistory() {
+        val savedHistory = planRepo.getChatHistory()
+        if (savedHistory != null) {
+            try {
+                val type = object : TypeToken<List<ChatMessage>>() {}.type
+                val history: List<ChatMessage> = gson.fromJson(savedHistory, type)
+                _messages.value = history
+            } catch (e: Exception) {
+                e.printStackTrace()
+                setDefaultWelcome()
+            }
+        } else {
+            setDefaultWelcome()
+        }
+    }
+
+    private fun setDefaultWelcome() {
         _messages.value = listOf(
             ChatMessage(getApplication<Application>().getString(R.string.chat_welcome_message), false)
         )
+    }
+
+    private fun saveChatHistory() {
+        val historyJson = gson.toJson(_messages.value)
+        planRepo.saveChatHistory(historyJson)
+    }
+
+    fun setAllowPlanAccess(allow: Boolean) {
+        _allowPlanAccess.value = allow
+    }
+
+    fun setAllowBehaviorAccess(allow: Boolean) {
+        _allowBehaviorAccess.value = allow
+    }
+
+    fun clearChat() {
+        _messages.value = listOf(
+            ChatMessage(getApplication<Application>().getString(R.string.chat_welcome_message), false)
+        )
+        _uiState.value = ChatUIState.Idle
+        planRepo.clearChatHistory()
     }
 
     fun sendMessage(text: String) {
@@ -53,6 +101,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
         val userMsg = ChatMessage(text, true)
         _messages.value = _messages.value + userMsg
+        saveChatHistory()
         
         viewModelScope.launch {
             _uiState.value = ChatUIState.Loading(getApplication<Application>().getString(R.string.chat_status_connecting))
@@ -89,6 +138,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                         val response = localAI.generateChatResponse(fullContext, text)
                         
                         _messages.value = _messages.value + ChatMessage(response, false)
+                        saveChatHistory()
                         _uiState.value = ChatUIState.Idle
                     } else {
                         _uiState.value = ChatUIState.Error(getApplication<Application>().getString(R.string.chat_error_init_failed))
@@ -117,6 +167,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     )
                     
                     _messages.value = _messages.value + ChatMessage(response, false)
+                    saveChatHistory()
                     _uiState.value = ChatUIState.Idle
                 }
             } catch (e: Exception) {
@@ -130,21 +181,27 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private fun constructBehaviorContext(): String {
         val religion = planRepo.getReligion()
         val language = if (planRepo.getPlanLanguage() == "ar") "العربية" else "English"
-        
-        val last15DaysLogs = behaviorRepo.getLogsForRange(LocalDate.now().minusDays(15), LocalDate.now())
-        val behaviorSummary = if (last15DaysLogs.isEmpty()) getApplication<Application>().getString(R.string.chat_no_logs) 
-        else last15DaysLogs.joinToString("\n") { 
-            "التاريخ: ${it.date}, التكرار: ${it.count}, السبب: ${it.reason}"
-        }
+
+        val planContent = if (_allowPlanAccess.value) {
+            val plan = planRepo.getPlan()
+            if (plan != null) "\n\nUser Recovery Plan:\n$plan" else "\n\n(No recovery plan found)"
+        } else ""
+
+        val behaviorSummary = if (_allowBehaviorAccess.value) {
+            val allLogs = behaviorRepo.getAllLogs().take(30) // Take last 30 entries for context
+            if (allLogs.isEmpty()) "\n\n" + getApplication<Application>().getString(R.string.chat_no_logs)
+            else "\n\nFull Behavior Analysis/Logs (Last 30 entries):\n" + allLogs.joinToString("\n") {
+                "التاريخ: ${it.date}, التكرار: ${it.count}, السبب: ${it.reason}"
+            }
+        } else ""
 
         return """
             User Religion: $religion
             Preferred Language: $language
-            
-            Behavior Logs (Last 15 days):
+            $planContent
             $behaviorSummary
             
-            Instructions: Analyze the behavior and talk to the user based on these settings.
+            Instructions: Analyze the behavior and the plan (if provided) and talk to the user based on these settings.
         """.trimIndent()
     }
 

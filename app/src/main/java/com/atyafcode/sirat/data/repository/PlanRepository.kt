@@ -97,6 +97,18 @@ class PlanRepository(private val context: Context) {
         return prefs.getBoolean(KEY_MODEL_COMPLETED, false)
     }
 
+    fun saveChatHistory(historyJson: String) {
+        prefs.edit().putString(KEY_CHAT_HISTORY, historyJson).apply()
+    }
+
+    fun getChatHistory(): String? {
+        return prefs.getString(KEY_CHAT_HISTORY, null)
+    }
+
+    fun clearChatHistory() {
+        prefs.edit().remove(KEY_CHAT_HISTORY).apply()
+    }
+
     companion object {
         private const val PREFS_NAME = "plan_builder_prefs"
         private const val PLAN_FILE_NAME = "user_recovery_plan.txt"
@@ -109,6 +121,7 @@ class PlanRepository(private val context: Context) {
         private const val KEY_OPENROUTER_MODEL = "openrouter_model"
         private const val KEY_DOWNLOAD_ID = "download_id"
         private const val KEY_MODEL_COMPLETED = "model_completed"
+        private const val KEY_CHAT_HISTORY = "chat_history"
 
         const val AI_PROVIDER_LOCAL = "local"
         const val AI_PROVIDER_CLOUD = "cloud"

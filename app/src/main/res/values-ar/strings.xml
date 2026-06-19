@@ -290,6 +290,10 @@
     <string name="chat_error_no_api_key">يرجى إدخال API Key في تبويبة بناء الخطة</string>
     <string name="chat_no_logs">لا توجد سجلات سلوك مسجلة حالياً.</string>
     <string name="chat_context_summary">سجلات السلوك الأخيرة للمستخدم:\n%1$s</string>
+    <string name="chat_allow_plan_access">الوصول لخطة التعافي</string>
+    <string name="chat_allow_behavior_access">الوصول لتحليل السلوك</string>
+    <string name="chat_clear_history">مسح السجل</string>
+    <string name="chat_clear_confirm">هل تريد مسح سجل المحادثة؟</string>
     <string name="plan_error_local_engine">يرجى تنزيل محرك الذكاء الاصطناعي أولاً أو استخدام المحرك السحابي</string>
     <string name="plan_error_init_local">فشل في تهيئة الذكاء الاصطناعي المحلي. تأكد من وجود مساحة كافية في الذاكرة (RAM).</string>
     <string name="plan_error_no_api_key">يرجى إدخال مفتاح API للمحرك السحابي</string>

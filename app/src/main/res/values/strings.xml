@@ -361,6 +361,10 @@
     <string name="chat_error_no_api_key">Please enter an API Key in the Plan Builder tab</string>
     <string name="chat_no_logs">No behavior logs recorded currently.</string>
     <string name="chat_context_summary">Recent behavior logs for the user:\n%1$s</string>
+    <string name="chat_allow_plan_access">Access Recovery Plan</string>
+    <string name="chat_allow_behavior_access">Access Behavior Analysis</string>
+    <string name="chat_clear_history">Clear History</string>
+    <string name="chat_clear_confirm">Do you want to clear the chat history?</string>
     <string name="plan_error_local_engine">Please download the AI engine first or use the Cloud engine</string>
     <string name="plan_error_init_local">Failed to initialize local AI. Ensure there is enough RAM.</string>
     <string name="plan_error_no_api_key">Please enter an API key for the Cloud engine</string>

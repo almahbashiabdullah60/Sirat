@@ -1,6 +1,7 @@
 package com.atyafcode.sirat.features.chat.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,10 +34,13 @@ fun ChatScreen(
 ) {
     val messages by viewModel.messages.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    val allowPlanAccess by viewModel.allowPlanAccess.collectAsState()
+    val allowBehaviorAccess by viewModel.allowBehaviorAccess.collectAsState()
     val listState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
 
     var inputText by remember { mutableStateOf("") }
+    var showClearDialog by remember { mutableStateOf(false) }
 
     // Scroll to bottom when messages change or keyboard appears
     LaunchedEffect(messages.size, uiState) {
@@ -49,6 +54,56 @@ fun ChatScreen(
             .fillMaxSize()
             .imePadding() // يرفع المحتوى بأكمله مع الكيبورد بشكل صحيح
     ) {
+        // Access Controls Row
+        Surface(
+            tonalElevation = 1.dp,
+            shadowElevation = 1.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { viewModel.setAllowPlanAccess(!allowPlanAccess) }
+                ) {
+                    Checkbox(
+                        checked = allowPlanAccess,
+                        onCheckedChange = { viewModel.setAllowPlanAccess(it) }
+                    )
+                    Text(
+                        stringResource(R.string.chat_allow_plan_access),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { viewModel.setAllowBehaviorAccess(!allowBehaviorAccess) }
+                ) {
+                    Checkbox(
+                        checked = allowBehaviorAccess,
+                        onCheckedChange = { viewModel.setAllowBehaviorAccess(it) }
+                    )
+                    Text(
+                        stringResource(R.string.chat_allow_behavior_access),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                IconButton(onClick = { showClearDialog = true }) {
+                    Icon(
+                        Icons.Default.DeleteSweep,
+                        contentDescription = stringResource(R.string.chat_clear_history),
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+
         // Chat History
         LazyColumn(
             state = listState,
@@ -141,6 +196,30 @@ fun ChatScreen(
                 }
             }
         }
+    }
+
+    if (showClearDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearDialog = false },
+            title = { Text(stringResource(R.string.chat_clear_history)) },
+            text = { Text(stringResource(R.string.chat_clear_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.clearChat()
+                        showClearDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.confirm_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearDialog = false }) {
+                    Text(stringResource(R.string.cancel_button))
+                }
+            }
+        )
     }
 }
 
