@@ -11,7 +11,7 @@
 |--------|---------|
 | `:app` | Main app, all features |
 | `:appintro` | Onboarding screens (library module) |
-| `:hidden-api` | Hidden API stubs (compileOnly dep in `:app`) |
+| `:hidden-api` | Hidden API stubs — 30 Java files (AIDL-like), compileOnly dep in `:app`. Intentional — required by `dev.rikka.tools.refine`. |
 | `:patternlock` | Disabled — commented out in `settings.gradle.kts` |
 
 ## Entrypoints

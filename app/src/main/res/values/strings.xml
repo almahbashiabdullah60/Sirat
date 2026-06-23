@@ -225,6 +225,7 @@
     <string name="settings_screen_export_logs_success">Logs exported</string>
     <string name="settings_screen_export_logs_error">Failed to export logs</string>
     <string name="settings_screen_version_template">Version %1$s</string>
+    <string name="settings_screen_beta_notice">This is a beta release.</string>
 
     <!-- Pattern Lock Strings -->
     <string name="enter_pattern_to_continue">Draw pattern</string>
@@ -301,6 +302,7 @@
     <string name="supervised_setup_secret_label">This is your security key</string>
     <string name="supervised_setup_qr_desc">Share this code with your supervisor. You will need to scan it to unlock apps.</string>
     <string name="supervised_setup_share_button">Share Code</string>
+    <string name="supervised_setup_regenerate">Generate New Code</string>
     <string name="supervised_setup_finish_button">Complete Setup</string>
     <string name="supervised_setup_step1">Step 1: Share code with supervisor</string>
     <string name="supervised_setup_step2">Step 2: Test Scanning</string>

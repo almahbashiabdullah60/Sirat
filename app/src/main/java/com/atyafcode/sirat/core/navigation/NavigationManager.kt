@@ -54,7 +54,9 @@ class NavigationManager(private val context: Context) {
 
         private val ROUTES_THAT_SKIP_PASSWORD_CHECK = setOf(
             Screen.AppIntro.route,
-            Screen.SetPassword.route
+            Screen.SetPassword.route,
+            Screen.SupervisedMethodChoice.route,
+            "${Screen.SupervisedSetup.route}/{method}"
         )
     }
 }

@@ -81,7 +81,7 @@ fun SupervisedLockOverlay(
                 color = MaterialTheme.colorScheme.primary
             )
             
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(70.dp))
 
             if (isScanning) {
                 if (hasCameraPermission) {
@@ -102,7 +102,7 @@ fun SupervisedLockOverlay(
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(70.dp))
                 
                 Button(
                     onClick = { isScanning = false },
@@ -131,7 +131,8 @@ fun SupervisedLockOverlay(
 
         IconButton(
             onClick = onExit,
-            modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 30.dp),
+
         ) {
             Icon(
                 Icons.Default.Close, 

@@ -146,6 +146,7 @@
     <string name="settings_screen_developer_title">المطور</string>
     <string name="settings_screen_advanced_title">متقدم</string>
     <string name="settings_screen_unlock_until_screen_off">حتى إغلاق الشاشة</string>
+    <string name="settings_screen_beta_notice">هذا إصدار تجريبي.</string>
     <string name="links_title">روابط</string>
     <string name="discord_community">مجتمع ديسكورد</string>
     <string name="source_code">الكود المصدري</string>
@@ -225,6 +226,7 @@
     <string name="supervised_setup_secret_label">هذا هو رمز الأمان الخاص بك</string>
     <string name="supervised_setup_qr_desc">قم بمشاركة هذا الكود مع المشرف الخاص بك. ستحتاج لمسحه لفتح التطبيقات المقفلة.</string>
     <string name="supervised_setup_share_button">مشاركة الكود</string>
+    <string name="supervised_setup_regenerate">توليد رمز جديد</string>
     <string name="supervised_setup_finish_button">إتمام الإعداد</string>
     <string name="supervised_setup_step1">الخطوة 1: مشاركة الرمز مع المشرف</string>
     <string name="supervised_setup_step2">الخطوة 2: تجربة المسح</string>

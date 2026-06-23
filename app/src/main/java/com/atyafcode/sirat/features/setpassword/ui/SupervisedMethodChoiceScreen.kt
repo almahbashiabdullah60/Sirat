@@ -54,7 +54,11 @@ fun SupervisedMethodChoiceScreen(navController: NavController) {
                 title = stringResource(R.string.lock_personal_title),
                 description = stringResource(R.string.lock_personal_desc),
                 icon = Icons.Default.Person,
-                onClick = { navController.navigate(Screen.SetPassword.route) }
+                onClick = {
+                    navController.navigate(Screen.SetPassword.route) {
+                        popUpTo(Screen.SupervisedMethodChoice.route) { inclusive = true }
+                    }
+                }
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -63,7 +67,11 @@ fun SupervisedMethodChoiceScreen(navController: NavController) {
                 title = stringResource(R.string.lock_supervised_qr_title),
                 description = stringResource(R.string.lock_supervised_qr_desc),
                 icon = Icons.Default.QrCode,
-                onClick = { navController.navigate(Screen.SupervisedSetup.route + "/qr") }
+                onClick = {
+                    navController.navigate(Screen.SupervisedSetup.route + "/qr") {
+                        popUpTo(Screen.SupervisedMethodChoice.route) { inclusive = true }
+                    }
+                }
             )
         }
     }

@@ -1,6 +1,7 @@
 package com.atyafcode.sirat.features.setpassword.ui
 
 import android.Manifest
+import android.content.ClipData
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -11,9 +12,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -39,8 +43,8 @@ fun SupervisedSetupScreen(navController: NavController, method: String) {
     val context = LocalContext.current
     val appLockRepository = (context.applicationContext as AppLockApplication).appLockRepository
     
-    val secret = remember { SecurityGenerator.generateRandomPassword(16) }
-    val qrBitmap = remember { SupervisedLockManager.generateQRCode(secret) }
+    var secret by rememberSaveable { mutableStateOf(SecurityGenerator.generateRandomPassword(16)) }
+    val qrBitmap = remember(secret) { SupervisedLockManager.generateQRCode(secret) }
     
     var step by remember { mutableStateOf(1) }
     var hasCameraPermission by remember {
@@ -109,6 +113,16 @@ fun SupervisedSetupScreen(navController: NavController, method: String) {
                     Text(stringResource(R.string.supervised_setup_share_button))
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = { secret = SecurityGenerator.generateRandomPassword(16) }
+                ) {
+                    Icon(Icons.Default.Refresh, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.supervised_setup_regenerate))
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(R.string.supervised_setup_qr_desc),
@@ -116,6 +130,23 @@ fun SupervisedSetupScreen(navController: NavController, method: String) {
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                TextButton(
+                    onClick = { navController.navigate(Screen.SetPasswordAlphanumeric.route) }
+                ) {
+                    Text(stringResource(R.string.use_password_button))
+                }
+                
+                OutlinedButton(
+                    onClick = { navController.navigate(Screen.SetPassword.route) },
+                    modifier = Modifier.padding(top = 4.dp)
+                ) {
+                    Icon(Icons.Default.Lock, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.use_pin_button))
+                }
                 
                 Spacer(modifier = Modifier.weight(1f))
                 
@@ -152,7 +183,8 @@ fun SupervisedSetupScreen(navController: NavController, method: String) {
                                 
                                 Toast.makeText(context, context.getString(R.string.supervised_setup_verify_success), Toast.LENGTH_SHORT).show()
                                 navController.navigate(Screen.Main.route) {
-                                    popUpTo(Screen.AppIntro.route) { inclusive = true }
+                                    popUpTo("${Screen.SupervisedSetup.route}/{method}") { inclusive = true }
+                                    launchSingleTop = true
                                 }
                             }
                         }
@@ -186,6 +218,7 @@ private fun shareQRCode(context: android.content.Context, bitmap: Bitmap?, secre
             putExtra(Intent.EXTRA_STREAM, contentUri)
             putExtra(Intent.EXTRA_TEXT, context.getString(R.string.supervised_setup_qr_desc) + " Key: $secret")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            clipData = ClipData.newUri(context.contentResolver, "QR Code", contentUri)
         }
         context.startActivity(Intent.createChooser(intent, context.getString(R.string.supervised_setup_share_button)))
     } catch (e: Exception) {

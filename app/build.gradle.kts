@@ -14,8 +14,8 @@ android {
         applicationId = "com.atyafcode.sirat"
         minSdk = 26
         targetSdk = 35
-        versionCode = 243
-        versionName = "2.4.3"
+        versionCode = 1
+        versionName = "1.0.0-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
