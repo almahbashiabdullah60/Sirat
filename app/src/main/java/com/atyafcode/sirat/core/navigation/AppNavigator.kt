@@ -31,6 +31,7 @@ import com.atyafcode.sirat.features.setpassword.ui.SetPasswordScreen
 import com.atyafcode.sirat.features.settings.ui.SettingsScreen
 import com.atyafcode.sirat.features.triggerexclusions.ui.TriggerExclusionsScreen
 import com.atyafcode.sirat.features.aisettings.ui.AISettingsScreen
+import com.atyafcode.sirat.features.filtering.ui.FilteringDashboardScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController, startDestination: String) {
@@ -146,6 +147,10 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
 
         composable(Screen.AISettings.route) {
             AISettingsScreen(navController)
+        }
+
+        composable(Screen.FilteringDashboard.route) {
+            FilteringDashboardScreen(navController)
         }
     }
 }

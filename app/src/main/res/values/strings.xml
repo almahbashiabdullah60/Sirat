@@ -144,6 +144,8 @@
     <string name="settings_screen_security_title">Security</string>
     <string name="settings_screen_change_pin_title">Change PIN</string>
     <string name="settings_screen_change_pin_desc">Update your existing lock screen credentials</string>
+    <string name="filtering_title">Internet Filtering</string>
+    <string name="filtering_subtitle">Block adult content, gambling, social media via VPN</string>
     <string name="settings_screen_anti_uninstall_title">Anti-Uninstall Protection</string>
     <string name="settings_screen_anti_uninstall_desc">Require authentication before uninstalling the app</string>
     <string name="settings_screen_haptic_feedback_title">Haptic Feedback</string>
@@ -425,6 +427,25 @@
     <!-- AI Settings Screen -->
     <string name="ai_settings_title">AI Assistant Settings</string>
     <string name="save_settings">Save Settings</string>
+
+    <!-- Filtering Dashboard UI -->
+    <string name="filtering_ui_recent_blocks">Recent Blocks</string>
+    <string name="filtering_ui_no_blocks">No blocked domains yet</string>
+    <string name="filtering_ui_protection_active">Protection Active</string>
+    <string name="filtering_ui_protection_inactive">Protection Inactive</string>
+    <string name="filtering_ui_blocks_categories">Blocking Categories</string>
+    <string name="filtering_ui_porn">Adult Content</string>
+    <string name="filtering_ui_gambling">Gambling</string>
+    <string name="filtering_ui_social">Social Media</string>
+    <string name="filtering_ui_safesearch">SafeSearch</string>
+    <string name="filtering_ui_vpn_start_hint">Tap to start filtering</string>
+
+    <!-- VPN DNS Filter -->
+    <string name="vpn_filter_session_name">Sirat DNS Filter</string>
+    <string name="vpn_filter_channel_name">Internet Filtering</string>
+    <string name="vpn_filter_channel_description">Notification for content filtering VPN service</string>
+    <string name="vpn_filter_notification_title">Internet Filtering Active</string>
+    <string name="vpn_filter_notification_text">Filtering harmful content</string>
 </resources>
 
 

@@ -139,6 +139,18 @@
     <string name="settings_screen_change_pin_desc">تغيير كلمة المرور أو النمط أو رمز PIN الحالي.</string>
     <string name="settings_screen_anti_uninstall_title">حماية إلغاء التثبيت</string>
     <string name="settings_screen_anti_uninstall_desc">تطلب المصادقة قبل محاولة إلغاء تثبيت التطبيق.</string>
+    <string name="filtering_title">تصفية الإنترنت</string>
+    <string name="filtering_subtitle">حظر المحتوى الإباحي والقمار والتواصل الاجتماعي عبر VPN</string>
+    <string name="filtering_ui_recent_blocks">عمليات الحظر الأخيرة</string>
+    <string name="filtering_ui_no_blocks">لا توجد نطاقات محجوبة بعد</string>
+    <string name="filtering_ui_protection_active">الحماية نشطة</string>
+    <string name="filtering_ui_protection_inactive">الحماية غير نشطة</string>
+    <string name="filtering_ui_blocks_categories">تصنيفات الحظر</string>
+    <string name="filtering_ui_porn">المحتوى الإباحي</string>
+    <string name="filtering_ui_gambling">القمار</string>
+    <string name="filtering_ui_social">التواصل الاجتماعي</string>
+    <string name="filtering_ui_safesearch">البحث الآمن</string>
+    <string name="filtering_ui_vpn_start_hint">اضغط لبدء التصفية</string>
     <string name="settings_screen_haptic_feedback_title">الاهتزاز عند اللمس</string>
     <string name="settings_screen_haptic_feedback_desc">الاهتزاز عند التفاعل مع أزرار شاشة القفل.</string>
     <string name="settings_screen_backend_implementation_title">طريقة الاكتشاف (Backend)</string>
@@ -354,6 +366,13 @@
     <!-- AI Settings Screen -->
     <string name="ai_settings_title">إعدادات مساعد الذكاء الاصطناعي</string>
     <string name="save_settings">حفظ الإعدادات</string>
+
+    <!-- VPN DNS Filter -->
+    <string name="vpn_filter_session_name">مرشح DNS صراط</string>
+    <string name="vpn_filter_channel_name">تصفية الإنترنت</string>
+    <string name="vpn_filter_channel_description">إشعار لخدمة VPN لتصفية المحتوى</string>
+    <string name="vpn_filter_notification_title">تصفية الإنترنت نشطة</string>
+    <string name="vpn_filter_notification_text">جاري تصفية المحتوى الضار</string>
 </resources>
 
 

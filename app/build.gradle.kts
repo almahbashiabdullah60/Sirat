@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
     id("dev.rikka.tools.refine") version "4.4.0"
 }
 
@@ -89,6 +90,10 @@ dependencies {
     implementation(libs.mediapipe.tasks.genai)
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.gson)
+    implementation(libs.dnsjava)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

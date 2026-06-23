@@ -342,6 +342,12 @@ fun SettingsScreen(
                             onClick = { navController.navigate(Screen.ChangePassword.route) }
                         ),
                         ActionSettingItem(
+                            icon = Icons.Default.FilterAlt,
+                            title = stringResource(R.string.filtering_title),
+                            subtitle = stringResource(R.string.filtering_subtitle),
+                            onClick = { navController.navigate(Screen.FilteringDashboard.route) }
+                        ),
+                        ActionSettingItem(
                             icon = Icons.Default.SupervisorAccount,
                             title = stringResource(R.string.settings_supervised_title),
                             subtitle = if (appLockRepository.getLockType() == PreferencesRepository.LOCK_TYPE_SUPERVISED) 

@@ -14,5 +14,7 @@ sealed class Screen(val route: String) {
     object TriggerExclusions : Screen("trigger_exclusions")
     object AntiUninstall: Screen("anti_uninstall")
     object AISettings: Screen("ai_settings")
+    object FilteringDashboard : Screen("filtering")
+    object CustomRules : Screen("custom_rules")
 }
 
