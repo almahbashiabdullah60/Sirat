@@ -14,105 +14,39 @@
 
 **تفاصيل التنفيذ:**
 - وراثة الكلاس `android.net.VpnService`.
-- الحفاظ على كروتينة (Coroutine) أو خيط معالجة (Thread) مستمر لقراءة الحزم الخام وكتابتها عبر واجهة الـ File Descriptor.
+- الحفاظ على كروتينة (Coroutine) مستمرة لقراءة الحزم عبر مكتبة **dnsjava** (تتم المعالجة في المرحلة 2).
 - تكوين واجهة الـ TUN لاعتراض **طلبات الـ DNS فقط** لتقليل استهلاك البطارية والحفاظ على الأداء وسرعة الإنترنت:
   - تعيين عنوان IP للـ TUN: `10.8.0.2/32`.
   - تعيين خادم DNS للـ TUN: `10.8.0.1`.
-  - إضافة مسار (Route): `10.8.0.1/32` (هذا يضمن أن الحزم الموجهة فقط لخادم الـ DNS الافتراضي `10.8.0.1` هي التي تدخل نفق الـ VPN، بينما تمر بقية حركات مرور الإنترنت مثل الويب والتطبيقات الأخرى مباشرة بسرعة الجهاز الطبيعية دون دخول الـ VPN).
-  - تشغيل الخدمة كـ Foreground Service مع إشعار دائم (مطلوب في أندرويد 8 فما فوق).
+  - إضافة مسار (Route): `10.8.0.1/32` (هذا يضمن أن الحزم الموجهة فقط لخادم الـ DNS الافتراضي `10.8.0.1` هي التي تدخل نفق الـ VPN، بينما تمر بقية حركات مرور الإنترنت مباشرة بسرعة الجهاز الطبيعية).
+  - تشغيل الخدمة كـ Foreground Service مع إشعار دائم (يستخدم نفس قناة الإشعارات الموجودة للتطبيق، أو يقنًاة جديدة باسم `vpn_filter`).
 
-```kotlin
-// هيكل برمجى مقترح لـ SiratVpnService.kt
-package com.atyafcode.sirat.services.vpn
-
-import android.content.Intent
-import android.net.VpnService
-import android.os.ParcelFileDescriptor
-import kotlinx.coroutines.*
-import java.io.FileInputStream
-import java.io.FileOutputStream
-
-class SiratVpnService : VpnService() {
-    private var vpnInterface: ParcelFileDescriptor? = null
-    private var vpnJob: Job? = null
-    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_START) {
-            startVpn()
-        } else if (intent?.action == ACTION_STOP) {
-            stopVpn()
-        }
-        return START_STICKY
-    }
-
-    private fun startVpn() {
-        if (vpnInterface != null) return
-        
-        // 1. تهيئة واجهة الـ TUN الافتراضية
-        val builder = Builder()
-            .setSession("Sirat Local DNS Filter")
-            .addAddress("10.8.0.2", 32)
-            .addDnsServer("10.8.0.1")
-            .addRoute("10.8.0.1", 32) // التقاط حركة مرور الـ DNS فقط!
-            
-        // 2. إعداد الخدمة لتعمل في الواجهة (Foreground Service Notification)
-        // ...
-        
-        vpnInterface = builder.establish()
-        
-        // 3. قراءة الحزم بشكل متزامن في الخلفية
-        vpnJob = serviceScope.launch {
-            val fileDescriptor = vpnInterface?.fileDescriptor ?: return@launch
-            val inputStream = FileInputStream(fileDescriptor)
-            val outputStream = FileOutputStream(fileDescriptor)
-            
-            val buffer = ByteArray(32767)
-            while (isActive) {
-                val length = inputStream.read(buffer)
-                if (length > 0) {
-                    // معالجة الحزم وتوجيهها (يتم برمجتها في المرحلة 2)
-                }
-            }
-        }
-    }
-
-    private fun stopVpn() {
-        vpnJob?.cancel()
-        vpnInterface?.close()
-        vpnInterface = null
-        stopForeground(true)
-        stopSelf()
-    }
-
-    override fun onDestroy() {
-        stopVpn()
-        super.onDestroy()
-    }
-
-    companion object {
-        const val ACTION_START = "com.atyafcode.sirat.vpn.START"
-        const val ACTION_STOP = "com.atyafcode.sirat.vpn.STOP"
-    }
-}
-```
+**هام - التفاعل مع الخدمات الحالية:** هذه الخدمة مستقلة ولا تعتمد على `AppLockAccessibilityService` أو `ShizukuAppLockService`. يجب إعلام `AppLockManager` بحالة الخدمة (شغالة/متوقفة) لتنسيق الموارد ومنع تعارضات البطارية. لا تؤثر الـ VPN على آلية كشف التطبيقات المفتوحة.
 
 ### 2. [تعديل] تعديل ملف `AndroidManifest.xml`
 المسار: `app/src/main/AndroidManifest.xml`
 
-تسجيل خدمة الـ VPN وطلب صلاحية `BIND_VPN_SERVICE` ليسمح نظام أندرويد للتطبيق بالعمل كـ VPN محلي.
+إضافة صلاحية الـ VPN وتصريح الخدمة (ملاحظة: `VpnService` لا يتطلب `BIND_VPN_SERVICE` - هذا فقط لـ `AccessibilityService`):
 
 ```xml
+<!-- تحت وسم <manifest> -->
+<uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
+
 <!-- تحت وسم <application> -->
 <service
     android:name=".services.vpn.SiratVpnService"
-    android:permission="android.permission.BIND_VPN_SERVICE"
     android:exported="false"
-    android:foregroundServiceType="specialUse"> 
-    <intent-filter>
-        <action android:name="android.net.VpnService" />
-    </intent-filter>
+    android:foregroundServiceType="specialUse">
+    <property
+        android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+        android:value="vpn_dns_filter" />
 </service>
+```
+
+```xml
+<!-- إضافة قناة الإشعارات في ملف strings.xml -->
+<string name="channel_vpn_filter">تصفية الإنترنت</string>
+<string name="channel_vpn_filter_description">إشعار خدمة تصفية المحتوى عبر VPN</string>
 ```
 
 ### 3. [ملف جديد] إنشاء ملف `VpnController.kt`
@@ -122,8 +56,9 @@ class SiratVpnService : VpnService() {
 
 **المهام:**
 - التحقق من منح صلاحية الـ VPN عبر `VpnService.prepare(context)`.
-- إذا لم تكن الصلاحية ممنوحة، إرجاع الـ Intent المناسب لفتح نافذة إعدادات النظام وتفعيل الـ VPN.
+- إذا لم تكن الصلاحية ممنوحة، إرجاع الـ Intent المناسب (مع `ActivityResultLauncher`) لفتح نافذة إعدادات النظام وتفعيل الـ VPN.
 - دوال مساعدة لإرسال Intents تشغيل/إيقاف الخدمة.
+- استدعاء `AppLockManager` عند تغيير الحالة لتسجيلها.
 
 ---
 

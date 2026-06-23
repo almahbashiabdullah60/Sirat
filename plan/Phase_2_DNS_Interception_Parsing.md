@@ -1,138 +1,205 @@
-# المرحلة 2: اعتراض وتحليل حزم الـ DNS
+# المرحلة 2: اعتراض وتحليل حزم الـ DNS باستخدام dnsjava
 
 ## الهدف
-قراءة حزم IPv4/UDP الخام الملتقطة من واجهة الـ TUN الافتراضية، وتحليلها لاستخراج استعلامات الـ DNS (نطاقات المواقع)، والتعامل معها: إما بحظرها فوراً محلياً عبر رد زائف، أو بتمريرها لخادم DNS عام آمن عبر مقبس شبكة (Socket) اعتيادي وإرجاع النتيجة للجهاز.
+استخدام مكتبة **dnsjava** (مكتبة Kotlin/Java معروفة وموثوقة) لتحليل طلبات DNS الواردة من واجهة الـ TUN، بدلاً من كتابة parser يدوي معقد للبايتات. يتم استخراج النطاق المطلوب، وفحصه في قوائم الحظر، ثم إما حظره (NXDOMAIN) أو تمريره إلى خادم DNS عام (مثل `1.1.1.1`).
+
+---
+
+## 📦 إضافة مكتبة dnsjava
+
+```toml
+# في gradle/libs.versions.toml — أضف:
+[dependencies]
+dnsjava = { module = "dnsjava:dnsjava", version = "3.6.2" }
+```
+
+```kotlin
+// في app/build.gradle.kts — أضف:
+implementation(libs.dnsjava)
+```
+
+**لماذا dnsjava بدلاً من الـ parsing اليدوي؟**
+- dnsjava هي مكتبة مستقرة ومختبرة منذ 20 عاماً
+- تتعامل مع تعقيدات DNS (مثل ضغط الأسماء، أنواع السجلات المختلفة، EDNS)
+- توفر بناءً سهلاً لحزم الرد (NXDOMAIN)
+- لا حاجة لإعادة اختراع العجلة
 
 ---
 
 ## 🏗️ آلية معالجة الحزم (Packet Processing Flow)
 
-تقوم الكروتينة المستمرة من المرحلة 1 بقراءة مصفوفة البايتات (ByteArray) وتمريرها وفقاً للمخطط التالي:
-
 ```text
 واجهة الشبكة TUN
        │
-       ▼ (قراءة ByteArray الحزمة)
-محلل حزمة IPv4 (IPv4 Packet Parser)
+       ▼ (قراءة ByteArray الحزمة الخام)
+  تحديد ما إذا كانت الحزمة UDP على منفذ 53
+  (يتم فحص أول 20 بايت للـ IPv4 header:
+   - البايت 9 == 17 (UDP)؟
+   - البايتات 22-23 == 53 (منفذ DNS)؟
+   - إذا لا: تُكتب الحزمة في TUN كما هي بدون تعديل)
        │
-       ├─► هل البروتوكول هو UDP (القيمة 17)؟
-       │      │
-       │      ├─► هل المنفذ المستهدف هو 53 (DNS)؟
-       │      │      │
-       │      │      ▼ (استخراج محتوى البيانات Payload)
-       │      │  محلل طلب الـ DNS (DNS Request Parser)
-       │      │      │
-       │      │      ▼ (استخراج النطاق المطلوب - Domain Name)
-       │      │  فحص النطاق (مستودع الكاش وقاعدة البيانات)
-       │      │      │
-       │      │      ├─► محظور؟ (BLOCKED)
-       │      │      │     │
-       │      │      │     ▼
-       │      │      │   توليد رد DNS محلي زائف (NXDOMAIN أو 0.0.0.0)
-       │      │      │     │
-       │      │      │     ▼
-       │      │      │   تغليف الرد في حزمة IP/UDP وكتابته في الـ TUN
-       │      │      │
-       │      │      └─► مسموح؟ (ALLOWED)
-       │      │            │
-       │      │            ▼
-       │      │          توجيه الطلب لخادم DNS عام (مثال 1.1.1.1) عبر Socket
-       │      │            │
-       │      │            ▼
-       │      │          استقبال الرد الفعلي من خادم الـ DNS
-       │      │            │
-       │      │            ▼
-       │      │          إعادة تغليف الرد الأصلي في حزمة IP/UDP
-       │      │            │
-       │      │            ▼
-       │      │          كتابة الحزمة الناتجة في الـ TUN لإعادتها للنظام
-       │      │
-       │      └─► منفذ آخر غير 53 (تجاهل الحزمة)
+       ▼ (استخراج Payload الـ DNS من الحزمة)
+  DnsResolver.processRequest(byteArray, ...)
        │
-       └─► بروتوكول آخر غير UDP (تجاهل الحزمة)
+       ├─► تحليل بايتات DNS باستخدام dnsjava
+       │      val message = Message(byteArray)
+       │      val question = message.getQuestion()
+       │      val domain = question.getName().toString(true)
+       │
+       ├─► فحص النطاق في FilterRepository
+       │      │
+       │      ├─► محظور ← بناء رد NXDOMAIN:
+       │      │      val response = message.clone()
+       │      │      response.header.setFlag(Flags.QR)
+       │      │      response.header.setRcode(Rcode.NXDOMAIN)
+       │      │      val responseBytes = response.toWire()
+       │      │      // تغليف في IP/UDP header وكتابته في TUN
+       │      │
+       │      └─► مسموح ← تمرير الطلب لخادم DNS عام:
+       │             val forwardBytes = message.toWire()
+       │             // إرسال forwardBytes إلى 1.1.1.1:53 عبر DatagramSocket
+       │             // استقبال الرد وإعادة تغليفه بترويسة IP/UDP
+       │             // كتابة الرد في TUN
 ```
 
 ---
 
-## 🛠️ الكلاسات والملفات البرمجية المطلوبة
+## 🛠️ الملفات البرمجية المطلوبة
 
-### 1. [ملفات جديدة] إنشاء محللات الحزم (`core/vpn/parser/`)
+### 1. [ملف جديد] إنشاء ملف `DnsResolver.kt`
+المسار: `app/src/main/java/com/atyafcode/sirat/services/vpn/DnsResolver.kt`
 
-لبناء وقراءة بايتات الحزم بشكل صحيح، نحتاج لإنشاء كلاسات مساعدة لتحليل ترويسات (Headers) بروتوكول الإنترنت والـ UDP والـ DNS:
+يدير تحليل طلبات DNS باستخدام dnsjava واتخاذ قرار الحظر أو التمرير.
 
-#### أ. `IpHeader.kt` و `UdpHeader.kt`
-- **ترويسة الـ IP (IPv4 Header):**
-  - التأكد من أن إصدار الحزمة هو `4` (أول 4 بتات في البايت 0).
-  - تحديد طول الترويسة (آخر 4 بتات في البايت 0 مضروباً في 4).
-  - استخراج نوع البروتوكول (البايت 9، قيمة الـ UDP هي `17`).
-  - استخراج عنوان الـ IP للمصدر (البايتات 12-15) والوجهة (البايتات 16-19).
-- **ترويسة الـ UDP (UDP Header):**
-  - تبدأ مباشرة بعد نهاية ترويسة الـ IP.
-  - استخراج منفذ المصدر (البايتات 0-1) والمنفذ المستهدف (البايتات 2-3).
-  - استخراج طول حزمة الـ UDP (البايتات 4-5) ومحتوى البيانات (البايتات 8 فما فوق).
+```kotlin
+package com.atyafcode.sirat.services.vpn
 
-#### ب. `DnsPacket.kt`
-- استخراج معرف العملية **Transaction ID** (أول بايتين من بيانات الـ DNS).
-- استخراج الأعلام **Flags** (البايتات 2-3).
-- استخراج عدد الأسئلة **Questions Count** (البايتات 4-5).
-- تحليل قسم الأسئلة (Question Section) الذي يبدأ من البايت 12:
-  - فك ترميز أسماء النطاقات (مثال: يتم تمثيل النطاق `www.google.com` بصيغة أطوال محددة مثل `3www6google3com0`). يجب كتابة دالة `parseDnsName(buffer, offset)` لتحويلها لنص مقروء.
-  - قراءة نوع الاستعلام (Type A للـ IPv4 أو Type AAAA للـ IPv6).
+import com.atyafcode.sirat.data.filter.FilterRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.xbill.DNS.*
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetAddress
 
----
+class DnsResolver(
+    private val filterRepository: FilterRepository,
+    private val dnsServer: InetAddress = InetAddress.getByName("1.1.1.1")
+) {
+    /**
+     * معالجة طلب DNS: إما حظره (NXDOMAIN) أو تمريره لخادم DNS العام.
+     * @param dnsPayloadBytes بايتات طلب DNS فقط (بدون ترويسات IP/UDP).
+     * @param onResponse (بايتات الرد المغلفة) -> كتابتها في TUN
+     */
+    suspend fun resolve(
+        dnsPayloadBytes: ByteArray,
+        onResponse: (ByteArray) -> Unit
+    ) = withContext(Dispatchers.IO) {
+        val query = try {
+            Message(dnsPayloadBytes)
+        } catch (e: Exception) {
+            return@withContext // حزمة غير صالحة، تجاهل
+        }
+        
+        val question = query.question ?: return@withContext
+        val domain = question.name.toString(true).lowercase()
+        
+        if (filterRepository.shouldBlockDomain(domain)) {
+            // بناء رد NXDOMAIN
+            val response = Message(query.toWire().size) // نفس ID
+            response.header.setFlag(Flags.QR) // استجابة
+            response.header.setFlag(Flags.AA) // Authoritative
+            response.header.setRcode(Rcode.NXDOMAIN)
+            response.addRecord(query.getQuestion(), Section.QUESTION)
+            onResponse(response.toWire())
+        } else {
+            // تمرير الطلب لخادم DNS عام
+            try {
+                val socket = DatagramSocket()
+                socket.soTimeout = 2000
+                val packet = DatagramPacket(
+                    dnsPayloadBytes, dnsPayloadBytes.size, dnsServer, 53
+                )
+                socket.send(packet)
+                
+                val buffer = ByteArray(4096)
+                val reply = DatagramPacket(buffer, buffer.size)
+                socket.receive(reply)
+                socket.close()
+                
+                onResponse(reply.data.copyOf(reply.length))
+            } catch (e: Exception) {
+                // فشل الاتصال، تجاهل
+            }
+        }
+    }
+}
+```
 
-### 2. [ملف جديد] إنشاء ملف `DnsPacketResolver.kt`
-المسار: `app/src/main/java/com/atyafcode/sirat/services/vpn/parser/DnsPacketResolver.kt`
+### 2. [تعديل] ربط `DnsResolver` مع `SiratVpnService`
+في `SiratVpnService.kt` (من المرحلة 1)، يتم تعديل حلقة القراءة لاستخدام `DnsResolver`:
 
-يدير عملية حل الاستعلامات وبناء حزم الردود وتمريرها.
+```kotlin
+// داخل حلقة قراءة الحزم من TUN:
+private val resolver = DnsResolver(filterRepository)
 
-#### أولاً: معالجة الطلبات المحظورة (Spoofing)
-في حال تبين أن النطاق محظور، نقوم ببناء رد DNS وهمي محلياً:
-1. نسخ معرف العملية (Transaction ID) من الطلب الأصلي.
-2. ضبط أعلام الـ DNS (Flags) كالتالي:
-   - Response flag = `1` (هذا رد وليس طلباً).
-   - Authoritative Answer = `1`.
-   - Reply Code = `3` (**NXDOMAIN** - النطاق غير موجود) لمنع المتصفح من المحاولة مجدداً أو الانتظار وتوفير رد سريع.
-3. تغليف رد الـ DNS المصاغ داخل ترويسة UDP وترويسة IP:
-   - IP المصدر = `10.8.0.1` (خادم الـ DNS الوهمي).
-   - IP الوجهة = `10.8.0.2` (عنوان الهاتف).
-   - منفذ المصدر = `53`.
-   - منفذ الوجهة = منفذ المصدر الذي أرسل منه التطبيق الأصلي الطلب.
-4. حساب قيمة الـ Checksum لترويسة الـ IP وتعيين ترويسة الـ UDP.
-5. كتابة الحزمة الناتجة في مخرجات الـ TUN.
+// لكل حزمة خام من TUN:
+fun processPacket(rawPacket: ByteArray, outputStream: FileOutputStream) {
+    // 1. فحص ترويسة IP: هل هي IPv4 (أول 4 بتات = 4)؟
+    if (rawPacket[0].toInt() shr 4 != 4) {
+        outputStream.write(rawPacket) // ليست IPv4، مررها كما هي
+        return
+    }
+    val headerLength = (rawPacket[0].toInt() and 0x0F) * 4
+    // 2. هل البروتوكول UDP (17)؟
+    if (rawPacket[9].toInt() != 17) {
+        outputStream.write(rawPacket) // ليس UDP، مررها
+        return
+    }
+    // 3. هل المنفذ الهدف 53؟
+    val destPort = ((rawPacket[headerLength + 2].toInt() and 0xFF) shl 8) or 
+                   (rawPacket[headerLength + 3].toInt() and 0xFF)
+    if (destPort != 53) {
+        outputStream.write(rawPacket) // ليس DNS، مررها
+        return
+    }
+    // 4. استخراج Payload DNS
+    val udpLengthIndex = headerLength + 4
+    val udpLength = ((rawPacket[udpLengthIndex].toInt() and 0xFF) shl 8) or 
+                    (rawPacket[udpLengthIndex + 1].toInt() and 0xFF)
+    val dnsStart = headerLength + 8
+    val dnsPayload = rawPacket.copyOfRange(dnsStart, headerLength + udpLength)
+    
+    // 5. معالجة DNS عبر dnsjava
+    resolver.resolve(dnsPayload) { responseBytes ->
+        // بناء ترويسة IP/UDP للرد
+        // ... (IP المصدر والوجهة معكوسان، منفذ 53)
+        outputStream.write(buildResponsePacket(rawPacket, responseBytes))
+    }
+}
+```
 
-#### ثانياً: معالجة الطلبات المسموحة (Forwarding)
-في حال كان النطاق مسموحاً به:
-1. فتح مقبس شبكة (UDP Socket) اعتيادي وتوجيهه لخادم DNS عام وسريع مثل `1.1.1.1` أو `8.8.8.8` على المنفذ 53.
-2. إرسال بايتات طلب الـ DNS الأصلي (بدون ترويسات IP/UDP الخاصة بالـ TUN) عبر المقبس.
-3. استقبال بايتات الرد الواردة من خادم الـ DNS العام.
-4. تغليف الرد الوارد بترويسة IP و UDP جديدة:
-   - IP المصدر = `10.8.0.1`.
-   - IP الوجهة = `10.8.0.2`.
-   - منفذ المصدر = `53`.
-   - منفذ الوجهة = المنفذ العشوائي للتطبيق صاحب الطلب.
-5. كتابة الحزمة الكاملة في مخرجات الـ TUN لترتد إلى التطبيق الذي طلبها.
+> **ملاحظة:** البايتات القليلة التي يتم فحصها يدوياً (IPv4 header، UDP port) هي عملية بسيطة ومستقرة ولا تحتاج مكتبة خارجية. فقط تحليل DNS هو ما يتم عبر dnsjava.
 
 ---
 
 ## ⚡ معايير الأداء والسرعة
 
-- **العمل في الخلفية (Async Task):** عدم تنفيذ أي قراءة/كتابة أو اتصالات شبكية على الـ Main Thread. استخدام كوروتينات مخصصة للشبكة `Dispatchers.IO`.
-- **إعادة تدوير المخازن (Buffer Recycling):** إعادة استخدام مصفوفات البايتات لتجنب كثرة عمليات الـ Garbage Collection التي قد تبطئ استجابة النظام.
-- **تحديد مهلة الاتصال (Timeout):** وضع مهلة زمنية قصيرة (2 ثانية مثلاً) لطلب الـ DNS الخارجي لمنع تعليق الطلبات في حال ضعف الشبكة.
+- **العمل في الخلفية:** كل عمليات الـ DNS تتم على `Dispatchers.IO` عبر الكوروتينات.
+- **تحديد مهلة الاتصال (Timeout):** `socket.soTimeout = 2000` (2 ثانية) لمنع تعليق الطلبات.
+- **عدم حظر الحزم غير المتعلقة بـ DNS:** الحزم التي ليست على منفذ 53 تمر فوراً دون تأخير يُذكر (مجرد فحص 3 بايتات فقط).
 
 ---
 
 ## 🏁 خطة التحقق والطلب (Verification Plan)
 
 ### الاختبارات المؤتمتة (Automated Tests)
-- إنشاء اختبار وحدة في `app/src/test/java/com/atyafcode/sirat/vpn/DnsParserTest.kt`:
-  - اختبار تفكيك بايتات طلب DNS قياسي والتأكد من استخراج النطاق بنجاح.
-  - اختبار دالة `parseDnsName` مع نطاقات مركبة والتأكد من عملها بشكل سليم.
-  - التحقق من دالة حساب الـ Checksum وتأكيد صحتها.
+- إنشاء اختبار وحدة في `app/src/test/java/com/atyafcode/sirat/vpn/DnsResolverTest.kt`:
+  - اختبار تحليل طلب DNS حقيقي والتأكد من استخراج النطاق.
+  - اختبار بناء رد NXDOMAIN والتأكد من صياغته الصحيحة.
 
 ### التحقق اليدوي
 1. تشغيل خدمة الـ VPN في التطبيق.
 2. فتح متصفح الهاتف وتصفح موقع مسموح (مثل `wikipedia.org`).
 3. التأكد من تحميل الصفحة بسلاسة وبدون تأخير ملحوظ.
-4. مراجعة سجلات الـ Logcat للتأكد من التقاط طلبات الـ DNS وتحليلها وتوجيهها بشكل سليم.
+4. مراجعة سجلات الـ Logcat للتأكد من التقاط طلبات الـ DNS وتحليلها.

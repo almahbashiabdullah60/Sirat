@@ -1,21 +1,43 @@
 # المرحلة 5: واجهة المستخدم والربط بالإعدادات
 
 ## الهدف
-بناء واجهة مستخدم حديثة وأنيقة بأسلوب لوحات التحكم (SaaS Dashboard) باستخدام **Jetpack Compose** و **Material 3**. تتيح الواجهة للمستخدم التحكم بتفعيل وإيقاف خدمة الـ VPN، وإدارة خيارات الحظر **الثلاثة** (حظر الإباحية، حظر القمار، حظر السوشيال ميديا)، وإضافة القوائم والكلمات المخصصة، وعرض سجل عمليات الحظر اللحظية.
+بناء واجهة مستخدم باستخدام **Jetpack Compose** و **Material 3** (باستخدام Theme التطبيق الحالي — ألوان ديناميكية من النظام). تتيح الواجهة للمستخدم التحكم بتفعيل وإيقاف خدمة الـ VPN، وإدارة خيارات الحظر **الثلاثة**، وإضافة القوائم والكلمات المخصصة، وعرض سجل عمليات الحظر.
 
 ---
 
-## 🎨 الهوية المرئية والألوان (Design System)
-التوافق الكامل مع هوية تطبيق "صراط" البصرية:
-- **اللون الأساسي (Primary):** `#2563EB` (أزرق ملكي)
-- **لون النجاح (Success):** `#10B981` (أخضر للحماية النشطة)
-- **لون التحذير (Warning):** `#F59E0B` (برتقالي دافئ)
-- **لون الخطر (Danger):** `#EF4444` (أحمر للحظر)
-- **لون الخلفية (Background):** `#F8FAFC`
-- **لون الأسطح والبطاقات (Surface):** `#FFFFFF`
-- **لون النصوص الرئيسية (Text):** `#0F172A`
-- **لون النصوص الفرعية (Muted Text):** `#64748B`
-- **الحواف الدائرية (Rounded Corners):** ما بين `12dp` إلى `16dp`.
+## 🎨 الهوية المرئية (Design System)
+**لا يتم تعريف ألوان جديدة.** تستخدم الواجهة `AppLockTheme` الموجود في `ui/theme/Theme.kt` والذي يعتمد على `dynamicColorScheme` (ألوان Material You الديناميكية من النظام) مع fallback إلى `lightColorScheme` / `darkColorScheme`. المكونات تستخدم ألوان Material 3 الدلالية:
+- `MaterialTheme.colorScheme.primary` للأزرار الرئيسية والحالة النشطة
+- `MaterialTheme.colorScheme.error` لحالة الحظر
+- `MaterialTheme.colorScheme.tertiary` للحماية النشطة
+- `MaterialTheme.colorScheme.surfaceVariant` للبطاقات
+
+---
+
+## 🗺️ ربط الملاحة (Navigation Integration)
+
+### 1. [تعديل] إضافة مسار التصفية في `Screen.kt`
+```kotlin
+// في core/navigation/Screen.kt — أضف:
+object FilteringDashboard : Screen("filtering")
+object CustomRules : Screen("custom_rules")
+```
+
+### 2. [تعديل] إضافة composables في `AppNavigator.kt`
+```kotlin
+// في core/navigation/AppNavigator.kt — أضف داخل NavHost:
+composable(Screen.FilteringDashboard.route) {
+    FilteringDashboardScreen(navController)
+}
+composable(Screen.CustomRules.route) {
+    CustomRulesScreen(navController)
+}
+```
+
+### 3. [تعديل] ربطها من شاشة الإعدادات أو الشاشة الرئيسية
+يمكن الوصول إلى `Screen.FilteringDashboard.route` من:
+- زر في `MainScreen.kt` (الشاشة الرئيسية) — كخيار إضافي
+- أو من `SettingsScreen.kt` كإعداد متقدم
 
 ---
 
@@ -24,7 +46,6 @@
 ### 1. [ملف جديد] كيان سجل الحظر الفوري `BlockedLog.kt`
 المسار: `app/src/main/java/com/atyafcode/sirat/data/filter/BlockedLog.kt`
 
-يستخدم لحفظ السجلات محلياً وعرضها للمنظومة للتأكد من فاعلية الحظر.
 ```kotlin
 package com.atyafcode.sirat.data.filter
 
@@ -35,50 +56,132 @@ import androidx.room.PrimaryKey
 data class BlockedLog(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val domain: String,
-    val reason: String, // "محتوى إباحي (جدول porn)", "قمار ومراهنات (جدول gambling)", "سوشيال ميديا (جدول social)"
+    val reason: String, // "porn", "gambling", "social", "keyword", "custom_blacklist"
     val timestamp: Long = System.currentTimeMillis()
 )
 ```
 
+### 2. إضافة دوال السجل في `FilterDao.kt`
+```kotlin
+@Insert
+suspend fun insertLog(log: BlockedLog)
+
+@Query("SELECT * FROM blocked_logs ORDER BY timestamp DESC LIMIT 50")
+suspend fun getRecentLogs(): List<BlockedLog>
+
+@Query("DELETE FROM blocked_logs")
+suspend fun clearLogs()
+```
+
 ---
 
-### 2. [ملف جديد] إنشاء ملف الـ ViewModel الخاص بالتصفية `FilteringViewModel.kt`
+### 3. [ملف جديد] إنشاء ملف `FilteringViewModel.kt`
 المسار: `app/src/main/java/com/atyafcode/sirat/features/filtering/ui/FilteringViewModel.kt`
 
-يدير حالة الشاشات وعرض البيانات والربط مع خدمة الـ VPN ومستودع الفلاتر.
+يتبع نمط `MainViewModel.kt` و `ChatViewModel.kt` الموجودين — يرث `ViewModel()` ويستخدم `StateFlow`.
 
-**الحالات والوظائف الأساسية:**
-- `isVpnRunning: StateFlow<Boolean>`: مراقبة حالة الـ VPN هل هو نشط حالياً أم متوقف.
-- `categoriesState: StateFlow<Map<String, Boolean>>`: حالة الخيارات الثلاثة (حظر الإباحية، حظر القمار، حظر السوشيال ميديا) المخزنة في SharedPreferences أو DataStore.
-- `blockedLogs: StateFlow<List<BlockedLog>>`: قائمة السجلات الفورية للمواقع المحظورة مؤخراً.
-- `customRules: StateFlow<List<CustomRule>>`: القوائم المخصصة للمستخدم (سماح/حظر يدوي).
-- `keywords: StateFlow<List<String>>`: الكلمات المفتاحية المحظورة مخصصة الصنع.
-- `toggleVpn()`: تشغيل أو إيقاف الـ VPN وطلب الصلاحية إذا لزم الأمر.
-- `updateCategory(category: String, enabled: Boolean)`: حفظ إعداد الفئة (porn, gambling, social) وتحديث كاش الـ VPN المقابل لها.
-- `addCustomRule(domain: String, isWhitelist: Boolean)` / `deleteCustomRule(domain: String)`.
+```kotlin
+package com.atyafcode.sirat.features.filtering.ui
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.atyafcode.sirat.data.filter.FilterDatabase
+import com.atyafcode.sirat.data.repository.FilterRepository
+import com.atyafcode.sirat.data.repository.PreferencesRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+
+class FilteringViewModel(application: Application) : AndroidViewModel(application) {
+    private val prefs = PreferencesRepository(application)
+    private val db = FilterDatabase.getInstance(application)
+    val filterRepo = FilterRepository(db)
+    
+    // حالة الـ VPN
+    private val _vpnRunning = MutableStateFlow(false)
+    val vpnRunning: StateFlow<Boolean> = _vpnRunning
+
+    // إعدادات الفئات — مخزنة في PreferencesRepository
+    private val _blockPorn = MutableStateFlow(true)
+    val blockPorn: StateFlow<Boolean> = _blockPorn
+
+    private val _blockGambling = MutableStateFlow(true)
+    val blockGambling: StateFlow<Boolean> = _blockGambling
+
+    private val _blockSocial = MutableStateFlow(false)
+    val blockSocial: StateFlow<Boolean> = _blockSocial
+
+    fun toggleVpn() { /* استدعاء VpnController */ }
+    fun setBlockPorn(enabled: Boolean) { _blockPorn.value = enabled }
+    fun setBlockGambling(enabled: Boolean) { _blockGambling.value = enabled }
+    fun setBlockSocial(enabled: Boolean) { _blockSocial.value = enabled }
+}
+```
 
 ---
 
-### 3. [ملفات جديدة] بناء شاشات Jetpack Compose (`features/filtering/ui/`)
+### 4. [ملفات جديدة] بناء شاشات Jetpack Compose (`features/filtering/ui/`)
 
 #### أ. شاشة لوحة التحكم الرئيسية (`FilteringDashboardScreen.kt`)
-- **بطاقة الحالة (Status Card):** بطاقة كبيرة علوية توضح حالة الحماية (نشطة باللون الأخضر مع أيقونة درع، أو متوقفة بالرمادي) مع زر تشغيل وتأثير نبض حركي خفيف. وعرض إحصائية لعدد المواقع المحجوبة اليوم.
-- **خيارات التحكم الثلاثة (The Three Blocking Toggles):** شبكة أو قائمة من 3 بطاقات أنيقة وعصرية مع أيقونات مناسبة للتحكم في الجداول المستهدفة:
-  - 🔞 **حظر المحتوى الإباحي:** يقوم بتفعيل/تعطيل الفحص والمطابقة مع جدول الـ `porn`.
-  - 🎰 **حظر القمار والمراهنات:** يقوم بتفعيل/تعطيل الفحص والمطابقة مع جدول الـ `gambling`.
-  - 📱 **حظر شبكات التواصل الاجتماعي:** يقوم بتفعيل/تعطيل الفحص والمطابقة مع جدول الـ `social`.
-- **سجل الحجب الأخير (Recent Blocked Logs):** قائمة مبسطة بالأسفل تعرض آخر 5 عمليات حظر مع الوقت، واسم الموقع الممنوع، وسبب المنع، وزر لفتح شاشة السجلات الكاملة.
+تستخدم `AppLockTheme` (كل شاشة داخل التطبيق تستخدم `AppLockTheme` تلقائياً في `MainActivity.kt`).
+
+```kotlin
+@Composable
+fun FilteringDashboardScreen(navController: NavHostController) {
+    val viewModel: FilteringViewModel = viewModel()
+    
+    FilteringDashboardContent(
+        vpnRunning = viewModel.vpnRunning.collectAsState().value,
+        blockPorn = viewModel.blockPorn.collectAsState().value,
+        blockGambling = viewModel.blockGambling.collectAsState().value,
+        blockSocial = viewModel.blockSocial.collectAsState().value,
+        onToggleVpn = { viewModel.toggleVpn() },
+        onBlockPornChange = { viewModel.setBlockPorn(it) },
+        onBlockGamblingChange = { viewModel.setBlockGambling(it) },
+        onBlockSocialChange = { viewModel.setBlockSocial(it) },
+        onNavigateToCustomRules = { navController.navigate(Screen.CustomRules.route) }
+    )
+}
+
+@Composable
+fun FilteringDashboardContent(
+    vpnRunning: Boolean,
+    blockPorn: Boolean,
+    blockGambling: Boolean,
+    blockSocial: Boolean,
+    onToggleVpn: () -> Unit,
+    onBlockPornChange: (Boolean) -> Unit,
+    onBlockGamblingChange: (Boolean) -> Unit,
+    onBlockSocialChange: (Boolean) -> Unit,
+    onNavigateToCustomRules: () -> Unit
+) {
+    // استخدام MaterialTheme.colorScheme.* بدلاً من ألوان مخصصة
+    val activeColor = MaterialTheme.colorScheme.primary
+    val dangerColor = MaterialTheme.colorScheme.error
+    val surfaceColor = MaterialTheme.colorScheme.surfaceVariant
+    
+    // ... بناء الواجهة باستخدام Material 3 Components
+}
+```
+
+- **بطاقة الحالة (Status Card):** تستخدم `MaterialTheme.colorScheme.primaryContainer` و `onPrimaryContainer` للحالة النشطة، و `surfaceVariant` للحالة المتوقفة.
+- **خيارات التحكم الثلاثة:** ثلاثة `Card` مع `Switch`:
+  - **حظر المحتوى الإباحي:** `blockPorn`
+  - **حظر القمار والمراهنات:** `blockGambling`
+  - **حظر شبكات التواصل الاجتماعي:** `blockSocial`
+- **سجل الحجب الأخير:** `LazyColumn` يعرض آخر عمليات الحظر.
 
 #### ب. مدير القوائم المخصصة (`CustomRulesScreen.kt`)
-- واجهة مقسمة لعلامتي تبويب (Tabs): **القائمة السوداء** (المواقع المطلوب حجبها يدوياً) و**القائمة البيضاء** (المواقع المستثناة من الحظر).
-- حقل نصي للتحقق من صحة صياغة النطاق المكتوب.
+- واجهة مقسمة لعلامتي تبويب (Tabs): **القائمة السوداء** و**القائمة البيضاء**.
+- حقل نصي (`OutlinedTextField`) لإضافة نطاق جديد.
 
 ---
 
 ## 🏁 خطة التحقق والطلب (Verification Plan)
 
 ### التحقق اليدوي
-1. تشغيل التطبيق والدخول لتبويب "حماية الإنترنت".
-2. الضغط على زر التفعيل الرئيسي للتأكد من ظهور الـ VPN بنجاح.
-3. تشغيل خيار حظر "الإباحية" وإيقاف الخيارين الآخرين. التأكد من حظر مواقع جدول الـ `porn` مع السماح بتصفح مواقع السوشيال ميديا والقمار بشكل طبيعي.
-4. تكرار التجربة بتشغيل خيار حظر "السوشيال ميديا" بمفرده والتأكد من حظر مواقع جدول الـ `social` فقط (مثل فيسبوك وانستغرام) ومراقبة تسجيلها في السجلات الفورية.
+1. إضافة `Screen.FilteringDashboard.route` إلى `Screen.kt` وتجربة التنقل إليه من الشاشة الرئيسية.
+2. الضغط على زر التفعيل الرئيسي للتأكد من ظهور نافذة طلب الـ VPN من النظام.
+3. تشغيل خيار حظر "الإباحية" وإيقاف الخيارين الآخرين. التأكد من حظر المواقع المدرجة في جدول `porn` مع السماح بتصفح المواقع الأخرى.
+4. تكرار التجربة مع خيار "السوشيال ميديا" والتأكد من حظر `facebook.com` و `instagram.com` فقط.
