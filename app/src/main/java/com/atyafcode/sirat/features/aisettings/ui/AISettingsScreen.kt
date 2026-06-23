@@ -103,13 +103,6 @@ fun AISettingsScreen(
                     Text(stringResource(R.string.plan_ai_source_label), style = MaterialTheme.typography.labelLarge)
                     Row(modifier = Modifier.fillMaxWidth()) {
                         FilterChip(
-                            selected = aiProvider == PlanRepository.AI_PROVIDER_LOCAL,
-                            onClick = { viewModel.aiProvider.value = PlanRepository.AI_PROVIDER_LOCAL },
-                            label = { Text(stringResource(R.string.plan_source_local)) },
-                            leadingIcon = { Icon(Icons.Default.Psychology, null, modifier = Modifier.size(18.dp)) },
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                        FilterChip(
                             selected = aiProvider == PlanRepository.AI_PROVIDER_CLOUD,
                             onClick = { viewModel.aiProvider.value = PlanRepository.AI_PROVIDER_CLOUD },
                             label = { Text(stringResource(R.string.plan_source_cloud)) },
@@ -201,46 +194,6 @@ fun AISettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            if (aiProvider == PlanRepository.AI_PROVIDER_LOCAL && !isModelDownloaded) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (downloadStatus.isRunning) 
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                        else 
-                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.Download, null, tint = if (downloadStatus.isRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
-                        Spacer(Modifier.height(8.dp))
-                        
-                        if (downloadStatus.isRunning) {
-                            Text(stringResource(R.string.plan_download_title), fontWeight = FontWeight.Bold)
-                            Text("${downloadStatus.progress}%", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.height(8.dp))
-                            LinearProgressIndicator(
-                                progress = downloadStatus.progress / 100f,
-                                modifier = Modifier.fillMaxWidth().height(8.dp),
-                                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            OutlinedButton(onClick = { viewModel.cancelDownload() }, modifier = Modifier.fillMaxWidth()) {
-                                Text(stringResource(R.string.plan_download_cancel))
-                            }
-                        } else {
-                            Text(stringResource(R.string.plan_download_local_not_found), fontWeight = FontWeight.Bold)
-                            Text(stringResource(R.string.plan_download_local_desc), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
-                            Spacer(Modifier.height(16.dp))
-                            Button(onClick = { viewModel.downloadModel() }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
-                                Text(stringResource(R.string.plan_download_now))
-                            }
-                        }
-                    }
-                }
-            }
 
             Spacer(modifier = Modifier.height(5.dp))
             

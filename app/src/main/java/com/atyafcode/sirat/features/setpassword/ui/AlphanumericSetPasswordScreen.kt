@@ -7,6 +7,7 @@ import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -342,6 +343,15 @@ fun AlphanumericSetPasswordScreen(
                         }
                     }) {
                         Text(stringResource(R.string.use_pin_instead))
+                    }
+
+                    OutlinedButton(
+                        onClick = { navController.navigate(Screen.SupervisedMethodChoice.route) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
+                    ) {
+                        Icon(Icons.Default.SupervisorAccount, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.switch_to_supervisor_lock))
                     }
                 }
 

@@ -301,6 +301,11 @@
     <string name="plan_error_empty_response">تلقى التطبيق رداً فارغاً من المحرك. حاول مرة أخرى.</string>
     <string name="permission_warning_title_suffix"> مطلوب</string>
 
+    <string name="restricted_setting_title">إعداد مقيد</string>
+    <string name="restricted_setting_desc">في أندرويد 13+، قد يكون هذا الإذن مقيداً للتطبيقات المثبتة يدوياً.\n\nلتفعيله:\n1. اذهب لمعلومات التطبيق (App Info) من إعدادات الهاتف.\n2. اضغط على النقاط الثلاث في الأعلى.\n3. اختر \"السماح بالإعدادات المقيدة\" (Allow restricted settings).\n4. عد إلى هنا وحاول التفعيل مرة أخرى.</string>
+    <string name="open_app_info_button">فتح معلومات التطبيق</string>
+    <string name="switch_to_supervisor_lock">التبديل إلى قفل المشرف</string>
+
     <!-- Behavior Log -->
     <string name="add_behavior_log">إضافة سجل سلوك</string>
     <string name="behavior_count">عدد المرات</string>
@@ -334,6 +339,10 @@
     <string name="plan_source_local">محلي (خصوصية)</string>
     <string name="plan_source_cloud">سحابي (سرعة)</string>
     <string name="plan_build_button">بناء خطة التعافي</string>
+    <string name="plan_analysis_period_label">فترة تحليل السلوك</string>
+    <string name="plan_period_week">أسبوع</string>
+    <string name="plan_period_month">شهر</string>
+    <string name="plan_period_year">سنة</string>
     <string name="plan_custom_title">خطة التعافي المخصصة</string>
     <string name="plan_export_pdf_success">تم تصدير الخطة بنجاح</string>
     <string name="plan_export_failed">فشل التصدير</string>

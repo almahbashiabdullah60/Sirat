@@ -48,6 +48,7 @@ import com.atyafcode.sirat.data.repository.BackendImplementation
 import com.atyafcode.sirat.features.appintro.domain.AppIntroManager
 import com.atyafcode.sirat.services.ShizukuAppLockService
 import com.atyafcode.sirat.services.UsageLockService
+import com.atyafcode.sirat.ui.components.RestrictedSettingDialog
 import com.atyafcode.sirat.ui.icons.Accessibility
 import com.atyafcode.sirat.ui.icons.BatterySaver
 import com.atyafcode.sirat.ui.icons.Display
@@ -134,6 +135,7 @@ fun AppIntroScreen(navController: NavController) {
     }
     var usageStatsPermissionGranted by remember { mutableStateOf(context.hasUsagePermission()) }
     var accessibilityServiceEnabled by remember { mutableStateOf(context.isAccessibilityServiceEnabled()) }
+    var showRestrictedSettingDialog by remember { mutableStateOf(false) }
 
     val requestPermissionLauncher =
         if (activity != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -209,6 +211,9 @@ fun AppIntroScreen(navController: NavController) {
             onNext = {
                 overlayPermissionGranted = Settings.canDrawOverlays(context)
                 if (!overlayPermissionGranted) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        showRestrictedSettingDialog = true
+                    }
                     val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     intent.data = "package:${context.packageName}".toUri()
@@ -347,6 +352,9 @@ fun AppIntroScreen(navController: NavController) {
                 onNext = {
                     accessibilityServiceEnabled = context.isAccessibilityServiceEnabled()
                     if (!accessibilityServiceEnabled) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            showRestrictedSettingDialog = true
+                        }
                         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(intent)
@@ -471,6 +479,12 @@ fun AppIntroScreen(navController: NavController) {
 
     val allPages =
         basicPages + methodSelectionPage + methodSpecificPages + finalPage
+
+    if (showRestrictedSettingDialog) {
+        RestrictedSettingDialog(
+            onDismiss = { showRestrictedSettingDialog = false }
+        )
+    }
 
     AppIntro(
         pages = allPages,

@@ -40,6 +40,7 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
     val goalType = MutableStateFlow("quit") // "quit" or "commit"
     val selectedBehavior = MutableStateFlow("")
     val availableBehaviors = MutableStateFlow<List<String>>(emptyList())
+    val analysisPeriod = MutableStateFlow(7) // 7, 30, or 365 days
 
     init {
         val savedPlan = planRepo.getPlan()
@@ -139,9 +140,12 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun constructPrompt(): String {
-        val last15DaysLogs = behaviorRepo.getLogsForRange(LocalDate.now().minusDays(15), LocalDate.now())
-        val behaviorSummary = if (last15DaysLogs.isEmpty()) getApplication<Application>().getString(R.string.chat_no_logs)
-        else last15DaysLogs.joinToString("\n") { 
+        val days = analysisPeriod.value
+        val startDate = LocalDate.now().minusDays(days.toLong())
+        val logs = behaviorRepo.getLogsForRange(startDate, LocalDate.now())
+        
+        val behaviorSummary = if (logs.isEmpty()) getApplication<Application>().getString(R.string.chat_no_logs)
+        else logs.joinToString("\n") { 
             "التاريخ: ${it.date}, التكرار: ${it.count}, السبب: ${it.reason}"
         }
 
@@ -155,8 +159,9 @@ class PlanBuilderViewModel(application: Application) : AndroidViewModel(applicat
             لغة الخطة المطلوبة: $language
             ديانة المستخدم: $religion
             الهدف الأساسي: $typeText $targetBehavior
+            الفترة الزمنية للتحليل المقدمة: $days يوماً
             
-            سجلات السلوك لآخر 15 يوم:
+            سجلات السلوك لهذه الفترة:
             $behaviorSummary
             
             بناءً على هذه البيانات، قم ببناء خطة تعافي مخصصة، عملية جداً، ومختصرة للغاية (Maximum 2-3 pages).

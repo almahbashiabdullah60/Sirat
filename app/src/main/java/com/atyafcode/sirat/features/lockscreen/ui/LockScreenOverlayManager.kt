@@ -9,7 +9,11 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.material3.Text
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.app.ActivityOptionsCompat
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.*
@@ -25,7 +29,7 @@ import com.atyafcode.sirat.ui.theme.AppLockTheme
 
 @SuppressLint("ViewConstructor")
 class LockScreenOverlayManager(private val context: Context):
-    LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner, OnBackPressedDispatcherOwner {
+    LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner, OnBackPressedDispatcherOwner, ActivityResultRegistryOwner {
 
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private var composeView: ComposeView? = null
@@ -39,6 +43,18 @@ class LockScreenOverlayManager(private val context: Context):
     override val lifecycle: Lifecycle get() = lifecycleRegistry
     override val savedStateRegistry: SavedStateRegistry get() = savedStateRegistryController.savedStateRegistry
     override val viewModelStore: ViewModelStore get() = store
+
+    override val activityResultRegistry = object : ActivityResultRegistry() {
+        override fun <I, O> onLaunch(
+            requestCode: Int,
+            contract: ActivityResultContract<I, O>,
+            input: I,
+            options: ActivityOptionsCompat?,
+        ) {
+            // No-op to prevent crash. Permission requests from overlay are not directly supported.
+            // Consider using a transparent Activity for such requests.
+        }
+    }
 
     override val onBackPressedDispatcher = OnBackPressedDispatcher {
         removeOverlay()
@@ -65,7 +81,8 @@ class LockScreenOverlayManager(private val context: Context):
 
             setContent {
                 CompositionLocalProvider(
-                    LocalOnBackPressedDispatcherOwner provides this@LockScreenOverlayManager
+                    LocalOnBackPressedDispatcherOwner provides this@LockScreenOverlayManager,
+                    LocalActivityResultRegistryOwner provides this@LockScreenOverlayManager
                 ) {
                     AppLockTheme {
                         val appLockRepository = context.appLockRepository()

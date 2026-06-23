@@ -35,6 +35,7 @@ fun PlanBuilderScreen(
     val goalType by viewModel.goalType.collectAsState()
     val selectedBehavior by viewModel.selectedBehavior.collectAsState()
     val availableBehaviors by viewModel.availableBehaviors.collectAsState()
+    val analysisPeriod by viewModel.analysisPeriod.collectAsState()
 
     val pdfExporter = remember { PlanPdfExporter(context) }
     val exportSuccessMessage = stringResource(R.string.plan_export_pdf_success)
@@ -99,6 +100,27 @@ fun PlanBuilderScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    stringResource(R.string.plan_analysis_period_label),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val periods = listOf(7 to R.string.plan_period_week, 30 to R.string.plan_period_month, 365 to R.string.plan_period_year)
+                    periods.forEach { (days, labelRes) ->
+                        FilterChip(
+                            selected = analysisPeriod == days,
+                            onClick = { viewModel.analysisPeriod.value = days },
+                            label = { Text(stringResource(labelRes)) }
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
                 

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -315,6 +316,15 @@ fun SetPasswordScreen(
                 if (!isVerifyOldPasswordMode && !isConfirmationMode) {
                     TextButton(onClick = { navController.navigate(Screen.SetPasswordAlphanumeric.route) }) {
                         Text(stringResource(R.string.use_password_button))
+                    }
+                    
+                    OutlinedButton(
+                        onClick = { navController.navigate(Screen.SupervisedMethodChoice.route) },
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Icon(Icons.Default.SupervisorAccount, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.switch_to_supervisor_lock))
                     }
                 }
 

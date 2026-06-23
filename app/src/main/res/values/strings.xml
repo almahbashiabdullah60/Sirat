@@ -241,6 +241,11 @@
     <string name="permission_warning_device_admin_desc">Prevents uninstallation.</string>
     <string name="permission_warning_title_suffix"> Required</string>
 
+    <string name="restricted_setting_title">Restricted Setting</string>
+    <string name="restricted_setting_desc">On Android 13+, this permission might be restricted for sideloaded apps.\n\nTo enable it:\n1. Go to App Info for Sirat in your phone settings.\n2. Tap the three dots (overflow menu) in the top right.\n3. Select \"Allow restricted settings\".\n4. Come back here and try enabling it again.</string>
+    <string name="open_app_info_button">Open App Info</string>
+    <string name="switch_to_supervisor_lock">Switch to Supervisor Lock</string>
+
     <string name="join_community">Join Community</string>
     <string name="join_community_desc">Join our Discord community.</string>
     <string name="join_discord">Join Discord</string>
@@ -405,6 +410,10 @@
     <string name="plan_source_local">Local (Privacy)</string>
     <string name="plan_source_cloud">Cloud (Speed)</string>
     <string name="plan_build_button">Build Recovery Plan</string>
+    <string name="plan_analysis_period_label">Behavior Analysis Period</string>
+    <string name="plan_period_week">Week</string>
+    <string name="plan_period_month">Month</string>
+    <string name="plan_period_year">Year</string>
     <string name="plan_custom_title">Custom Recovery Plan</string>
     <string name="plan_export_pdf_success">Plan exported successfully</string>
     <string name="plan_export_failed">Export failed</string>

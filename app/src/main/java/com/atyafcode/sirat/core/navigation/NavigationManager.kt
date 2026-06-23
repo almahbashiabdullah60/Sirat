@@ -33,20 +33,24 @@ class NavigationManager(private val context: Context) {
 
     private fun isPasswordSet(): Boolean {
         val appLockPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val settingsPrefs = context.getSharedPreferences(SETTINGS_PREFS_NAME, Context.MODE_PRIVATE)
 
         val hasPin = appLockPrefs.getString(PASSWORD_KEY, null) != null
         val hasPattern = appLockPrefs.getString(PATTERN_KEY, null) != null
+        val isSupervised = settingsPrefs.getString(LOCK_TYPE_KEY, "") == LOCK_TYPE_SUPERVISED &&
+                appLockPrefs.getString(SUPERVISED_SECRET_KEY, null) != null
 
-        return (hasPin || hasPattern)
+        return (hasPin || hasPattern || isSupervised)
     }
 
     companion object {
         private const val PREFS_NAME = "app_lock_prefs"
-
-        //private const val SETTINGS_PREFS_NAME = "app_lock_settings"
+        private const val SETTINGS_PREFS_NAME = "app_lock_settings"
         private const val PASSWORD_KEY = "password"
         private const val PATTERN_KEY = "pattern"
-        //private const val LOCK_TYPE_KEY = "lock_type"
+        private const val LOCK_TYPE_KEY = "lock_type"
+        private const val SUPERVISED_SECRET_KEY = "supervised_secret"
+        private const val LOCK_TYPE_SUPERVISED = "supervised"
 
         private val ROUTES_THAT_SKIP_PASSWORD_CHECK = setOf(
             Screen.AppIntro.route,

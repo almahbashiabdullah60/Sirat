@@ -74,6 +74,7 @@ import com.atyafcode.sirat.features.chat.ui.ChatScreen
 import com.atyafcode.sirat.features.behavior.ui.BehaviorScreen
 import com.atyafcode.sirat.features.planbuilder.ui.PlanBuilderScreen
 import com.atyafcode.sirat.ui.components.DonateModalBottomSheet
+import com.atyafcode.sirat.ui.components.RestrictedSettingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -115,6 +116,7 @@ fun MainScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var firstMissingPermission by remember { mutableStateOf<MissingPermission?>(null) }
     var selectedTab by remember { mutableStateOf(MainTab.APPS) }
+    var showRestrictedSettingDialog by remember { mutableStateOf(false) }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -307,6 +309,11 @@ fun MainScreen(
                             PermissionWarningBanner(
                                 missingPermission = missingPerm,
                                 onClick = {
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+                                        (missingPerm == MissingPermission.OVERLAY || missingPerm == MissingPermission.ACCESSIBILITY)
+                                    ) {
+                                        showRestrictedSettingDialog = true
+                                    }
                                     when (missingPerm) {
                                         MissingPermission.OVERLAY -> {
                                             context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
@@ -407,6 +414,12 @@ fun MainScreen(
                 }
             }
         }
+    }
+
+    if (showRestrictedSettingDialog) {
+        RestrictedSettingDialog(
+            onDismiss = { showRestrictedSettingDialog = false }
+        )
     }
 
     if (showAddAppsSheet) {
