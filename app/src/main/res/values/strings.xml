@@ -437,7 +437,7 @@
     <string name="filtering_ui_porn">Adult Content</string>
     <string name="filtering_ui_gambling">Gambling</string>
     <string name="filtering_ui_social">Social Media</string>
-    <string name="filtering_ui_safesearch">SafeSearch</string>
+    <string name="filtering_ui_safesearch">Search lock</string>
     <string name="filtering_ui_vpn_start_hint">Tap to start filtering</string>
 
     <!-- VPN DNS Filter -->

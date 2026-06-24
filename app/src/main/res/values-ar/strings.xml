@@ -149,7 +149,7 @@
     <string name="filtering_ui_porn">المحتوى الإباحي</string>
     <string name="filtering_ui_gambling">القمار</string>
     <string name="filtering_ui_social">التواصل الاجتماعي</string>
-    <string name="filtering_ui_safesearch">البحث الآمن</string>
+    <string name="filtering_ui_safesearch">قفل البحث</string>
     <string name="filtering_ui_vpn_start_hint">اضغط لبدء التصفية</string>
     <string name="settings_screen_haptic_feedback_title">الاهتزاز عند اللمس</string>
     <string name="settings_screen_haptic_feedback_desc">الاهتزاز عند التفاعل مع أزرار شاشة القفل.</string>

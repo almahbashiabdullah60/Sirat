@@ -4,7 +4,7 @@ import com.atyafcode.sirat.data.filter.FilterDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class FilterRepository(private val database: FilterDatabase) {
+class FilterRepository private constructor(private val database: FilterDatabase) {
 
     private var pornCache = HashSet<String>()
     private var gamblingCache = HashSet<String>()
@@ -12,6 +12,17 @@ class FilterRepository(private val database: FilterDatabase) {
     private var whitelistCache = HashSet<String>()
     private var blacklistCache = HashSet<String>()
     private var keywordCache = HashSet<String>()
+
+    companion object {
+        @Volatile
+        private var INSTANCE: FilterRepository? = null
+
+        fun getInstance(database: FilterDatabase): FilterRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: FilterRepository(database).also { INSTANCE = it }
+            }
+        }
+    }
 
     suspend fun loadCaches() = withContext(Dispatchers.IO) {
         val dao = database.filterDao()

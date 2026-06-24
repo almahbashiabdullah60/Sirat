@@ -55,7 +55,7 @@ class DnsProxyService : android.app.Service() {
 
         val app = applicationContext as android.app.Application
         val db = FilterDatabase.getInstance(app)
-        val filterRepository = FilterRepository(db)
+        val filterRepository = FilterRepository.getInstance(db)
         val syncManager = SyncManager(app, db, filterRepository)
 
         kotlinx.coroutines.runBlocking {

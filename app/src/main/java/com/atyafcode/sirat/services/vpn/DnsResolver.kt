@@ -67,9 +67,20 @@ class DnsResolver(
 
         val safeSearch = DnsFilterController.safeSearch
         if (safeSearch && question.type == Type.A) {
-            val safeIp = safeSearchMap.entries.firstOrNull { (originalName) ->
-                domain == originalName || domain.endsWith(".$originalName")
-            }?.value
+            // Google specific logic: Only redirect main search domains, NOT services like mail, drive, docs
+            val isGoogleSearch = domain == "google.com" || domain == "www.google.com" || 
+                                (domain.startsWith("google.") && domain.count { it == '.' } <= 2)
+            
+            val targetDomain = when {
+                isGoogleSearch -> "google.com"
+                domain == "bing.com" || domain == "www.bing.com" -> "bing.com"
+                domain == "youtube.com" || domain == "www.youtube.com" || domain == "m.youtube.com" -> "youtube.com"
+                domain == "duckduckgo.com" || domain == "www.duckduckgo.com" -> "duckduckgo.com"
+                else -> null
+            }
+
+            val safeIp = targetDomain?.let { safeSearchMap[it] }
+
             if (safeIp != null) {
                 val response = Message(query.toWire().size)
                 response.header.setFlag(Flags.QR.toInt())

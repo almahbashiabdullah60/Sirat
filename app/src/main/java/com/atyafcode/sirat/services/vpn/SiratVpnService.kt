@@ -63,7 +63,7 @@ class SiratVpnService : VpnService() {
         startForeground(NOTIFICATION_ID, createNotification())
 
         val db = FilterDatabase.getInstance(this@SiratVpnService.applicationContext as android.app.Application)
-        val filterRepository = FilterRepository(db)
+        val filterRepository = FilterRepository.getInstance(db)
         filterRepository.setKeywords(DnsFilterController.keywords)
         kotlinx.coroutines.runBlocking(Dispatchers.IO) {
             filterRepository.loadCaches()

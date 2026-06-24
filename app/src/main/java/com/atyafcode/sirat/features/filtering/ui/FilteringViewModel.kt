@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 class FilteringViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = FilterDatabase.getInstance(application)
-    val filterRepo = FilterRepository(db)
+    val filterRepo = FilterRepository.getInstance(db)
     private val syncManager = SyncManager(application, db, filterRepo)
     private val prefs = application.getSharedPreferences("filter_prefs", 0)
 
