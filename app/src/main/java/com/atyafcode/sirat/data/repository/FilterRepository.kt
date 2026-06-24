@@ -24,6 +24,8 @@ class FilterRepository(private val database: FilterDatabase) {
         blacklistCache = rules.filter { !it.isWhitelist }.map { it.domain }.toHashSet()
     }
 
+    fun cacheStats(): String = "porn=${pornCache.size} gambling=${gamblingCache.size} social=${socialCache.size}"
+
     fun setKeywords(keywords: Set<String>) {
         keywordCache = keywords.toHashSet()
     }

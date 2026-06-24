@@ -9,6 +9,7 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.atyafcode.sirat.MainActivity
 import com.atyafcode.sirat.R
@@ -60,13 +61,20 @@ class SiratVpnService : VpnService() {
 
         val db = FilterDatabase.getInstance(this@SiratVpnService.applicationContext as android.app.Application)
         val filterRepository = FilterRepository(db)
+        filterRepository.setKeywords(DnsFilterController.keywords)
         resolver = DnsResolver(
             filterRepository = filterRepository,
-            filterDao = db.filterDao()
+            filterDao = db.filterDao(),
+            blockPorn = DnsFilterController.blockPorn,
+            blockGambling = DnsFilterController.blockGambling,
+            blockSocial = DnsFilterController.blockSocial,
+            safeSearchEnabled = DnsFilterController.safeSearch,
+            useKeywords = DnsFilterController.keywords.isNotEmpty()
         )
 
-        serviceScope.launch {
+        kotlinx.coroutines.runBlocking(Dispatchers.IO) {
             SyncManager(this@SiratVpnService, db, filterRepository).syncAll()
+            Log.d(TAG, "Caches loaded: ${filterRepository.cacheStats()}")
         }
 
         val builder = Builder()
@@ -98,7 +106,7 @@ class SiratVpnService : VpnService() {
         }
     }
 
-    private fun processPacket(buffer: ByteArray, length: Int, output: FileOutputStream) {
+    private suspend fun processPacket(buffer: ByteArray, length: Int, output: FileOutputStream) {
         if (length < 20) {
             output.write(buffer, 0, length)
             return
@@ -131,10 +139,8 @@ class SiratVpnService : VpnService() {
             output.write(buffer, 0, length)
             return
         }
-        kotlinx.coroutines.runBlocking {
-            resolver.resolve(dnsPayload) { responseBytes ->
-                writeResponse(buffer, length, headerLength, responseBytes, output)
-            }
+        resolver.resolve(dnsPayload) { responseBytes ->
+            writeResponse(buffer, length, headerLength, responseBytes, output)
         }
     }
 
@@ -211,5 +217,6 @@ class SiratVpnService : VpnService() {
 
         @Volatile
         var isRunning = false
+        private const val TAG = "SiratVpnService"
     }
 }

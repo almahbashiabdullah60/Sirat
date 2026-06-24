@@ -373,6 +373,30 @@
     <string name="vpn_filter_channel_description">إشعار لخدمة VPN لتصفية المحتوى</string>
     <string name="vpn_filter_notification_title">تصفية الإنترنت نشطة</string>
     <string name="vpn_filter_notification_text">جاري تصفية المحتوى الضار</string>
+
+    <!-- Custom Rules -->
+    <string name="custom_rules_title">قواعد مخصصة</string>
+    <string name="custom_rules_add">إضافة قاعدة</string>
+    <string name="custom_rules_empty">لا توجد قواعد مخصصة بعد. أضف نطاقات للحظر أو السماح.</string>
+    <string name="custom_rules_label">النطاق</string>
+    <string name="custom_rules_whitelist">قائمة سماح (السماح)</string>
+    <string name="custom_rules_blocklist">قائمة حظر</string>
+    <string name="custom_rules_delete">حذف</string>
+    <string name="custom_rules_delete_confirm">حذف قاعدة %s؟</string>
+
+    <!-- Keywords -->
+    <string name="keywords_title">كلمات مفتاحية</string>
+    <string name="keywords_add">إضافة كلمة</string>
+    <string name="keywords_delete">حذف الكلمة %s؟</string>
+    <string name="keywords_empty">لم تتم إضافة كلمات</string>
+    <string name="keywords_label">كلمة مفتاحية</string>
+
+    <!-- Blocking Stats -->
+    <string name="blocking_stats_blocked">VPN · %d محظور</string>
+
+    <!-- Generic -->
+    <string name="generic_add">إضافة</string>
+    <string name="generic_cancel">إلغاء</string>
 </resources>
 
 

@@ -446,6 +446,30 @@
     <string name="vpn_filter_channel_description">Notification for content filtering VPN service</string>
     <string name="vpn_filter_notification_title">Internet Filtering Active</string>
     <string name="vpn_filter_notification_text">Filtering harmful content</string>
+
+    <!-- Custom Rules -->
+    <string name="custom_rules_title">Custom Rules</string>
+    <string name="custom_rules_add">Add Rule</string>
+    <string name="custom_rules_empty">No custom rules yet. Add domains to block or whitelist.</string>
+    <string name="custom_rules_label">Domain</string>
+    <string name="custom_rules_whitelist">Whitelist (allow)</string>
+    <string name="custom_rules_blocklist">Blocklist</string>
+    <string name="custom_rules_delete">Delete</string>
+    <string name="custom_rules_delete_confirm">Delete rule for %s?</string>
+
+    <!-- Keywords -->
+    <string name="keywords_title">Keywords</string>
+    <string name="keywords_add">Add Keyword</string>
+    <string name="keywords_delete">Delete keyword %s?</string>
+    <string name="keywords_empty">No keywords added</string>
+    <string name="keywords_label">Keyword</string>
+
+    <!-- Blocking Stats -->
+    <string name="blocking_stats_blocked">VPN mode · %d blocked</string>
+
+    <!-- Generic -->
+    <string name="generic_add">Add</string>
+    <string name="generic_cancel">Cancel</string>
 </resources>
 
 

@@ -54,6 +54,9 @@ interface FilterDao {
     @Query("SELECT * FROM blocked_logs ORDER BY timestamp DESC LIMIT 50")
     suspend fun getRecentLogs(): List<BlockedLog>
 
+    @Query("SELECT COUNT(*) FROM blocked_logs")
+    suspend fun getLogCount(): Int
+
     @Query("DELETE FROM blocked_logs")
     suspend fun clearLogs()
 }
