@@ -14,21 +14,19 @@ import org.xbill.DNS.Type
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.SocketTimeoutException
 
 class DnsResolver(
     private val filterRepository: FilterRepository,
     private val filterDao: FilterDao,
     private val dnsServer: InetAddress = InetAddress.getByName("1.1.1.1"),
-    private val blockPorn: Boolean = true,
-    private val blockGambling: Boolean = true,
-    private val blockSocial: Boolean = false,
-    private val useKeywords: Boolean = true,
-    private val safeSearchEnabled: Boolean = true
+    private val protectSocket: ((DatagramSocket) -> Boolean)? = null
 ) {
     private val safeSearchMap = mutableMapOf<String, InetAddress>()
+    private var dnsSocket: DatagramSocket? = null
 
     init {
-        kotlinx.coroutines.runBlocking {
+        kotlinx.coroutines.runBlocking(Dispatchers.IO) {
             resolveSafeSearchIps()
         }
     }
@@ -51,6 +49,20 @@ class DnsResolver(
         }
     }
 
+    private fun getSocket(): DatagramSocket {
+        return dnsSocket ?: synchronized(this) {
+            dnsSocket ?: DatagramSocket().also {
+                it.soTimeout = 2000
+                dnsSocket = it
+            }
+        }
+    }
+
+    fun close() {
+        dnsSocket?.close()
+        dnsSocket = null
+    }
+
     suspend fun resolve(dnsPayloadBytes: ByteArray, onResponse: (ByteArray) -> Unit) {
         val query = try {
             Message(dnsPayloadBytes)
@@ -61,7 +73,8 @@ class DnsResolver(
         val question = query.question ?: return
         val domain = question.name.toString(true).lowercase()
 
-        if (safeSearchEnabled && question.type == Type.A) {
+        val safeSearch = DnsFilterController.safeSearch
+        if (safeSearch && question.type == Type.A) {
             val safeIp = safeSearchMap.entries.firstOrNull { (originalName) ->
                 domain == originalName || domain.endsWith(".$originalName")
             }?.value
@@ -76,7 +89,14 @@ class DnsResolver(
             }
         }
 
-        if (filterRepository.shouldBlockDomain(domain, blockPorn, blockGambling, blockSocial, useKeywords)) {
+        if (filterRepository.shouldBlockDomain(
+                domain,
+                DnsFilterController.blockPorn,
+                DnsFilterController.blockGambling,
+                DnsFilterController.blockSocial,
+                DnsFilterController.keywords.isNotEmpty()
+            )
+        ) {
             val response = Message(query.toWire().size)
             response.header.setFlag(Flags.QR.toInt())
             response.header.setFlag(Flags.AA.toInt())
@@ -90,25 +110,49 @@ class DnsResolver(
     }
 
     private fun forwardQuery(dnsPayloadBytes: ByteArray, onResponse: (ByteArray) -> Unit) {
-        try {
-            val socket = DatagramSocket()
-            socket.soTimeout = 2000
-            val packet = DatagramPacket(dnsPayloadBytes, dnsPayloadBytes.size, dnsServer, 53)
-            socket.send(packet)
+        val maxRetries = 2
+        for (attempt in 1..maxRetries) {
+            try {
+                var socket = dnsSocket
+                if (socket == null || socket.isClosed) {
+                    socket = DatagramSocket()
+                    socket.soTimeout = 2000
+                    protectSocket?.invoke(socket)
+                    dnsSocket = socket
+                }
+                val packet = DatagramPacket(dnsPayloadBytes, dnsPayloadBytes.size, dnsServer, 53)
+                socket.send(packet)
 
-            val buffer = ByteArray(4096)
-            val reply = DatagramPacket(buffer, buffer.size)
-            socket.receive(reply)
-            socket.close()
+                val buffer = ByteArray(4096)
+                val reply = DatagramPacket(buffer, buffer.size)
+                socket.receive(reply)
 
-            onResponse(reply.data.copyOf(reply.length))
-        } catch (_: Exception) {
+                onResponse(reply.data.copyOf(reply.length))
+                return
+            } catch (_: SocketTimeoutException) {
+                if (attempt < maxRetries) {
+                    dnsSocket?.close()
+                    dnsSocket = null
+                }
+            } catch (_: Exception) {
+                dnsSocket?.close()
+                dnsSocket = null
+                return
+            }
         }
+        try {
+            val query = Message(dnsPayloadBytes)
+            val response = Message(query.toWire().size)
+            response.header.setFlag(Flags.QR.toInt())
+            response.header.setRcode(Rcode.SERVFAIL.toInt())
+            response.addRecord(query.getQuestion(), Section.QUESTION)
+            onResponse(response.toWire())
+        } catch (_: Exception) { }
     }
 
     private fun logBlockedDomain(domain: String, reason: String) {
         try {
-            kotlinx.coroutines.runBlocking {
+            kotlinx.coroutines.runBlocking(Dispatchers.IO) {
                 filterDao.insertLog(BlockedLog(domain = domain, reason = reason))
             }
         } catch (_: Exception) {

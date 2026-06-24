@@ -60,7 +60,7 @@ class DnsProxyService : android.app.Service() {
 
         kotlinx.coroutines.runBlocking {
             Log.d(TAG, "Syncing domain lists...")
-            syncManager.syncAll()
+            syncManager.syncSelected(true, true, true)
             Log.d(TAG, "Caches: ${filterRepository.cacheStats()}")
         }
 

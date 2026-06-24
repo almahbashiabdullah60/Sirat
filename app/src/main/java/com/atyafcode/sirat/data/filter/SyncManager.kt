@@ -15,23 +15,38 @@ class SyncManager(
     private val database: FilterDatabase,
     private val repository: FilterRepository
 ) {
-    suspend fun syncAll() = withContext(Dispatchers.IO) {
+    suspend fun syncSelected(blockPorn: Boolean, blockGambling: Boolean, blockSocial: Boolean) = withContext(Dispatchers.IO) {
         val dao = database.filterDao()
 
-        syncCategory("filter/porn.json") { list ->
-            dao.clearPorn()
-            dao.insertPorn(list.map { PornDomain(it) })
-        }
-        syncCategory("filter/gambling.json") { list ->
-            dao.clearGambling()
-            dao.insertGambling(list.map { GamblingDomain(it) })
-        }
-        syncCategory("filter/social.json") { list ->
-            dao.clearSocial()
-            dao.insertSocial(list.map { SocialDomain(it) })
+        if (blockPorn) {
+            syncCategory("filter/porn.json") { list ->
+                dao.clearPorn()
+                dao.insertPorn(list.map { PornDomain(it) })
+            }
+            repository.loadPornCache()
+        } else {
+            repository.clearPornCache()
         }
 
-        repository.loadCaches()
+        if (blockGambling) {
+            syncCategory("filter/gambling.json") { list ->
+                dao.clearGambling()
+                dao.insertGambling(list.map { GamblingDomain(it) })
+            }
+            repository.loadGamblingCache()
+        } else {
+            repository.clearGamblingCache()
+        }
+
+        if (blockSocial) {
+            syncCategory("filter/social.json") { list ->
+                dao.clearSocial()
+                dao.insertSocial(list.map { SocialDomain(it) })
+            }
+            repository.loadSocialCache()
+        } else {
+            repository.clearSocialCache()
+        }
     }
 
     private fun syncCategory(assetPath: String, inserter: suspend (List<String>) -> Unit) {

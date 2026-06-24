@@ -118,8 +118,8 @@ fun FilteringDashboardScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item { StatusCard(active, blockCount, onToggle = { onToggle() }) }
-            item { BlockingOptions(viewModel) }
-            item { KeywordsSection(viewModel, keywords) }
+            item { BlockingOptions(viewModel, active) }
+            item { KeywordsSection(viewModel, keywords, active) }
             item {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
@@ -193,7 +193,7 @@ private fun StatusCard(active: Boolean, blockCount: Int, onToggle: () -> Unit) {
 }
 
 @Composable
-private fun BlockingOptions(viewModel: FilteringViewModel) {
+private fun BlockingOptions(viewModel: FilteringViewModel, active: Boolean) {
     val blockPorn by viewModel.blockPorn.collectAsState()
     val blockGambling by viewModel.blockGambling.collectAsState()
     val blockSocial by viewModel.blockSocial.collectAsState()
@@ -210,16 +210,16 @@ private fun BlockingOptions(viewModel: FilteringViewModel) {
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(Modifier.height(12.dp))
-            ToggleRow(stringResource(R.string.filtering_ui_porn), blockPorn) { viewModel.setBlockPorn(it) }
-            ToggleRow(stringResource(R.string.filtering_ui_gambling), blockGambling) { viewModel.setBlockGambling(it) }
-            ToggleRow(stringResource(R.string.filtering_ui_social), blockSocial) { viewModel.setBlockSocial(it) }
-            ToggleRow(stringResource(R.string.filtering_ui_safesearch), safeSearch) { viewModel.setSafeSearch(it) }
+            ToggleRow(stringResource(R.string.filtering_ui_porn), blockPorn, !active) { viewModel.setBlockPorn(it) }
+            ToggleRow(stringResource(R.string.filtering_ui_gambling), blockGambling, !active) { viewModel.setBlockGambling(it) }
+            ToggleRow(stringResource(R.string.filtering_ui_social), blockSocial, !active) { viewModel.setBlockSocial(it) }
+            ToggleRow(stringResource(R.string.filtering_ui_safesearch), safeSearch, !active) { viewModel.setSafeSearch(it) }
         }
     }
 }
 
 @Composable
-private fun KeywordsSection(viewModel: FilteringViewModel, keywords: Set<String>) {
+private fun KeywordsSection(viewModel: FilteringViewModel, keywords: Set<String>, active: Boolean) {
     var showDialog by remember { mutableStateOf(false) }
     var newKeyword by remember { mutableStateOf("") }
 
@@ -238,14 +238,14 @@ private fun KeywordsSection(viewModel: FilteringViewModel, keywords: Set<String>
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
-                IconButton(onClick = { showDialog = true }) {
+                IconButton(onClick = { showDialog = true }, enabled = !active) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.keywords_add))
                 }
             }
             Spacer(Modifier.height(8.dp))
             if (keywords.isEmpty()) {
                 Text(
-                        text = stringResource(R.string.keywords_empty),
+                    text = stringResource(R.string.keywords_empty),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -257,7 +257,7 @@ private fun KeywordsSection(viewModel: FilteringViewModel, keywords: Set<String>
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(kw, style = MaterialTheme.typography.bodyMedium)
-                        IconButton(onClick = { viewModel.removeKeyword(kw) }) {
+                        IconButton(onClick = { viewModel.removeKeyword(kw) }, enabled = !active) {
                             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.custom_rules_delete), tint = MaterialTheme.colorScheme.error)
                         }
                     }
@@ -295,7 +295,7 @@ private fun KeywordsSection(viewModel: FilteringViewModel, keywords: Set<String>
 }
 
 @Composable
-private fun ToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+private fun ToggleRow(label: String, checked: Boolean, enabled: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -304,7 +304,7 @@ private fun ToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = label, style = MaterialTheme.typography.bodyLarge)
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(checked = checked, enabled = enabled, onCheckedChange = onCheckedChange)
     }
 }
 

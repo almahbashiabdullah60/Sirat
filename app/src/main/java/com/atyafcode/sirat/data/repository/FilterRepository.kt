@@ -24,6 +24,33 @@ class FilterRepository(private val database: FilterDatabase) {
         blacklistCache = rules.filter { !it.isWhitelist }.map { it.domain }.toHashSet()
     }
 
+    suspend fun loadPornCache() = withContext(Dispatchers.IO) {
+        pornCache = database.filterDao().getAllPorn().toHashSet()
+    }
+
+    suspend fun loadGamblingCache() = withContext(Dispatchers.IO) {
+        gamblingCache = database.filterDao().getAllGambling().toHashSet()
+    }
+
+    suspend fun loadSocialCache() = withContext(Dispatchers.IO) {
+        socialCache = database.filterDao().getAllSocial().toHashSet()
+    }
+
+    suspend fun clearPornCache() = withContext(Dispatchers.IO) {
+        pornCache.clear()
+        database.filterDao().clearPorn()
+    }
+
+    suspend fun clearGamblingCache() = withContext(Dispatchers.IO) {
+        gamblingCache.clear()
+        database.filterDao().clearGambling()
+    }
+
+    suspend fun clearSocialCache() = withContext(Dispatchers.IO) {
+        socialCache.clear()
+        database.filterDao().clearSocial()
+    }
+
     fun cacheStats(): String = "porn=${pornCache.size} gambling=${gamblingCache.size} social=${socialCache.size}"
 
     fun setKeywords(keywords: Set<String>) {

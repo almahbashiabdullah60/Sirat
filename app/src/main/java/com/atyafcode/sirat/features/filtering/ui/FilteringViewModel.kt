@@ -18,20 +18,21 @@ class FilteringViewModel(application: Application) : AndroidViewModel(applicatio
     private val db = FilterDatabase.getInstance(application)
     val filterRepo = FilterRepository(db)
     private val syncManager = SyncManager(application, db, filterRepo)
+    private val prefs = application.getSharedPreferences("filter_prefs", 0)
 
     private val _active = MutableStateFlow(false)
     val active: StateFlow<Boolean> = _active
 
-    private val _blockPorn = MutableStateFlow(true)
+    private val _blockPorn = MutableStateFlow(prefs.getBoolean("blockPorn", true))
     val blockPorn: StateFlow<Boolean> = _blockPorn
 
-    private val _blockGambling = MutableStateFlow(true)
+    private val _blockGambling = MutableStateFlow(prefs.getBoolean("blockGambling", true))
     val blockGambling: StateFlow<Boolean> = _blockGambling
 
-    private val _blockSocial = MutableStateFlow(false)
+    private val _blockSocial = MutableStateFlow(prefs.getBoolean("blockSocial", false))
     val blockSocial: StateFlow<Boolean> = _blockSocial
 
-    private val _safeSearch = MutableStateFlow(true)
+    private val _safeSearch = MutableStateFlow(prefs.getBoolean("safeSearch", true))
     val safeSearch: StateFlow<Boolean> = _safeSearch
 
     private val _logs = MutableStateFlow<List<BlockedLog>>(emptyList())
@@ -46,6 +47,10 @@ class FilteringViewModel(application: Application) : AndroidViewModel(applicatio
     private val _customRules = MutableStateFlow<List<CustomRule>>(emptyList())
     val customRules: StateFlow<List<CustomRule>> = _customRules
 
+    init {
+        syncFlags()
+    }
+
     fun refreshState() {
         _active.value = DnsFilterController.isRunning()
         loadLogs()
@@ -56,13 +61,23 @@ class FilteringViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun start(context: android.content.Context) {
         syncFlags()
-        DnsFilterController.start(context)
-        _active.value = true
+        viewModelScope.launch {
+            syncManager.syncSelected(_blockPorn.value, _blockGambling.value, _blockSocial.value)
+            DnsFilterController.start(context)
+            _active.value = true
+        }
     }
 
     fun stop(context: android.content.Context) {
         DnsFilterController.stop(context)
         _active.value = false
+        viewModelScope.launch {
+            db.filterDao().clearLogs()
+            filterRepo.clearPornCache()
+            filterRepo.clearGamblingCache()
+            filterRepo.clearSocialCache()
+        }
+        resetBlockCount()
     }
 
     private fun syncFlags() {
@@ -73,10 +88,43 @@ class FilteringViewModel(application: Application) : AndroidViewModel(applicatio
         DnsFilterController.keywords = _keywords.value
     }
 
-    fun setBlockPorn(enabled: Boolean) { _blockPorn.value = enabled }
-    fun setBlockGambling(enabled: Boolean) { _blockGambling.value = enabled }
-    fun setBlockSocial(enabled: Boolean) { _blockSocial.value = enabled }
-    fun setSafeSearch(enabled: Boolean) { _safeSearch.value = enabled }
+    private fun persistFlags() {
+        prefs.edit()
+            .putBoolean("blockPorn", _blockPorn.value)
+            .putBoolean("blockGambling", _blockGambling.value)
+            .putBoolean("blockSocial", _blockSocial.value)
+            .putBoolean("safeSearch", _safeSearch.value)
+            .apply()
+    }
+
+    fun setBlockPorn(enabled: Boolean) {
+        _blockPorn.value = enabled
+        DnsFilterController.blockPorn = enabled
+        persistFlags()
+    }
+
+    fun setBlockGambling(enabled: Boolean) {
+        _blockGambling.value = enabled
+        DnsFilterController.blockGambling = enabled
+        persistFlags()
+    }
+
+    fun setBlockSocial(enabled: Boolean) {
+        _blockSocial.value = enabled
+        DnsFilterController.blockSocial = enabled
+        persistFlags()
+    }
+
+    fun setSafeSearch(enabled: Boolean) {
+        _safeSearch.value = enabled
+        DnsFilterController.safeSearch = enabled
+        persistFlags()
+    }
+
+    private fun resetBlockCount() {
+        _blockCount.value = 0
+        _logs.value = emptyList()
+    }
 
     fun loadLogs() {
         viewModelScope.launch {
@@ -87,12 +135,6 @@ class FilteringViewModel(application: Application) : AndroidViewModel(applicatio
     fun loadBlockCount() {
         viewModelScope.launch {
             _blockCount.value = db.filterDao().getLogCount()
-        }
-    }
-
-    fun syncDomainLists() {
-        viewModelScope.launch {
-            syncManager.syncAll()
         }
     }
 

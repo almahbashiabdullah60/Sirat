@@ -15,7 +15,6 @@ import com.atyafcode.sirat.MainActivity
 import com.atyafcode.sirat.R
 import com.atyafcode.sirat.core.utils.LocaleUtils
 import com.atyafcode.sirat.data.filter.FilterDatabase
-import com.atyafcode.sirat.data.filter.SyncManager
 import com.atyafcode.sirat.data.repository.FilterRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -58,24 +57,21 @@ class SiratVpnService : VpnService() {
     private fun startVpn() {
         if (vpnInterface != null) return
         isRunning = true
+        startForeground(NOTIFICATION_ID, createNotification())
 
         val db = FilterDatabase.getInstance(this@SiratVpnService.applicationContext as android.app.Application)
         val filterRepository = FilterRepository(db)
         filterRepository.setKeywords(DnsFilterController.keywords)
+        kotlinx.coroutines.runBlocking(Dispatchers.IO) {
+            filterRepository.loadCaches()
+        }
         resolver = DnsResolver(
             filterRepository = filterRepository,
             filterDao = db.filterDao(),
-            blockPorn = DnsFilterController.blockPorn,
-            blockGambling = DnsFilterController.blockGambling,
-            blockSocial = DnsFilterController.blockSocial,
-            safeSearchEnabled = DnsFilterController.safeSearch,
-            useKeywords = DnsFilterController.keywords.isNotEmpty()
+            protectSocket = { socket -> this.protect(socket) }
         )
 
-        kotlinx.coroutines.runBlocking(Dispatchers.IO) {
-            SyncManager(this@SiratVpnService, db, filterRepository).syncAll()
-            Log.d(TAG, "Caches loaded: ${filterRepository.cacheStats()}")
-        }
+        Log.d(TAG, "Caches loaded: ${filterRepository.cacheStats()}")
 
         val builder = Builder()
             .setSession(getString(R.string.vpn_filter_session_name))
@@ -85,10 +81,9 @@ class SiratVpnService : VpnService() {
 
         vpnInterface = builder.establish() ?: run {
             isRunning = false
+            stopForeground(STOP_FOREGROUND_REMOVE)
             return
         }
-
-        startForeground(NOTIFICATION_ID, createNotification())
 
         vpnJob = serviceScope.launch {
             val fd = vpnInterface!!.fileDescriptor
@@ -158,8 +153,10 @@ class SiratVpnService : VpnService() {
         val dstIp = original.copyOfRange(16, 20)
         System.arraycopy(dstIp, 0, response, 12, 4)
         System.arraycopy(srcIp, 0, response, 16, 4)
-        response[ipHeaderLen + 2] = original[ipHeaderLen + 2]
-        response[ipHeaderLen + 3] = original[ipHeaderLen + 3]
+        response[ipHeaderLen + 0] = original[ipHeaderLen + 2]
+        response[ipHeaderLen + 1] = original[ipHeaderLen + 3]
+        response[ipHeaderLen + 2] = original[ipHeaderLen + 0]
+        response[ipHeaderLen + 3] = original[ipHeaderLen + 1]
         output.write(response)
     }
 
@@ -167,6 +164,8 @@ class SiratVpnService : VpnService() {
         isRunning = false
         vpnJob?.cancel()
         vpnJob = null
+        resolver?.close()
+        resolver = null
         vpnInterface?.close()
         vpnInterface = null
         stopForeground(STOP_FOREGROUND_REMOVE)
