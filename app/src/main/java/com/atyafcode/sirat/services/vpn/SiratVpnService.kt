@@ -25,6 +25,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class SiratVpnService : VpnService() {
 
@@ -32,6 +34,7 @@ class SiratVpnService : VpnService() {
     private var vpnJob: Job? = null
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var resolver: DnsResolver? = null
+    private val outputLock = ReentrantLock()
 
     private val notificationManager: NotificationManager by lazy {
         getSystemService(NotificationManager::class.java)
@@ -69,7 +72,9 @@ class SiratVpnService : VpnService() {
             filterRepository = filterRepository,
             filterDao = db.filterDao(),
             protectSocket = { socket -> this.protect(socket) }
-        )
+        ).apply {
+            serviceScope.launch { initSafeSearch() }
+        }
 
         Log.d(TAG, "Caches loaded: ${filterRepository.cacheStats()}")
 
@@ -93,7 +98,10 @@ class SiratVpnService : VpnService() {
                     while (isActive) {
                         val length = input.read(buffer)
                         if (length > 0) {
-                            processPacket(buffer, length, output)
+                            val packetCopy = buffer.copyOf(length)
+                            serviceScope.launch {
+                                processPacket(packetCopy, length, output)
+                            }
                         }
                     }
                 }
@@ -103,39 +111,49 @@ class SiratVpnService : VpnService() {
 
     private suspend fun processPacket(buffer: ByteArray, length: Int, output: FileOutputStream) {
         if (length < 20) {
-            output.write(buffer, 0, length)
+            safeWrite(output, buffer, 0, length)
             return
         }
         if ((buffer[0].toInt() shr 4) != 4) {
-            output.write(buffer, 0, length)
+            safeWrite(output, buffer, 0, length)
             return
         }
         val headerLength = (buffer[0].toInt() and 0x0F) * 4
-        if (headerLength + 2 > length || buffer[9].toInt() != 17) {
-            output.write(buffer, 0, length)
+        if (headerLength + 8 > length || buffer[9].toInt() != 17) {
+            safeWrite(output, buffer, 0, length)
             return
         }
         val destPort = ((buffer[headerLength + 2].toInt() and 0xFF) shl 8) or
                 (buffer[headerLength + 3].toInt() and 0xFF)
         if (destPort != 53) {
-            output.write(buffer, 0, length)
+            safeWrite(output, buffer, 0, length)
             return
         }
         val udpLength = ((buffer[headerLength + 4].toInt() and 0xFF) shl 8) or
                 (buffer[headerLength + 5].toInt() and 0xFF)
         val dnsStart = headerLength + 8
-        if (dnsStart + 12 > length) {
-            output.write(buffer, 0, length)
+        if (dnsStart > length || headerLength + udpLength > length) {
+            safeWrite(output, buffer, 0, length)
             return
         }
         val dnsPayload = buffer.copyOfRange(dnsStart, headerLength + udpLength)
 
         val resolver = resolver ?: run {
-            output.write(buffer, 0, length)
+            safeWrite(output, buffer, 0, length)
             return
         }
         resolver.resolve(dnsPayload) { responseBytes ->
             writeResponse(buffer, length, headerLength, responseBytes, output)
+        }
+    }
+
+    private fun safeWrite(output: FileOutputStream, buffer: ByteArray, offset: Int, length: Int) {
+        try {
+            outputLock.withLock {
+                output.write(buffer, offset, length)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error writing to VPN interface", e)
         }
     }
 
@@ -145,19 +163,45 @@ class SiratVpnService : VpnService() {
     ) {
         val totalLen = ipHeaderLen + 8 + dnsResponse.size
         val response = ByteArray(totalLen)
+        
+        // Copy IP Header and UDP Header (ports only initially)
         System.arraycopy(original, 0, response, 0, ipHeaderLen + 8)
         System.arraycopy(dnsResponse, 0, response, ipHeaderLen + 8, dnsResponse.size)
+
+        // Update IP Total Length
         response[2] = ((totalLen shr 8) and 0xFF).toByte()
         response[3] = (totalLen and 0xFF).toByte()
+
+        // Swap IP addresses
         val srcIp = original.copyOfRange(12, 16)
         val dstIp = original.copyOfRange(16, 20)
         System.arraycopy(dstIp, 0, response, 12, 4)
         System.arraycopy(srcIp, 0, response, 16, 4)
+
+        // Reset IP Checksum for calculation
+        response[10] = 0
+        response[11] = 0
+        val ipChecksum = IpPacketUtils.calculateChecksum(response, 0, ipHeaderLen)
+        response[10] = ((ipChecksum.toInt() shr 8) and 0xFF).toByte()
+        response[11] = (ipChecksum.toInt() and 0xFF).toByte()
+
+        // Update UDP Header
+        // Swap Ports
         response[ipHeaderLen + 0] = original[ipHeaderLen + 2]
         response[ipHeaderLen + 1] = original[ipHeaderLen + 3]
         response[ipHeaderLen + 2] = original[ipHeaderLen + 0]
         response[ipHeaderLen + 3] = original[ipHeaderLen + 1]
-        output.write(response)
+
+        // Update UDP Length
+        val udpLen = 8 + dnsResponse.size
+        response[ipHeaderLen + 4] = ((udpLen shr 8) and 0xFF).toByte()
+        response[ipHeaderLen + 5] = (udpLen and 0xFF).toByte()
+
+        // UDP Checksum (set to 0, which is optional for IPv4 UDP)
+        response[ipHeaderLen + 6] = 0
+        response[ipHeaderLen + 7] = 0
+
+        safeWrite(output, response, 0, totalLen)
     }
 
     private fun stopVpn() {

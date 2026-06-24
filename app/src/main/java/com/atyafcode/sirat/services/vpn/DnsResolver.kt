@@ -23,12 +23,14 @@ class DnsResolver(
     private val protectSocket: ((DatagramSocket) -> Boolean)? = null
 ) {
     private val safeSearchMap = mutableMapOf<String, InetAddress>()
-    private var dnsSocket: DatagramSocket? = null
 
     init {
-        kotlinx.coroutines.runBlocking(Dispatchers.IO) {
-            resolveSafeSearchIps()
-        }
+        // SafeSearch resolution is now handled by the caller or lazily if needed.
+        // For now, keeping it simple but avoiding blocking runBlocking in init if possible.
+    }
+
+    suspend fun initSafeSearch() = withContext(Dispatchers.IO) {
+        resolveSafeSearchIps()
     }
 
     private fun resolveSafeSearchIps() {
@@ -49,18 +51,8 @@ class DnsResolver(
         }
     }
 
-    private fun getSocket(): DatagramSocket {
-        return dnsSocket ?: synchronized(this) {
-            dnsSocket ?: DatagramSocket().also {
-                it.soTimeout = 2000
-                dnsSocket = it
-            }
-        }
-    }
-
     fun close() {
-        dnsSocket?.close()
-        dnsSocket = null
+        // No persistent socket to close now as we use per-request sockets for concurrency
     }
 
     suspend fun resolve(dnsPayloadBytes: ByteArray, onResponse: (ByteArray) -> Unit) {
@@ -112,14 +104,12 @@ class DnsResolver(
     private fun forwardQuery(dnsPayloadBytes: ByteArray, onResponse: (ByteArray) -> Unit) {
         val maxRetries = 2
         for (attempt in 1..maxRetries) {
+            var socket: DatagramSocket? = null
             try {
-                var socket = dnsSocket
-                if (socket == null || socket.isClosed) {
-                    socket = DatagramSocket()
-                    socket.soTimeout = 2000
-                    protectSocket?.invoke(socket)
-                    dnsSocket = socket
-                }
+                socket = DatagramSocket()
+                socket.soTimeout = 2000
+                protectSocket?.invoke(socket)
+                
                 val packet = DatagramPacket(dnsPayloadBytes, dnsPayloadBytes.size, dnsServer, 53)
                 socket.send(packet)
 
@@ -130,14 +120,11 @@ class DnsResolver(
                 onResponse(reply.data.copyOf(reply.length))
                 return
             } catch (_: SocketTimeoutException) {
-                if (attempt < maxRetries) {
-                    dnsSocket?.close()
-                    dnsSocket = null
-                }
+                // Retry if attempt < maxRetries
             } catch (_: Exception) {
-                dnsSocket?.close()
-                dnsSocket = null
                 return
+            } finally {
+                socket?.close()
             }
         }
         try {
