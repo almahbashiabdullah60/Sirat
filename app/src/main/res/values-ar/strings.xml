@@ -105,7 +105,6 @@
     <string name="main_screen_join_community_join_discord_button">انضم لديسكورد</string>
     <string name="main_screen_join_community_dismiss_button">إغلاق</string>
     <string name="main_screen_support_development_dialog_title">دعم التطوير</string>
-    <string name="main_screen_support_development_donate_button">تبرع</string>
     <string name="main_screen_app_protection_cd">حماية التطبيقات</string>
     <string name="main_screen_settings_cd">الإعدادات</string>
     <string name="main_screen_loading_applications_text">جاري إعداد بيئتك الآمنة…</string>
@@ -188,8 +187,6 @@
     <string name="join_discord">انضم لديسكورد</string>
     <string name="maybe_later">ربما لاحقاً</string>
 
-    <string name="donate">تبرع</string>
-    <string name="donate_subtitle">حافظ على التطبيق مجانياً وخالياً من الإعلانات.</string>
 
     <!-- Anti-Uninstall Extra Strings -->
     <string name="anti_uninstall_title">حماية إلغاء التثبيت</string>
@@ -201,6 +198,7 @@
     <string name="package_name_label">اسم الحزمة</string>
     <string name="add_button">إضافة</string>
     <string name="confirm_button">تأكيد</string>
+    <string name="enable_button">تمكين</string>
     <string name="shizuku_desc_detailed">يرجى ملاحظة أن Shizuku يجب أن يكون مثبتاً ومفعلاً لتعمل هذه الميزة.</string>
     <string name="search_apps_hint">البحث عن تطبيقات أو حزم...</string>
     <string name="manually_added_label">حزمة مضافة يدوياً</string>
@@ -268,6 +266,7 @@
     <string name="chat_input_placeholder">تحدث مع المساعد...</string>
     <string name="chat_send_cd">إرسال</string>
     <string name="chat_loading_message">جاري الاتصال بالمساعد...</string>
+    <string name="seconds_unit">ثانية</string>
 
     <!-- Plan Builder Extension -->
     <string name="plan_target_behavior_label">السلوك المستهدف</string>
@@ -397,6 +396,11 @@
     <!-- Generic -->
     <string name="generic_add">إضافة</string>
     <string name="generic_cancel">إلغاء</string>
+    <string name="settings_screen_logging_title">تسجيل الأحداث</string>
+    <string name="settings_screen_logging_desc">تفعيل تسجيل الأحداث للمساعدة في حل المشكلات التقنية</string>
+    <string name="settings_screen_share_audit_logs">مشاركة سجلات الأمان</string>
+    <string name="settings_screen_share_logs">مشاركة السجلات</string>
+    <string name="settings_screen_export_audit_title">تصدير سجلات الأمان</string>
 </resources>
 
 

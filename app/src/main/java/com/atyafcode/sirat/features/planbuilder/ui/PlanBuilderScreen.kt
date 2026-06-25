@@ -144,10 +144,20 @@ fun PlanBuilderScreen(
             enabled = uiState !is PlanUIState.Loading
         ) {
             if (uiState is PlanUIState.Loading) {
+                var seconds by remember { mutableIntStateOf(0) }
+                LaunchedEffect(Unit) {
+                    while (true) {
+                        kotlinx.coroutines.delay(1000)
+                        seconds++
+                    }
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                     Spacer(Modifier.width(12.dp))
-                    Text((uiState as PlanUIState.Loading).message, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        "${(uiState as PlanUIState.Loading).message} ($seconds ${stringResource(R.string.seconds_unit)})", 
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             } else {
                 Icon(Icons.Default.Assignment, null)

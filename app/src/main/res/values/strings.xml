@@ -102,7 +102,6 @@
     <string name="main_screen_join_community_join_discord_button">Join Discord</string>
     <string name="main_screen_join_community_dismiss_button">Dismiss</string>
     <string name="main_screen_support_development_dialog_title">Support</string>
-    <string name="main_screen_support_development_donate_button">Donate</string>
     <string name="main_screen_app_protection_cd">App Protection</string>
     <string name="main_screen_settings_cd">Settings</string>
     <string name="main_screen_loading_applications_text">Preparing your safe environment…</string>
@@ -124,7 +123,6 @@
     <string name="settings_screen_back_cd">Back</string>
     <string name="settings_screen_support_development_dialog_title">Support Development</string>
     <string name="support_development_text">Thank you for supporting sirat!</string>
-    <string name="settings_screen_support_development_donate_button">Donate</string>
     <string name="settings_screen_permission_required_dialog_title">Permission Required</string>
     <string name="settings_screen_permission_required_proceed_button">Proceed</string>
     <string name="settings_screen_device_admin_dialog_title">Admin Permission</string>
@@ -254,10 +252,6 @@
     <string name="join_discord">Join Discord</string>
     <string name="maybe_later">Maybe Later</string>
 
-    <string name="donate">Donate</string>
-    <string name="donate_subtitle">Keep it free.</string>
-    <string name="donate_dialog_title">Support</string>
-    <string name="donate_dialog_message">Thank you!</string>
 
     <!-- Language Settings -->
     <string name="language_settings_title">Language</string>
@@ -334,6 +328,7 @@
     <string name="chat_input_placeholder">Talk to the assistant...</string>
     <string name="chat_send_cd">Send</string>
     <string name="chat_loading_message">Connecting to assistant...</string>
+    <string name="seconds_unit">sec</string>
 
     <!-- Plan Builder Extension -->
     <string name="plan_target_behavior_label">Target Behavior</string>
@@ -470,6 +465,11 @@
     <!-- Generic -->
     <string name="generic_add">Add</string>
     <string name="generic_cancel">Cancel</string>
+    <string name="settings_screen_logging_title">Logging</string>
+    <string name="settings_screen_logging_desc">Enable debug logging for troubleshooting</string>
+    <string name="settings_screen_share_audit_logs">Share audit logs</string>
+    <string name="settings_screen_share_logs">Share logs</string>
+    <string name="settings_screen_export_audit_title">Export Security Logs</string>
 </resources>
 
 

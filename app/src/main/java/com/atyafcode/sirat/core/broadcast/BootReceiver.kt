@@ -21,8 +21,7 @@ class BootReceiver : BroadcastReceiver() {
         
         when (intent.action) {
             Intent.ACTION_MY_PACKAGE_REPLACED -> {
-                Log.d(TAG, "App package replaced, clearing old logs and showing donate link")
-                repository.setShowDonateLink(true)
+                Log.d(TAG, "App package replaced, clearing old logs")
                 // Clear all old logs on app update
                 LogUtils.clearAllLogs()
                 try {

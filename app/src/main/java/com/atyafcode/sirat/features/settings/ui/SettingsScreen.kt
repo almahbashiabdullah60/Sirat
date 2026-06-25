@@ -51,7 +51,6 @@ import com.atyafcode.sirat.data.repository.PreferencesRepository
 import com.atyafcode.sirat.features.admin.AdminDisableActivity
 import com.atyafcode.sirat.services.ShizukuAppLockService
 import com.atyafcode.sirat.services.UsageLockService
-import com.atyafcode.sirat.ui.components.DonateButton
 import com.atyafcode.sirat.ui.icons.*
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuProvider
@@ -65,7 +64,6 @@ fun SettingsScreen(
     val context = LocalContext.current
     val appLockRepository = remember { AppLockRepository(context) }
 
-    var showDialog by remember { mutableStateOf(false) }
     var showUnlockTimeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
@@ -106,35 +104,6 @@ fun SettingsScreen(
             BiometricManager.Authenticators.BIOMETRIC_WEAK or
                     BiometricManager.Authenticators.BIOMETRIC_STRONG
         ) == BiometricManager.BIOMETRIC_SUCCESS
-    }
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(stringResource(R.string.settings_screen_support_development_dialog_title)) },
-            text = { Text(stringResource(R.string.support_development_text)) },
-            confirmButton = {
-                FilledTonalButton(
-                    onClick = {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "https://pranavpurwar.github.io/donate.html".toUri()
-                            )
-                        )
-                        showDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.settings_screen_support_development_donate_button))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.cancel_button))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surface
-        )
     }
 
     if (showUnlockTimeDialog) {
@@ -267,10 +236,6 @@ fun SettingsScreen(
             }
 
             item {
-                DonateButton()
-            }
-
-            item {
                 SectionTitle(text = stringResource(R.string.settings_screen_lock_screen_customization_title))
             }
 
@@ -336,12 +301,6 @@ fun SettingsScreen(
                 SettingsGroup(
                     items = listOf(
                         ActionSettingItem(
-                            icon = Icons.Default.Lock,
-                            title = stringResource(R.string.settings_screen_change_pin_title),
-                            subtitle = stringResource(R.string.settings_screen_change_pin_desc),
-                            onClick = { navController.navigate(Screen.ChangePassword.route) }
-                        ),
-                        ActionSettingItem(
                             icon = Icons.Default.FilterAlt,
                             title = stringResource(R.string.filtering_title),
                             subtitle = stringResource(R.string.filtering_subtitle),
@@ -359,7 +318,7 @@ fun SettingsScreen(
                             icon = Icons.Default.Timer,
                             title = stringResource(R.string.settings_screen_unlock_duration_title),
                             subtitle = if (unlockTimeDuration > 0) {
-                                if (unlockTimeDuration > 10_000) "Until screen off"
+                                if (unlockTimeDuration > 10_000) stringResource(R.string.settings_screen_unlock_until_screen_off)
                                 else stringResource(
                                     R.string.settings_screen_unlock_duration_summary_minutes,
                                     unlockTimeDuration
@@ -426,7 +385,7 @@ fun SettingsScreen(
                         ),
                         ActionSettingItem(
                             icon = Icons.Outlined.Security,
-                            title = stringResource(R.string.settings_Screen_export_audit),
+                            title = stringResource(R.string.settings_screen_export_audit_title),
                             subtitle = stringResource(R.string.settings_screen_export_audit_desc),
                             onClick = {
                                 val uri = LogUtils.exportAuditLogs()
@@ -437,7 +396,7 @@ fun SettingsScreen(
                                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     }
                                     context.startActivity(
-                                        Intent.createChooser(shareIntent, "Share audit logs")
+                                        Intent.createChooser(shareIntent, context.getString(R.string.settings_screen_share_audit_logs))
                                     )
                                 } else {
                                     Toast.makeText(
@@ -461,7 +420,7 @@ fun SettingsScreen(
                                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     }
                                     context.startActivity(
-                                        Intent.createChooser(shareIntent, "Share logs")
+                                        Intent.createChooser(shareIntent, context.getString(R.string.settings_screen_share_logs))
                                     )
                                 } else {
                                     Toast.makeText(
@@ -474,8 +433,8 @@ fun SettingsScreen(
                         ),
                         ToggleSettingItem(
                             icon = Icons.Default.Troubleshoot,
-                            title = "Logging",
-                            subtitle = "Enable debug logging for troubleshooting",
+                            title = stringResource(R.string.settings_screen_logging_title),
+                            subtitle = stringResource(R.string.settings_screen_logging_desc),
                             checked = loggingEnabled,
                             enabled = true,
                             onCheckedChange = { isChecked ->
@@ -770,7 +729,7 @@ fun UnlockTimeDurationDialog(
                                     duration
                                 )
                                 60 -> stringResource(R.string.settings_screen_unlock_duration_dialog_option_hour)
-                                Integer.MAX_VALUE -> "Until Screen Off"
+                                Integer.MAX_VALUE -> stringResource(R.string.settings_screen_unlock_until_screen_off)
                                 else -> stringResource(
                                     R.string.settings_screen_unlock_duration_summary_minutes,
                                     duration

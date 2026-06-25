@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Delete
@@ -101,7 +102,10 @@ fun FilteringDashboardScreen(navController: NavHostController) {
                 title = { Text(stringResource(R.string.filtering_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Text("<")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.settings_screen_back_cd)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -210,7 +214,7 @@ private fun BlockingOptions(viewModel: FilteringViewModel, active: Boolean) {
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(Modifier.height(12.dp))
-            ToggleRow(stringResource(R.string.filtering_ui_porn), blockPorn, !active) { viewModel.setBlockPorn(it) }
+            ToggleRow(stringResource(R.string.filtering_ui_porn), blockPorn, false) { }
             ToggleRow(stringResource(R.string.filtering_ui_gambling), blockGambling, !active) { viewModel.setBlockGambling(it) }
             ToggleRow(stringResource(R.string.filtering_ui_social), blockSocial, !active) { viewModel.setBlockSocial(it) }
             ToggleRow(stringResource(R.string.filtering_ui_safesearch), safeSearch, !active) { viewModel.setSafeSearch(it) }

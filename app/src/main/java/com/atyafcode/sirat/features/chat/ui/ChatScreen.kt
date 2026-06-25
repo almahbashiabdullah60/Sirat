@@ -225,6 +225,14 @@ fun ChatScreen(
 
 @Composable
 fun LoadingBubble(message: String) {
+    var seconds by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(1000)
+            seconds++
+        }
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
@@ -241,12 +249,23 @@ fun LoadingBubble(message: String) {
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)),
             shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp)
         ) {
-            Text(
-                message,
+            Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-            )
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    "($seconds ${stringResource(R.string.seconds_unit)})",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

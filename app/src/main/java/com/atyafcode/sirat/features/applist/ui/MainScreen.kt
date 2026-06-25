@@ -69,11 +69,9 @@ import com.atyafcode.sirat.core.utils.isAccessibilityServiceEnabled
 import com.atyafcode.sirat.core.utils.openAccessibilitySettings
 import com.atyafcode.sirat.data.repository.BackendImplementation
 import androidx.compose.material.icons.outlined.Psychology
-import androidx.compose.material.icons.rounded.Psychology
 import com.atyafcode.sirat.features.chat.ui.ChatScreen
 import com.atyafcode.sirat.features.behavior.ui.BehaviorScreen
 import com.atyafcode.sirat.features.planbuilder.ui.PlanBuilderScreen
-import com.atyafcode.sirat.ui.components.DonateModalBottomSheet
 import com.atyafcode.sirat.ui.components.RestrictedSettingDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

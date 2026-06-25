@@ -10,17 +10,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.atyafcode.sirat.AppLockApplication
 import com.atyafcode.sirat.R
 import com.atyafcode.sirat.core.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SupervisedMethodChoiceScreen(navController: NavController) {
+    val context = LocalContext.current
+    val appLockRepository = (context.applicationContext as AppLockApplication).appLockRepository
+    val hasPassword = appLockRepository.getPassword() != null
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,7 +61,8 @@ fun SupervisedMethodChoiceScreen(navController: NavController) {
                 description = stringResource(R.string.lock_personal_desc),
                 icon = Icons.Default.Person,
                 onClick = {
-                    navController.navigate(Screen.SetPassword.route) {
+                    val route = if (hasPassword) Screen.ChangePassword.route else Screen.SetPassword.route
+                    navController.navigate(route) {
                         popUpTo(Screen.SupervisedMethodChoice.route) { inclusive = true }
                     }
                 }

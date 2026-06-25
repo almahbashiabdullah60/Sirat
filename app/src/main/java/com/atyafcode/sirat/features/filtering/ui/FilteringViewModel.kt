@@ -23,7 +23,7 @@ class FilteringViewModel(application: Application) : AndroidViewModel(applicatio
     private val _active = MutableStateFlow(false)
     val active: StateFlow<Boolean> = _active
 
-    private val _blockPorn = MutableStateFlow(prefs.getBoolean("blockPorn", true))
+    private val _blockPorn = MutableStateFlow(true)
     val blockPorn: StateFlow<Boolean> = _blockPorn
 
     private val _blockGambling = MutableStateFlow(prefs.getBoolean("blockGambling", true))
@@ -98,9 +98,7 @@ class FilteringViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun setBlockPorn(enabled: Boolean) {
-        _blockPorn.value = enabled
-        DnsFilterController.blockPorn = enabled
-        persistFlags()
+        // Mandatory, do nothing
     }
 
     fun setBlockGambling(enabled: Boolean) {
