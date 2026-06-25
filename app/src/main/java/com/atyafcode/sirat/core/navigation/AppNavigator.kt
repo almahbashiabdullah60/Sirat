@@ -64,6 +64,10 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
                 PreferencesRepository.LOCK_TYPE_PASSWORD -> {
                     AlphanumericSetPasswordScreen(navController, false)
                 }
+                PreferencesRepository.LOCK_TYPE_SUPERVISED -> {
+                    // User was in supervised mode and already verified; skip old password
+                    SetPasswordScreen(navController, isFirstTimeSetup = false, skipVerification = true)
+                }
                 else -> {
                     SetPasswordScreen(navController, isFirstTimeSetup = false)
                 }

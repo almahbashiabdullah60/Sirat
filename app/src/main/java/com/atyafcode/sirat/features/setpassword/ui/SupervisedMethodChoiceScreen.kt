@@ -15,10 +15,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.atyafcode.sirat.AppLockApplication
 import com.atyafcode.sirat.R
 import com.atyafcode.sirat.core.navigation.Screen
+import com.atyafcode.sirat.data.repository.PreferencesRepository
+import androidx.compose.runtime.DisposableEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +31,42 @@ fun SupervisedMethodChoiceScreen(navController: NavController) {
     val context = LocalContext.current
     val appLockRepository = (context.applicationContext as AppLockApplication).appLockRepository
     val hasPassword = appLockRepository.getPassword() != null
+    val currentLockType = appLockRepository.getLockType()
+    val isSupervised = currentLockType == PreferencesRepository.LOCK_TYPE_SUPERVISED
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+                val authSuccess = savedStateHandle?.get<Boolean>("authSuccess") == true
+                if (authSuccess) {
+                    savedStateHandle?.remove<Boolean>("authSuccess")
+                    val pendingAction = savedStateHandle?.get<String>("pendingAuthAction")
+                    if (pendingAction != null) {
+                        savedStateHandle?.remove<String>("pendingAuthAction")
+                        when (pendingAction) {
+                            "switchToPersonal" -> {
+                                navController.navigate(Screen.SetPassword.route) {
+                                    popUpTo(Screen.SupervisedMethodChoice.route) { inclusive = true }
+                                }
+                            }
+                            "switchToSupervised" -> {
+                                navController.navigate(Screen.SupervisedSetup.route + "/qr") {
+                                    popUpTo(Screen.SupervisedMethodChoice.route) { inclusive = true }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -61,9 +102,14 @@ fun SupervisedMethodChoiceScreen(navController: NavController) {
                 description = stringResource(R.string.lock_personal_desc),
                 icon = Icons.Default.Person,
                 onClick = {
-                    val route = if (hasPassword) Screen.ChangePassword.route else Screen.SetPassword.route
-                    navController.navigate(route) {
-                        popUpTo(Screen.SupervisedMethodChoice.route) { inclusive = true }
+                    if (isSupervised && hasPassword) {
+                        navController.currentBackStackEntry?.savedStateHandle?.set("pendingAuthAction", "switchToPersonal")
+                        navController.navigate(Screen.PasswordOverlay.route)
+                    } else {
+                        val route = if (hasPassword) Screen.ChangePassword.route else Screen.SetPassword.route
+                        navController.navigate(route) {
+                            popUpTo(Screen.SupervisedMethodChoice.route) { inclusive = true }
+                        }
                     }
                 }
             )
@@ -75,8 +121,13 @@ fun SupervisedMethodChoiceScreen(navController: NavController) {
                 description = stringResource(R.string.lock_supervised_qr_desc),
                 icon = Icons.Default.QrCode,
                 onClick = {
-                    navController.navigate(Screen.SupervisedSetup.route + "/qr") {
-                        popUpTo(Screen.SupervisedMethodChoice.route) { inclusive = true }
+                    if (!isSupervised && hasPassword) {
+                        navController.currentBackStackEntry?.savedStateHandle?.set("pendingAuthAction", "switchToSupervised")
+                        navController.navigate(Screen.PasswordOverlay.route)
+                    } else {
+                        navController.navigate(Screen.SupervisedSetup.route + "/qr") {
+                            popUpTo(Screen.SupervisedMethodChoice.route) { inclusive = true }
+                        }
                     }
                 }
             )

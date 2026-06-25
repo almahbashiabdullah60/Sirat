@@ -44,12 +44,13 @@ import com.atyafcode.sirat.ui.theme.titleMediumEmphasized
 @Composable
 fun AlphanumericSetPasswordScreen(
     navController: NavController,
-    isFirstTimeSetup: Boolean
+    isFirstTimeSetup: Boolean,
+    skipVerification: Boolean = false
 ) {
     var passwordState by remember { mutableStateOf("") }
     var confirmPasswordState by remember { mutableStateOf("") }
     var isConfirmationMode by remember { mutableStateOf(false) }
-    var isVerifyOldPasswordMode by remember { mutableStateOf(!isFirstTimeSetup) }
+    var isVerifyOldPasswordMode by remember { mutableStateOf(!isFirstTimeSetup && !skipVerification) }
 
     var isRandomMode by remember { mutableStateOf(false) }
     var passwordLength by remember { mutableStateOf(8f) }

@@ -20,13 +20,6 @@ class NavigationManager(private val context: Context) {
         }
     }
 
-    /**
-     * Checks if password verification should be skipped for the given route.
-     */
-    fun shouldSkipPasswordCheck(currentRoute: String?): Boolean {
-        return currentRoute in ROUTES_THAT_SKIP_PASSWORD_CHECK
-    }
-
     private fun shouldShowAppIntro(): Boolean {
         return AppIntroManager.shouldShowIntro(context)
     }
@@ -51,13 +44,6 @@ class NavigationManager(private val context: Context) {
         private const val LOCK_TYPE_KEY = "lock_type"
         private const val SUPERVISED_SECRET_KEY = "supervised_secret"
         private const val LOCK_TYPE_SUPERVISED = "supervised"
-
-        private val ROUTES_THAT_SKIP_PASSWORD_CHECK = setOf(
-            Screen.AppIntro.route,
-            Screen.SetPassword.route,
-            Screen.SupervisedMethodChoice.route,
-            "${Screen.SupervisedSetup.route}/{method}"
-        )
     }
 }
 
