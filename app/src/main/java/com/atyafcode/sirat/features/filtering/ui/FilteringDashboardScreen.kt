@@ -38,6 +38,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,9 +52,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.atyafcode.sirat.R
+import com.atyafcode.sirat.core.navigation.Screen
 import com.atyafcode.sirat.data.filter.BlockedLog
 import com.atyafcode.sirat.data.filter.entities.CustomRule
 import java.text.SimpleDateFormat
@@ -79,13 +84,16 @@ fun FilteringDashboardScreen(navController: NavHostController) {
     val blockCount by viewModel.blockCount.collectAsState()
     val keywords by viewModel.keywords.collectAsState()
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     LaunchedEffect(Unit) {
         viewModel.refreshState()
     }
 
     fun onToggle() {
         if (active) {
-            viewModel.stop(context)
+            navController.currentBackStackEntry?.savedStateHandle?.set("pendingAuthAction", "stopFilter")
+            navController.navigate(Screen.PasswordOverlay.route)
         } else {
             val intent = VpnService.prepare(context)
             if (intent != null) {
@@ -149,6 +157,29 @@ fun FilteringDashboardScreen(navController: NavHostController) {
             } else {
                 items(logs) { log -> BlockedLogItem(log) }
             }
+        }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+                val authSuccess = savedStateHandle?.get<Boolean>("authSuccess") == true
+                if (authSuccess) {
+                    savedStateHandle.remove<Boolean>("authSuccess")
+                    val pendingAuthAction = savedStateHandle?.get<String>("pendingAuthAction")
+                    if (pendingAuthAction != null) {
+                        savedStateHandle.remove<String>("pendingAuthAction")
+                        if (pendingAuthAction == "stopFilter") {
+                            viewModel.stop(context)
+                        }
+                    }
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }

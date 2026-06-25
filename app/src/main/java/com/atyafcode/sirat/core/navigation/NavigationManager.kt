@@ -16,7 +16,7 @@ class NavigationManager(private val context: Context) {
         return when {
             shouldShowAppIntro() -> Screen.AppIntro.route
             !isPasswordSet() -> Screen.SetPassword.route
-            else -> Screen.PasswordOverlay.route
+            else -> Screen.Main.route
         }
     }
 

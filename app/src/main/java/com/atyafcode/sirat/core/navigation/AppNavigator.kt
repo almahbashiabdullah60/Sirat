@@ -101,6 +101,7 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
                                 handleBiometricAuthentication(activity, navController)
                             },
                             onAuthSuccess = {
+                                navController.previousBackStackEntry?.savedStateHandle?.set("authSuccess", true)
                                 handleAuthenticationSuccess(navController)
                             }
                         )
@@ -110,6 +111,7 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
                         SupervisedLockOverlay(
                             lockedAppName = context.getString(R.string.this_app),
                             onUnlock = {
+                                navController.previousBackStackEntry?.savedStateHandle?.set("authSuccess", true)
                                 handleAuthenticationSuccess(navController)
                             },
                             onExit = {
@@ -126,6 +128,7 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
                                 handleBiometricAuthentication(activity, navController)
                             },
                             onAuthSuccess = {
+                                navController.previousBackStackEntry?.savedStateHandle?.set("authSuccess", true)
                                 handleAuthenticationSuccess(navController)
                             }
                         )
@@ -187,7 +190,12 @@ private fun handleBiometricAuthentication(
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
                     LogUtils.d(TAG, "Biometric authentication succeeded")
-                    navigateToMain(navController)
+                    navController.previousBackStackEntry?.savedStateHandle?.set("authSuccess", true)
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    } else {
+                        navigateToMain(navController)
+                    }
                 }
 
                 override fun onAuthenticationFailed() {

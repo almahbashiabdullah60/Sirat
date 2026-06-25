@@ -146,6 +146,20 @@ fun MainScreen(
                     isAntiUninstallEnabled && !dpm.isAdminActive(component) -> MissingPermission.DEVICE_ADMIN
                     else -> null
                 }
+
+                val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+                val authSuccess = savedStateHandle?.get<Boolean>("authSuccess") == true
+                if (authSuccess) {
+                    savedStateHandle.remove<Boolean>("authSuccess")
+                    val pendingAuthAction = savedStateHandle?.get<String>("pendingAuthAction")
+                    if (pendingAuthAction != null) {
+                        savedStateHandle.remove<String>("pendingAuthAction")
+                        if (pendingAuthAction.startsWith("unlockApp:")) {
+                            val packageName = pendingAuthAction.removePrefix("unlockApp:")
+                            mainViewModel.unlockApp(packageName)
+                        }
+                    }
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -380,7 +394,8 @@ fun MainScreen(
                                     .weight(1f),
                                 lockedApps = lockedApps,
                                 onUnlockApp = { appItem ->
-                                    mainViewModel.unlockApp(appItem.packageName)
+                                    navController.currentBackStackEntry?.savedStateHandle?.set("pendingAuthAction", "unlockApp:${appItem.packageName}")
+                                    navController.navigate(Screen.PasswordOverlay.route)
                                 }
                             )
                         }
@@ -456,6 +471,7 @@ fun MainScreen(
             )
         }
     }
+
 }
 
 @Composable
