@@ -47,6 +47,7 @@ fun SupervisedLockOverlay(
     val secret = appLockRepository.getSupervisedSecret()
 
     var isScanning by remember { mutableStateOf(false) }
+    var isUnlocked by remember { mutableStateOf(false) }
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
@@ -87,7 +88,8 @@ fun SupervisedLockOverlay(
                 if (hasCameraPermission) {
                     CameraPreview(
                         onBarcodeDetected = { barcode ->
-                            if (barcode == secret) {
+                            if (!isUnlocked && barcode == secret) {
+                                isUnlocked = true
                                 onUnlock()
                             }
                         }
