@@ -85,7 +85,7 @@ This project is a rebranded and significantly modified version based on the core
 
 ### License
 ```text
-MIT License
+GNU General Public License v3.0
 Copyright (c) 2023-2025 Pranav Purwar
 Modified Version (Sirat) Copyright (c) 2026 Abdullah Al-Mahbashi
 ```
