@@ -147,22 +147,6 @@ class PreferencesRepository(context: Context) {
         return settingsPrefs.getBoolean(KEY_APPLOCK_ENABLED, DEFAULT_PROTECT_ENABLED)
     }
 
-    fun setUnlockTimeDuration(minutes: Int) {
-        settingsPrefs.edit { putInt(KEY_UNLOCK_TIME_DURATION, minutes) }
-    }
-
-    fun getUnlockTimeDuration(): Int {
-        return settingsPrefs.getInt(KEY_UNLOCK_TIME_DURATION, DEFAULT_UNLOCK_DURATION)
-    }
-
-    fun setAutoUnlockEnabled(enabled: Boolean) {
-        settingsPrefs.edit { putBoolean(KEY_AUTO_UNLOCK, enabled) }
-    }
-
-    fun isAutoUnlockEnabled(): Boolean {
-        return settingsPrefs.getBoolean(KEY_AUTO_UNLOCK, false)
-    }
-
     fun setBackendImplementation(backend: BackendImplementation) {
         settingsPrefs.edit { putString(KEY_BACKEND_IMPLEMENTATION, backend.name) }
     }
@@ -213,13 +197,11 @@ class PreferencesRepository(context: Context) {
         private const val KEY_DISABLE_HAPTICS = "disable_haptics"
         private const val KEY_USE_MAX_BRIGHTNESS = "use_max_brightness"
         private const val KEY_ANTI_UNINSTALL = "anti_uninstall"
-        private const val KEY_UNLOCK_TIME_DURATION = "unlock_time_duration"
         private const val KEY_BACKEND_IMPLEMENTATION = "backend_implementation"
         private const val KEY_COMMUNITY_LINK_SHOWN = "community_link_shown"
         private const val KEY_LOGGING_ENABLED = "logging_enabled"
         private const val LAST_VERSION_CODE = "last_version_code"
         private const val KEY_APPLOCK_ENABLED = "applock_enabled"
-        private const val KEY_AUTO_UNLOCK = "auto_unlock"
         private const val KEY_SHOW_SYSTEM_APPS = "show_system_apps"
         private const val KEY_LOCK_TYPE = "lock_type"
         private const val KEY_APP_LANGUAGE = "app_language"
@@ -230,7 +212,6 @@ class PreferencesRepository(context: Context) {
         private const val KEY_SUPERVISED_METHOD = "supervised_method"
 
         private const val DEFAULT_PROTECT_ENABLED = true
-        private const val DEFAULT_UNLOCK_DURATION = 0
 
         const val LOCK_TYPE_PIN = "pin"
         const val LOCK_TYPE_PATTERN = "pattern"

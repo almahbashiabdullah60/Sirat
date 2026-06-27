@@ -202,7 +202,7 @@ class ShizukuAppLockService : Service() {
 
         if (packageName !in lockedApps) return
 
-        val unlockDurationMinutes = appLockRepository.getUnlockTimeDuration()
+        val unlockDurationMinutes = 0
         val unlockTimestamp = AppLockManager.appUnlockTimes[packageName] ?: 0L
 
         LogUtils.d(

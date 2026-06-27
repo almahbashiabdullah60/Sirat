@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Security
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -54,7 +53,6 @@ import com.atyafcode.sirat.services.UsageLockService
 import com.atyafcode.sirat.ui.icons.*
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuProvider
-import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +62,6 @@ fun SettingsScreen(
     val context = LocalContext.current
     val appLockRepository = remember { AppLockRepository(context) }
 
-    var showUnlockTimeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
     val shizukuPermissionLauncher = rememberLauncherForActivityResult(
@@ -85,10 +82,8 @@ fun SettingsScreen(
         }
     }
 
-    var autoUnlock by remember { mutableStateOf(appLockRepository.isAutoUnlockEnabled()) }
     var useMaxBrightness by remember { mutableStateOf(appLockRepository.shouldUseMaxBrightness()) }
     var useBiometricAuth by remember { mutableStateOf(appLockRepository.isBiometricAuthEnabled()) }
-    var unlockTimeDuration by remember { mutableIntStateOf(appLockRepository.getUnlockTimeDuration()) }
     var antiUninstallEnabled by remember { mutableStateOf(appLockRepository.isAntiUninstallEnabled()) }
     var disableHapticFeedback by remember { mutableStateOf(appLockRepository.shouldDisableHaptics()) }
     var loggingEnabled by remember { mutableStateOf(appLockRepository.isLoggingEnabled()) }
@@ -104,18 +99,6 @@ fun SettingsScreen(
             BiometricManager.Authenticators.BIOMETRIC_WEAK or
                     BiometricManager.Authenticators.BIOMETRIC_STRONG
         ) == BiometricManager.BIOMETRIC_SUCCESS
-    }
-
-    if (showUnlockTimeDialog) {
-        UnlockTimeDurationDialog(
-            currentDuration = unlockTimeDuration,
-            onDismiss = { showUnlockTimeDialog = false },
-            onConfirm = { newDuration ->
-                unlockTimeDuration = newDuration
-                appLockRepository.setUnlockTimeDuration(newDuration)
-                showUnlockTimeDialog = false
-            }
-        )
     }
 
     if (showLanguageDialog) {
@@ -278,17 +261,6 @@ fun SettingsScreen(
                                 appLockRepository.setDisableHaptics(isChecked)
                             }
                         ),
-                        ToggleSettingItem(
-                            icon = Icons.Default.ShieldMoon,
-                            title = stringResource(R.string.settings_screen_auto_unlock_title),
-                            subtitle = stringResource(R.string.settings_screen_auto_unlock_desc),
-                            checked = autoUnlock,
-                            enabled = true,
-                            onCheckedChange = { isChecked ->
-                                autoUnlock = isChecked
-                                appLockRepository.setAutoUnlockEnabled(isChecked)
-                            }
-                        )
                     )
                 )
             }
@@ -313,18 +285,6 @@ fun SettingsScreen(
                                 stringResource(R.string.settings_supervised_mode_on) 
                             else stringResource(R.string.settings_supervised_mode_off),
                             onClick = { navController.navigate(Screen.SupervisedMethodChoice.route) }
-                        ),
-                        ActionSettingItem(
-                            icon = Icons.Default.Timer,
-                            title = stringResource(R.string.settings_screen_unlock_duration_title),
-                            subtitle = if (unlockTimeDuration > 0) {
-                                if (unlockTimeDuration > 10_000) stringResource(R.string.settings_screen_unlock_until_screen_off)
-                                else stringResource(
-                                    R.string.settings_screen_unlock_duration_summary_minutes,
-                                    unlockTimeDuration
-                                )
-                            } else stringResource(R.string.settings_screen_unlock_duration_summary_immediate),
-                            onClick = { showUnlockTimeDialog = true }
                         ),
                         ToggleSettingItem(
                             icon = Icons.Default.Lock,
@@ -687,70 +647,6 @@ fun ActionSettingRow(
         colors = ListItemDefaults.colors(
             containerColor = Color.Transparent
         )
-    )
-}
-
-@Composable
-fun UnlockTimeDurationDialog(
-    currentDuration: Int,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit
-) {
-    val durations = listOf(0, 1, 5, 15, 30, 60, Integer.MAX_VALUE)
-    var selectedDuration by remember { mutableIntStateOf(currentDuration) }
-
-    if (!durations.contains(selectedDuration)) {
-        selectedDuration = durations.minByOrNull { abs(it - currentDuration) } ?: 0
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_screen_unlock_duration_dialog_title)) },
-        text = {
-            Column {
-                Text(stringResource(R.string.settings_screen_unlock_duration_dialog_description_new))
-                durations.forEach { duration ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { selectedDuration = duration }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = selectedDuration == duration,
-                            onClick = { selectedDuration = duration }
-                        )
-                        Text(
-                            text = when (duration) {
-                                0 -> stringResource(R.string.settings_screen_unlock_duration_dialog_option_immediate)
-                                1 -> stringResource(
-                                    R.string.settings_screen_unlock_duration_dialog_option_minute,
-                                    duration
-                                )
-                                60 -> stringResource(R.string.settings_screen_unlock_duration_dialog_option_hour)
-                                Integer.MAX_VALUE -> stringResource(R.string.settings_screen_unlock_until_screen_off)
-                                else -> stringResource(
-                                    R.string.settings_screen_unlock_duration_summary_minutes,
-                                    duration
-                                )
-                            },
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(selectedDuration) }) {
-                Text(stringResource(R.string.confirm_button))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel_button))
-            }
-        }
     )
 }
 

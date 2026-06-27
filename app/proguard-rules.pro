@@ -24,3 +24,7 @@
 -keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Entity class *
 -dontwarn androidx.room.paging.**
+
+# Missing classes detected during R8 build
+-dontwarn lombok.Generated
+-dontwarn org.slf4j.impl.StaticLoggerBinder

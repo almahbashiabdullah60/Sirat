@@ -416,9 +416,7 @@ fun PinPasswordOverlayScreen(
                             onPinAttempt = onPinAttempt,
                             onPasswordChange = {
                                 showError = false
-                                if (appLockRepository.isAutoUnlockEnabled()) {
-                                    onPinAttempt?.invoke(passwordState.value)
-                                }
+                                onPinAttempt?.invoke(passwordState.value)
                             },
                             onPinIncorrect = { showError = true }
                         )
@@ -474,9 +472,7 @@ fun PinPasswordOverlayScreen(
                         onPinAttempt = onPinAttempt,
                         onPasswordChange = {
                             showError = false
-                            if (appLockRepository.isAutoUnlockEnabled()) {
-                                onPinAttempt?.invoke(passwordState.value)
-                            }
+                            onPinAttempt?.invoke(passwordState.value)
                         },
                         onPinIncorrect = { showError = true }
                     )

@@ -296,7 +296,7 @@ class AppLockAccessibilityService : AccessibilityService() {
 
         AppLockManager.clearTemporarilyUnlockedApp()
 
-        val unlockDurationMinutes = appLockRepository.getUnlockTimeDuration()
+        val unlockDurationMinutes = 0
         val unlockTimestamp = AppLockManager.appUnlockTimes[packageName] ?: 0L
 
         LogUtils.d(

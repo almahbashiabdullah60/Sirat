@@ -90,11 +90,6 @@ class AppLockRepository(private val context: Context) {
     fun setProtectEnabled(enabled: Boolean) = preferencesRepository.setProtectEnabled(enabled)
     fun isProtectEnabled(): Boolean = preferencesRepository.isProtectEnabled()
 
-    fun setUnlockTimeDuration(minutes: Int) = preferencesRepository.setUnlockTimeDuration(minutes)
-    fun getUnlockTimeDuration(): Int = preferencesRepository.getUnlockTimeDuration()
-    fun setAutoUnlockEnabled(enabled: Boolean) = preferencesRepository.setAutoUnlockEnabled(enabled)
-    fun isAutoUnlockEnabled(): Boolean = preferencesRepository.isAutoUnlockEnabled()
-
     fun setBackendImplementation(backend: BackendImplementation) =
         preferencesRepository.setBackendImplementation(backend)
 
