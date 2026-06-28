@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import com.atyafcode.sirat.MainActivity
 import com.atyafcode.sirat.R
 import com.atyafcode.sirat.core.utils.appLockRepository
+import com.atyafcode.sirat.core.utils.hasUsagePermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -46,10 +47,16 @@ class UsageLockService : Service() {
     private fun startMonitoring() {
         serviceScope.launch {
             while (isActive) {
-                val currentPackage = AppLockManager.getForegroundPackage(this@UsageLockService)
-                if (currentPackage != null && currentPackage != lastPackageName) {
-                    lastPackageName = currentPackage
-                    AppLockManager.handlePackageChange(this@UsageLockService, currentPackage)
+                try {
+                    if (hasUsagePermission()) {
+                        val currentPackage = AppLockManager.getForegroundPackage(this@UsageLockService)
+                        if (currentPackage != null && currentPackage != lastPackageName) {
+                            lastPackageName = currentPackage
+                            AppLockManager.handlePackageChange(this@UsageLockService, currentPackage)
+                        }
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("UsageLockService", "Error in monitoring loop: ${e.message}")
                 }
                 delay(500)
             }

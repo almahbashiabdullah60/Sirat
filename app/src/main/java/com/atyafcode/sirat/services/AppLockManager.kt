@@ -83,14 +83,19 @@ object AppLockManager {
     }
 
     fun getForegroundPackage(context: Context): String? {
-        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        val time = System.currentTimeMillis()
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 60, time)
-        if (stats != null && stats.isNotEmpty()) {
-            val sortedStats = stats.sortedByDescending { it.lastTimeUsed }
-            return sortedStats[0].packageName
+        return try {
+            val usageStatsManager = context.applicationContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val time = System.currentTimeMillis()
+            val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 60, time)
+            if (stats != null && stats.isNotEmpty()) {
+                val sortedStats = stats.sortedByDescending { it.lastTimeUsed }
+                return sortedStats[0].packageName
+            }
+            null
+        } catch (e: Exception) {
+            LogUtils.e(TAG, "Error getting foreground package: ${e.message}")
+            null
         }
-        return null
     }
 
     fun handlePackageChange(context: Context, packageName: String) {

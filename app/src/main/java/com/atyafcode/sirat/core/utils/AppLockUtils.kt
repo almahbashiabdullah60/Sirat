@@ -73,13 +73,28 @@ fun launchBatterySettings(context: Context) {
  * Checks if the app has usage stats permission.
  */
 fun Context.hasUsagePermission(): Boolean {
-    val appOps = getSystemService(Context.APP_OPS_SERVICE) as android.app.AppOpsManager
-    val mode = appOps.checkOpNoThrow(
-        android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
-        android.os.Process.myUid(),
-        packageName
-    )
-    return mode == android.app.AppOpsManager.MODE_ALLOWED
+    return try {
+        val appContext = applicationContext
+        val appOps = appContext.getSystemService(Context.APP_OPS_SERVICE) as android.app.AppOpsManager
+        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            appOps.unsafeCheckOpNoThrow(
+                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                appContext.packageName
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            appOps.checkOpNoThrow(
+                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                appContext.packageName
+            )
+        }
+        mode == android.app.AppOpsManager.MODE_ALLOWED
+    } catch (e: Exception) {
+        Log.e("AppLockUtils", "Error checking usage permission: ${e.message}")
+        false
+    }
 }
 
 private fun createBatteryOptimizationIntent(context: Context): Intent {
