@@ -41,6 +41,9 @@ class LocalDnsServer(
     private var serverJob: Job? = null
 
     private val safeSearchMap = mutableMapOf<String, InetAddress>()
+    private val logScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val forwardLock = Any()
+    private var forwardSocket: DatagramSocket? = null
 
     init {
         resolveSafeSearchIps()
@@ -75,7 +78,6 @@ class LocalDnsServer(
                 while (isActive) {
                     val packet = DatagramPacket(buffer, buffer.size)
                     socket.receive(packet)
-                    Log.d("LocalDnsServer", "Received packet from ${packet.address}:${packet.port} (${packet.length} bytes)")
                     launch {
                         handleQuery(packet.data.copyOf(packet.length), packet.address, packet.port, socket)
                     }
@@ -91,6 +93,11 @@ class LocalDnsServer(
         serverSocket = null
         serverJob?.cancel()
         serverJob = null
+        synchronized(forwardLock) {
+            forwardSocket?.close()
+            forwardSocket = null
+        }
+        logScope.cancel()
         job.cancel()
     }
 
@@ -135,16 +142,25 @@ class LocalDnsServer(
 
     private fun forwardQuery(dnsPayload: ByteArray, socket: DatagramSocket, srcAddr: InetAddress, srcPort: Int) {
         try {
-            val forwardSocket = DatagramSocket()
-            forwardSocket.soTimeout = 2000
-            val request = DatagramPacket(dnsPayload, dnsPayload.size, upstreamDns, 53)
-            forwardSocket.send(request)
-            val buffer = ByteArray(4096)
-            val reply = DatagramPacket(buffer, buffer.size)
-            forwardSocket.receive(reply)
-            forwardSocket.close()
-            sendResponse(socket, reply.data.copyOf(reply.length), srcAddr, srcPort)
+            val reply = synchronized(forwardLock) {
+                val fs = getForwardSocket()
+                val request = DatagramPacket(dnsPayload, dnsPayload.size, upstreamDns, 53)
+                fs.send(request)
+                val buffer = ByteArray(4096)
+                val replyPacket = DatagramPacket(buffer, buffer.size)
+                fs.receive(replyPacket)
+                replyPacket.data.copyOf(replyPacket.length)
+            }
+            sendResponse(socket, reply, srcAddr, srcPort)
         } catch (_: Exception) { }
+    }
+
+    private fun getForwardSocket(): DatagramSocket {
+        forwardSocket?.let { if (!it.isClosed) return it }
+        val socket = DatagramSocket()
+        socket.soTimeout = 2000
+        forwardSocket = socket
+        return socket
     }
 
     private fun sendResponse(socket: DatagramSocket, data: ByteArray, addr: InetAddress, port: Int) {
@@ -155,7 +171,7 @@ class LocalDnsServer(
 
     private fun logBlockedDomain(domain: String, reason: String) {
         try {
-            kotlinx.coroutines.runBlocking {
+            logScope.launch {
                 filterDao.insertLog(BlockedLog(domain = domain, reason = reason))
             }
         } catch (_: Exception) { }

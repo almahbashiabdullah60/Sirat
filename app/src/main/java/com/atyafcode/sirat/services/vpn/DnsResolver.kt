@@ -1,9 +1,14 @@
 package com.atyafcode.sirat.services.vpn
 
+import android.util.LruCache
 import com.atyafcode.sirat.data.filter.BlockedLog
 import com.atyafcode.sirat.data.filter.FilterDao
 import com.atyafcode.sirat.data.repository.FilterRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.xbill.DNS.ARecord
 import org.xbill.DNS.Flags
@@ -23,6 +28,14 @@ class DnsResolver(
     private val protectSocket: ((DatagramSocket) -> Boolean)? = null
 ) {
     private val safeSearchMap = mutableMapOf<String, InetAddress>()
+
+    // نطاق عمل خفيف لتسجيل النطاقات المحظورة دون حجز مسار الحزمة (تجنّب runBlocking).
+    private val logScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    // كاش لاستجابات الخادم العلوي مفاتيحه "domain:type" لإلغاء تكرار الاستعلامات الشائعة.
+    private val upstreamCache = LruCache<String, ByteArray>(256)
+    private val forwardLock = Any()
+    private var forwardSocket: DatagramSocket? = null
 
     init {
         // SafeSearch resolution is now handled by the caller or lazily if needed.
@@ -52,7 +65,12 @@ class DnsResolver(
     }
 
     fun close() {
-        // No persistent socket to close now as we use per-request sockets for concurrency
+        synchronized(forwardLock) {
+            forwardSocket?.close()
+            forwardSocket = null
+        }
+        upstreamCache.evictAll()
+        logScope.cancel()
     }
 
     suspend fun resolve(dnsPayloadBytes: ByteArray, onResponse: (ByteArray) -> Unit) {
@@ -64,6 +82,19 @@ class DnsResolver(
 
         val question = query.question ?: return
         val domain = question.name.toString(true).lowercase()
+        val typeKey = "$domain:${question.type}"
+
+        // محاولة إرجاع استجابة مخزّنة مسبقاً (تُوفّر استعلامات علوية و CPU).
+        upstreamCache.get(typeKey)?.let { cached ->
+            // طابق مُعرّف المعاملة (TXID) للاستعلام الحالي عبر أول بايتين فقط.
+            if (cached.size >= 2) {
+                val reply = cached.copyOf()
+                reply[0] = dnsPayloadBytes[0]
+                reply[1] = dnsPayloadBytes[1]
+                onResponse(reply)
+                return
+            }
+        }
 
         val safeSearch = DnsFilterController.safeSearch
         if (safeSearch && question.type == Type.A) {
@@ -108,34 +139,37 @@ class DnsResolver(
             onResponse(response.toWire())
             logBlockedDomain(domain, "blocklist")
         } else {
-            forwardQuery(dnsPayloadBytes, onResponse)
+            forwardQuery(dnsPayloadBytes, onResponse, typeKey)
         }
     }
 
-    private fun forwardQuery(dnsPayloadBytes: ByteArray, onResponse: (ByteArray) -> Unit) {
+    private fun forwardQuery(dnsPayloadBytes: ByteArray, onResponse: (ByteArray) -> Unit, typeKey: String) {
         val maxRetries = 2
         for (attempt in 1..maxRetries) {
-            var socket: DatagramSocket? = null
             try {
-                socket = DatagramSocket()
-                socket.soTimeout = 2000
-                protectSocket?.invoke(socket)
-                
-                val packet = DatagramPacket(dnsPayloadBytes, dnsPayloadBytes.size, dnsServer, 53)
-                socket.send(packet)
+                val reply = synchronized(forwardLock) {
+                    val socket = getForwardSocket()
+                    val packet = DatagramPacket(dnsPayloadBytes, dnsPayloadBytes.size, dnsServer, 53)
+                    socket.send(packet)
 
-                val buffer = ByteArray(4096)
-                val reply = DatagramPacket(buffer, buffer.size)
-                socket.receive(reply)
-
-                onResponse(reply.data.copyOf(reply.length))
+                    val buffer = ByteArray(4096)
+                    val replyPacket = DatagramPacket(buffer, buffer.size)
+                    socket.receive(replyPacket)
+                    replyPacket.data.copyOf(replyPacket.length)
+                }
+                // خزّن الاستجابة للتكرارات القادمة (مع تطبيع TXID إلى الصفر في النسخة المخزّنة).
+                if (reply.size >= 2) {
+                    val cached = reply.copyOf()
+                    cached[0] = 0
+                    cached[1] = 0
+                    upstreamCache.put(typeKey, cached)
+                }
+                onResponse(reply)
                 return
             } catch (_: SocketTimeoutException) {
-                // Retry if attempt < maxRetries
+                // أعِد المحاولة إذا كان attempt < maxRetries
             } catch (_: Exception) {
                 return
-            } finally {
-                socket?.close()
             }
         }
         try {
@@ -148,9 +182,19 @@ class DnsResolver(
         } catch (_: Exception) { }
     }
 
+    private fun getForwardSocket(): DatagramSocket {
+        forwardSocket?.let { if (!it.isClosed) return it }
+        val socket = DatagramSocket()
+        socket.soTimeout = 2000
+        protectSocket?.invoke(socket)
+        forwardSocket = socket
+        return socket
+    }
+
     private fun logBlockedDomain(domain: String, reason: String) {
+        // تسجيل غير متزامن (fire-and-forget) حتى لا يحجز مسار معالجة الحزمة.
         try {
-            kotlinx.coroutines.runBlocking(Dispatchers.IO) {
+            logScope.launch {
                 filterDao.insertLog(BlockedLog(domain = domain, reason = reason))
             }
         } catch (_: Exception) {

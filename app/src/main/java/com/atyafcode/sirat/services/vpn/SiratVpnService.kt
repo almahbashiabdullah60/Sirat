@@ -94,14 +94,13 @@ class SiratVpnService : VpnService() {
             val fd = vpnInterface!!.fileDescriptor
             FileInputStream(fd).use { input ->
                 FileOutputStream(fd).use { output ->
+                    // معالجة الحزم تسلسلياً: حركة DNS منخفضة الحجم، وتجنّب إنشاء coroutine
+                    // لكل حزمة يقلّل ضغط الـ GC والـ thread pool ويخفض استهلاك البطارية.
                     val buffer = ByteArray(32767)
                     while (isActive) {
                         val length = input.read(buffer)
                         if (length > 0) {
-                            val packetCopy = buffer.copyOf(length)
-                            serviceScope.launch {
-                                processPacket(packetCopy, length, output)
-                            }
+                            processPacket(buffer, length, output)
                         }
                     }
                 }
