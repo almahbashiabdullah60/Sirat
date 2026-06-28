@@ -132,7 +132,7 @@ class ShizukuActivityManager(
         if (context.isDeviceLocked()) return
 
         getTasksWrapper().filterVisible().forEach {
-            val activity = it.topActivity!!
+            val activity = it.topActivity ?: return@forEach
             val packageName = activity.packageName
             val className = activity.className
 
@@ -241,8 +241,9 @@ fun TaskInfo.isFreeform(): Boolean {
 fun TaskInfo.isFocused(): Boolean {
     try {
         return HiddenApiBypass.getInstanceFields(TaskInfo::class.java)
-            .firstOrNull { it.name == "isFocused" }!!
-            .getBoolean(this)
+            .find { it.name == "isFocused" }
+            ?.apply { isAccessible = true }
+            ?.getBoolean(this) ?: false
     } catch (e: Throwable) {
         e.printStackTrace()
         return false

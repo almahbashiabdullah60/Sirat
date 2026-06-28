@@ -434,8 +434,9 @@ class AppLockAccessibilityService : AccessibilityService() {
             ?.contains("Device admin app") == true &&
                 event.className == "android.widget.FrameLayout"
 
+        val className = event.className?.toString() ?: ""
         val isAdminConfigClass =
-            event.className!!.contains("DeviceAdminAdd") || event.className!!.contains("DeviceAdminSettings")
+            className.contains("DeviceAdminAdd") || className.contains("DeviceAdminSettings")
 
         return hasDeviceAdminDescription || isAdminConfigClass
     }

@@ -221,7 +221,7 @@ class LocalAIProvider(private val context: Context) {
                 android.util.Log.d("SiratAI", "Generating response for prompt length: ${prompt.length}")
                 val response = engine.generateResponse(prompt)
                 android.util.Log.d("SiratAI", "Response generated successfully")
-                response
+                response ?: "خطأ: لم يتم توليد رد من المحرك المحلي."
             } catch (e: Exception) {
                 android.util.Log.e("SiratAI", "Error during generation", e)
                 "فشل في بناء الخطة محلياً: ${e.localizedMessage}"

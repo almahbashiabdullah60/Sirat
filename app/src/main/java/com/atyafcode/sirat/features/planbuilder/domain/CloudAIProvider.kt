@@ -1,5 +1,6 @@
 package com.atyafcode.sirat.features.planbuilder.domain
 
+import androidx.annotation.Keep
 import com.atyafcode.sirat.data.repository.PlanRepository
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -16,11 +17,17 @@ interface GeminiService {
     @POST("v1beta/models/gemini-1.5-flash:generateContent")
     suspend fun generateContent(@Query("key") apiKey: String, @Body request: GeminiRequest): GeminiResponse
 }
+@Keep
 data class GeminiRequest(val contents: List<GeminiContent>, val generationConfig: GeminiConfig? = GeminiConfig())
+@Keep
 data class GeminiConfig(val maxOutputTokens: Int = 1024, val temperature: Double = 0.5)
+@Keep
 data class GeminiContent(val parts: List<GeminiPart>)
+@Keep
 data class GeminiPart(val text: String)
+@Keep
 data class GeminiResponse(val candidates: List<GeminiCandidate>?)
+@Keep
 data class GeminiCandidate(val content: GeminiContent?)
 
 // --- OpenAI Models ---
@@ -28,13 +35,17 @@ interface OpenAIService {
     @POST("v1/chat/completions")
     suspend fun getCompletion(@Header("Authorization") authHeader: String, @Body request: OpenAIRequest): OpenAIResponse
 }
+@Keep
 data class OpenAIRequest(
     val model: String = "gpt-4o-mini",
     val messages: List<OpenAIMessage>,
     val max_tokens: Int = 1024
 )
+@Keep
 data class OpenAIMessage(val role: String, val content: String)
+@Keep
 data class OpenAIResponse(val choices: List<OpenAIChoice>?)
+@Keep
 data class OpenAIChoice(val message: OpenAIMessage?)
 
 // --- OpenRouter Models ---
@@ -49,16 +60,22 @@ interface OpenRouterService {
     ): OpenRouterChatResponse
 }
 
+@Keep
 data class OpenRouterModelsResponse(val data: List<OpenRouterModel>?)
+@Keep
 data class OpenRouterModel(val id: String, val name: String, val pricing: OpenRouterPricing?)
+@Keep
 data class OpenRouterPricing(val prompt: String, val completion: String)
 
+@Keep
 data class OpenRouterChatRequest(
     val model: String,
     val messages: List<OpenAIMessage>,
     val max_tokens: Int = 1024
 )
+@Keep
 data class OpenRouterChatResponse(val choices: List<OpenRouterChoice>?)
+@Keep
 data class OpenRouterChoice(val message: OpenAIMessage?)
 
 class CloudAIProvider {

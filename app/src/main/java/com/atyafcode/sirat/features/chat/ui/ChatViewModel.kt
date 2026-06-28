@@ -1,5 +1,6 @@
 package com.atyafcode.sirat.features.chat.ui
 
+import androidx.annotation.Keep
 import com.atyafcode.sirat.R
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+@Keep
 data class ChatMessage(
     val text: String,
     val isUser: Boolean,
