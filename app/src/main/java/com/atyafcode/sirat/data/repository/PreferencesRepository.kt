@@ -179,6 +179,40 @@ class PreferencesRepository(context: Context) {
         settingsPrefs.edit { putBoolean(KEY_LOGGING_ENABLED, enabled) }
     }
 
+    // === Content Detection (الكشف البصري بالذكاء الاصطناعي) ===
+
+    fun setContentDetectionEnabled(enabled: Boolean) {
+        settingsPrefs.edit { putBoolean(KEY_CONTENT_DETECTION_ENABLED, enabled) }
+    }
+
+    fun isContentDetectionEnabled(): Boolean {
+        return settingsPrefs.getBoolean(KEY_CONTENT_DETECTION_ENABLED, false)
+    }
+
+    fun setContentDetectionScanInterval(intervalMs: Long) {
+        settingsPrefs.edit { putLong(KEY_CONTENT_DETECTION_SCAN_INTERVAL, intervalMs) }
+    }
+
+    fun getContentDetectionScanInterval(): Long {
+        return settingsPrefs.getLong(KEY_CONTENT_DETECTION_SCAN_INTERVAL, 3000L)
+    }
+
+    fun setContentDetectionExcludedApps(apps: Set<String>) {
+        settingsPrefs.edit { putStringSet(KEY_CONTENT_DETECTION_EXCLUDED_APPS, apps) }
+    }
+
+    fun getContentDetectionExcludedApps(): Set<String> {
+        return settingsPrefs.getStringSet(KEY_CONTENT_DETECTION_EXCLUDED_APPS, emptySet()) ?: emptySet()
+    }
+
+    fun setContentDetectionThreshold(threshold: Float) {
+        settingsPrefs.edit { putFloat(KEY_CONTENT_DETECTION_THRESHOLD, threshold) }
+    }
+
+    fun getContentDetectionThreshold(): Float {
+        return settingsPrefs.getFloat(KEY_CONTENT_DETECTION_THRESHOLD, 0.85f)
+    }
+
     fun setAppLanguage(languageCode: String) {
         settingsPrefs.edit { putString(KEY_APP_LANGUAGE, languageCode) }
     }
@@ -210,6 +244,12 @@ class PreferencesRepository(context: Context) {
         private const val KEY_PASSWORD_LENGTH = "password_length"
         private const val KEY_SUPERVISED_SECRET = "supervised_secret"
         private const val KEY_SUPERVISED_METHOD = "supervised_method"
+
+        // Content Detection keys
+        private const val KEY_CONTENT_DETECTION_ENABLED = "content_detection_enabled"
+        private const val KEY_CONTENT_DETECTION_SCAN_INTERVAL = "content_detection_scan_interval"
+        private const val KEY_CONTENT_DETECTION_EXCLUDED_APPS = "content_detection_excluded_apps"
+        private const val KEY_CONTENT_DETECTION_THRESHOLD = "content_detection_threshold"
 
         private const val DEFAULT_PROTECT_ENABLED = true
 

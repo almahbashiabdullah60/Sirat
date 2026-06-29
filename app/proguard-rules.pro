@@ -22,6 +22,12 @@
 -keep interface com.google.mlkit.** { *; }
 -dontwarn com.google.mlkit.**
 
+# TensorFlow Lite (NSFW Content Detection)
+-keep class org.tensorflow.lite.** { *; }
+-keep class org.tensorflow.lite.support.** { *; }
+-keep class org.tensorflow.lite.gpu.** { *; }
+-dontwarn org.tensorflow.lite.**
+
 # MediaPipe
 -keep class com.google.mediapipe.** { *; }
 -dontwarn com.google.mediapipe.**

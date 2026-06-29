@@ -16,5 +16,6 @@ sealed class Screen(val route: String) {
     object AISettings: Screen("ai_settings")
     object FilteringDashboard : Screen("filtering")
     object CustomRules : Screen("custom_rules")
+    object ContentDetectionSettings : Screen("content_detection_settings")
 }
 

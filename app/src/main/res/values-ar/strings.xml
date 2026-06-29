@@ -401,6 +401,28 @@
     <string name="settings_screen_share_audit_logs">مشاركة سجلات الأمان</string>
     <string name="settings_screen_share_logs">مشاركة السجلات</string>
     <string name="settings_screen_export_audit_title">تصدير سجلات الأمان</string>
+
+    <!-- Content Detection (الكشف البصري بالذكاء الاصطناعي) -->
+    <string name="content_detection_title">الكشف البصري عن المحتوى</string>
+    <string name="content_detection_subtitle">مسح الشاشة بالذكاء الاصطناعي للكشف عن المحتوى غير اللائق</string>
+    <string name="content_detection_status_on">مفعّل</string>
+    <string name="content_detection_status_off">معطّل</string>
+    <string name="content_detection_enable">تفعيل الكشف البصري</string>
+    <string name="content_detection_enable_desc">استخدام الذكاء الاصطناعي لمسح الشاشة والكشف عن المحتوى غير اللائق في أي تطبيق، وليس فقط المتصفح. كل المعالجة تتم على جهازك.</string>
+    <string name="content_detection_scan_interval">الفاصل الزمني للمسح</string>
+    <string name="content_detection_scan_interval_desc">المدة بين كل مسحة وأخرى (أقل = أكثر دقة، أعلى = بطارية أفضل)</string>
+    <string name="content_detection_threshold">حد الحساسية</string>
+    <string name="content_detection_threshold_desc">كلما زادت القيمة، قلّت النتائج الخاطئة لكن قد يفوت بعض المحتوى</string>
+    <string name="content_detection_excluded_apps">التطبيقات المستثناة من المسح</string>
+    <string name="content_detection_battery_title">استهلاك البطارية</string>
+    <string name="content_detection_battery_warning">الاستهلاك المتوقع: أقل من 1%% يوميًا أثناء الاستخدام النشط. يتوقف المسح عند إطفاء الشاشة أو انخفاض البطارية.</string>
+    <string name="content_detection_api_warning">تتطلب هذه الميزة أندرويد 11 (API 30) أو أحدث لاستخدام واجهة التقاط الشاشة.</string>
+    <string name="content_detection_violation_warning">تم كشف محتوى غير لائق في هذا التطبيق</string>
+    <string name="content_detection_app_locked">تم قفل التطبيق مؤقتًا لمدة 15 دقيقة بسبب تكرار المخالفات</string>
+    <string name="content_detection_privacy_title">الخصوصية</string>
+    <string name="content_detection_privacy_note">جميع المعالجة تتم على جهازك. لا تُرسل أي صور أو بيانات إلى أي خادم.</string>
+    <string name="content_detection_how_it_works_title">آلية العمل</string>
+    <string name="content_detection_how_it_works_desc">يقوم صراط بشكل دوري بالتقاط لقطة شاشة وتحليلها باستخدام نموذج ذكاء اصطناعي على الجهاز. إذا تم كشف محتوى غير لائق، يضغط تلقائيًا على زر الرجوع. بعد 3 مخالفات، يتم قفل التطبيق المخالف لمدة 15 دقيقة.</string>
 </resources>
 
 

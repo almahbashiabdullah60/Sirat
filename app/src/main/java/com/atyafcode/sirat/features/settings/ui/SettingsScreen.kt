@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Security
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -277,6 +278,14 @@ fun SettingsScreen(
                             title = stringResource(R.string.filtering_title),
                             subtitle = stringResource(R.string.filtering_subtitle),
                             onClick = { navController.navigate(Screen.FilteringDashboard.route) }
+                        ),
+                        ActionSettingItem(
+                            icon = Icons.Outlined.Visibility,
+                            title = stringResource(R.string.content_detection_title),
+                            subtitle = if (appLockRepository.isContentDetectionEnabled())
+                                stringResource(R.string.content_detection_status_on)
+                            else stringResource(R.string.content_detection_status_off),
+                            onClick = { navController.navigate(Screen.ContentDetectionSettings.route) }
                         ),
                         ActionSettingItem(
                             icon = Icons.Default.SupervisorAccount,

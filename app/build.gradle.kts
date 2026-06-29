@@ -95,6 +95,10 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // NSFW Content Detection — On-device AI (visual screen scanning)
+    implementation(libs.tensorflow.lite)
+    implementation(libs.tensorflow.lite.gpu)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

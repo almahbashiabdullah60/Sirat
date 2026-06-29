@@ -33,6 +33,7 @@ import com.atyafcode.sirat.features.triggerexclusions.ui.TriggerExclusionsScreen
 import com.atyafcode.sirat.features.aisettings.ui.AISettingsScreen
 import com.atyafcode.sirat.features.filtering.ui.FilteringDashboardScreen
 import com.atyafcode.sirat.features.filtering.ui.CustomRulesScreen
+import com.atyafcode.sirat.features.contentdetection.ui.ContentDetectionSettingsScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController, startDestination: String) {
@@ -163,6 +164,10 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
 
         composable(Screen.CustomRules.route) {
             CustomRulesScreen(navController)
+        }
+
+        composable(Screen.ContentDetectionSettings.route) {
+            ContentDetectionSettingsScreen(navController)
         }
     }
 }

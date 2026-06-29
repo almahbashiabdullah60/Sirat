@@ -22,6 +22,7 @@ import com.atyafcode.sirat.core.utils.appLockRepository
 import com.atyafcode.sirat.core.utils.enableAccessibilityServiceWithShizuku
 import com.atyafcode.sirat.data.repository.AppLockRepository
 import com.atyafcode.sirat.data.repository.BackendImplementation
+import com.atyafcode.sirat.features.contentdetection.domain.ScreenScanManager
 import com.atyafcode.sirat.features.lockscreen.ui.LockScreenOverlayManager
 import com.atyafcode.sirat.services.AppLockConstants.ACCESSIBILITY_SETTINGS_CLASSES
 import com.atyafcode.sirat.services.AppLockConstants.EXCLUDED_APPS
@@ -37,6 +38,9 @@ class AppLockAccessibilityService : AccessibilityService() {
 
     private var overlayManager: LockScreenOverlayManager? = null
     private lateinit var mainHandler: Handler
+
+    // مدير مسح الشاشة بالذكاء الاصطناعي للكشف عن المحتوى غير اللائق
+    private var screenScanManager: ScreenScanManager? = null
 
     companion object {
         private const val TAG = "AppLockAccessibility"
@@ -55,6 +59,9 @@ class AppLockAccessibilityService : AccessibilityService() {
                     AppLockManager.isLockScreenShown.set(false)
                     AppLockManager.clearTemporarilyUnlockedApp()
                     AppLockManager.appUnlockTimes.clear()
+                    screenScanManager?.pause()
+                } else if (intent?.action == Intent.ACTION_USER_PRESENT) {
+                    screenScanManager?.resume()
                 }
             } catch (e: Exception) {
                 logError("Error in screenStateReceiver", e)
@@ -73,6 +80,12 @@ class AppLockAccessibilityService : AccessibilityService() {
             mainHandler = Handler(mainLooper)
 
             overlayManager = LockScreenOverlayManager(this)
+
+            // تهيئة مدير الكشف البصري إذا كانت الميزة مفعّلة
+            if (appLockRepository.isContentDetectionEnabled()) {
+                screenScanManager = ScreenScanManager(appLockRepository, applicationContext)
+                screenScanManager?.start()
+            }
 
             val filter = android.content.IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_OFF)
@@ -96,6 +109,7 @@ class AppLockAccessibilityService : AccessibilityService() {
                 feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
                 packageNames = null
                 flags += AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+                // canTakeScreenshots يُفعّل تلقائيًا على API 30+ — لا حاجة لـ flag إضافي
             }
 
             Log.d(TAG, "Accessibility service connected")
@@ -155,6 +169,19 @@ class AppLockAccessibilityService : AccessibilityService() {
             processPackageLocking(packageName)
         } catch (e: Exception) {
             logError("Error processing package locking for $packageName", e)
+        }
+
+        // الكشف البصري عن المحتوى غير اللائق بالذكاء الاصطناعي
+        try {
+            screenScanManager?.maybeScan(
+                service = this,
+                packageName = packageName,
+                onDetection = { result ->
+                    LogUtils.d(TAG, "NSFW detected in ${result.packageName}: confidence=${result.confidence}")
+                }
+            )
+        } catch (e: Exception) {
+            logError("Error during content detection scan for $packageName", e)
         }
     }
 
@@ -342,6 +369,9 @@ class AppLockAccessibilityService : AccessibilityService() {
 
         LogUtils.d(TAG, "Showing overlay for: $packageName")
 
+        // إيقاف المسح البصري مؤقتًا أثناء عرض شاشة القفل
+        screenScanManager?.pause()
+
         mainHandler.post {
             AppLockManager.isLockScreenShown.set(true)
             overlayManager?.showOverlay(
@@ -350,11 +380,13 @@ class AppLockAccessibilityService : AccessibilityService() {
                 onUnlock = {
                     AppLockManager.isLockScreenShown.set(false)
                     AppLockManager.unlockApp(packageName)
+                    screenScanManager?.resume()
                 },
                 onExit = {
                     performGlobalAction(GLOBAL_ACTION_HOME)
                     Thread.sleep(200)
                     AppLockManager.isLockScreenShown.set(false)
+                    screenScanManager?.resume()
                 }
             )
         }
@@ -582,6 +614,10 @@ class AppLockAccessibilityService : AccessibilityService() {
             LogUtils.d(TAG, "Accessibility service destroyed")
 
             overlayManager?.removeOverlay()
+
+            // إيقاف وتحرير مدير الكشف البصري
+            screenScanManager?.stop()
+            screenScanManager = null
 
             try {
                 unregisterReceiver(screenStateReceiver)

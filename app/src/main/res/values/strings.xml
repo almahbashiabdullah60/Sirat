@@ -470,6 +470,28 @@
     <string name="settings_screen_share_audit_logs">Share audit logs</string>
     <string name="settings_screen_share_logs">Share logs</string>
     <string name="settings_screen_export_audit_title">Export Security Logs</string>
+
+    <!-- Content Detection (Visual AI Screen Scanning) -->
+    <string name="content_detection_title">Visual Content Detection</string>
+    <string name="content_detection_subtitle">AI screen scanning to detect inappropriate content</string>
+    <string name="content_detection_status_on">Enabled</string>
+    <string name="content_detection_status_off">Disabled</string>
+    <string name="content_detection_enable">Enable Visual Detection</string>
+    <string name="content_detection_enable_desc">Use AI to scan your screen and detect inappropriate content in any app, not just the browser. All processing happens on your device.</string>
+    <string name="content_detection_scan_interval">Scan Interval</string>
+    <string name="content_detection_scan_interval_desc">Time between screen scans (lower = more thorough, higher = better battery)</string>
+    <string name="content_detection_threshold">Sensitivity Threshold</string>
+    <string name="content_detection_threshold_desc">Higher value means fewer false positives but may miss some content</string>
+    <string name="content_detection_excluded_apps">Excluded Apps</string>
+    <string name="content_detection_battery_title">Battery Usage</string>
+    <string name="content_detection_battery_warning">Expected battery usage: less than 1%% per day during active use. Scanning pauses when screen is off or battery is low.</string>
+    <string name="content_detection_api_warning">This feature requires Android 11 (API 30) or later to use the Accessibility screenshot API.</string>
+    <string name="content_detection_violation_warning">Inappropriate content detected in this app</string>
+    <string name="content_detection_app_locked">App temporarily locked for 15 minutes due to repeated violations</string>
+    <string name="content_detection_privacy_title">Privacy</string>
+    <string name="content_detection_privacy_note">All processing happens on your device. No images or data are ever sent to any server.</string>
+    <string name="content_detection_how_it_works_title">How It Works</string>
+    <string name="content_detection_how_it_works_desc">Sirat periodically captures a screenshot and analyzes it using an on-device AI model. If inappropriate content is detected, it automatically presses the back button. After 3 violations, the offending app is locked for 15 minutes.</string>
 </resources>
 
 

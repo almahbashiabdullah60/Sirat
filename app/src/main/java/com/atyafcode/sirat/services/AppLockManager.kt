@@ -23,6 +23,9 @@ object AppLockManager {
     val appUnlockTimes = ConcurrentHashMap<String, Long>()
     val isLockScreenShown = AtomicBoolean(false)
 
+    // قفل مؤقت للتطبيقات المخالفة (الكشف البصري)
+    private val contentDetectionTempLocks = ConcurrentHashMap<String, Long>()
+
     private var recentlyLeftApp: String = ""
     private var recentlyLeftTime: Long = 0L
     private const val GRACE_PERIOD_MS = 300L
@@ -109,6 +112,30 @@ object AppLockManager {
                 context.startActivity(intent)
             }
         }
+    }
+
+    /**
+     * قفل تطبيق مؤقتًا بسبب كشف محتوى إباحي.
+     * @param packageName اسم الحزمة
+     * @param durationMs مدة القفل بالميلي ثانية
+     */
+    fun lockAppTemporarilyForContentDetection(packageName: String, durationMs: Long) {
+        contentDetectionTempLocks[packageName] = System.currentTimeMillis() + durationMs
+        // مسح حالة فتح التطبيق المؤقت
+        temporarilyUnlockedApp = ""
+        LogUtils.d(TAG, "App $packageName locked for content detection: ${durationMs}ms")
+    }
+
+    /**
+     * التحقق من قفل المحتوى المؤقت.
+     */
+    fun isContentDetectionLocked(packageName: String): Boolean {
+        val unlockTime = contentDetectionTempLocks[packageName]
+        if (unlockTime != null) {
+            if (System.currentTimeMillis() < unlockTime) return true
+            contentDetectionTempLocks.remove(packageName)
+        }
+        return false
     }
 }
 

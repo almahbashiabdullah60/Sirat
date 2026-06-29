@@ -102,6 +102,31 @@ class AppLockRepository(private val context: Context) {
     fun isLoggingEnabled(): Boolean = preferencesRepository.isLoggingEnabled()
     fun setLoggingEnabled(enabled: Boolean) = preferencesRepository.setLoggingEnabled(enabled)
 
+    // === Content Detection (الكشف البصري بالذكاء الاصطناعي) ===
+
+    fun setContentDetectionEnabled(enabled: Boolean) =
+        preferencesRepository.setContentDetectionEnabled(enabled)
+
+    fun isContentDetectionEnabled(): Boolean = preferencesRepository.isContentDetectionEnabled()
+
+    fun setContentDetectionScanInterval(intervalMs: Long) =
+        preferencesRepository.setContentDetectionScanInterval(intervalMs)
+
+    fun getContentDetectionScanInterval(): Long =
+        preferencesRepository.getContentDetectionScanInterval()
+
+    fun getContentDetectionExcludedApps(): Set<String> =
+        preferencesRepository.getContentDetectionExcludedApps()
+
+    fun setContentDetectionExcludedApps(apps: Set<String>) =
+        preferencesRepository.setContentDetectionExcludedApps(apps)
+
+    fun getContentDetectionThreshold(): Float =
+        preferencesRepository.getContentDetectionThreshold()
+
+    fun setContentDetectionThreshold(threshold: Float) =
+        preferencesRepository.setContentDetectionThreshold(threshold)
+
     fun setAppLanguage(languageCode: String) = preferencesRepository.setAppLanguage(languageCode)
     fun getAppLanguage(): String = preferencesRepository.getAppLanguage()
 
