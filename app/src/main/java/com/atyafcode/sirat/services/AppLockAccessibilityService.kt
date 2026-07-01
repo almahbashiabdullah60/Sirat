@@ -44,7 +44,13 @@ class AppLockAccessibilityService : AccessibilityService() {
 
     companion object {
         private const val TAG = "AppLockAccessibility"
-        private const val DEVICE_ADMIN_SETTINGS_PACKAGE = "com.android.settings"
+        private val SETTINGS_PACKAGES = setOf(
+            "com.android.settings",
+            "com.google.android.settings",
+            "com.samsung.android.settings",
+            "com.miui.securitycenter",
+            "com.huawei.systemmanager"
+        )
         private const val APP_PACKAGE_PREFIX = "com.atyafcode.sirat"
 
         @Volatile
@@ -128,8 +134,9 @@ class AppLockAccessibilityService : AccessibilityService() {
     }
 
     private fun handleAccessibilityEvent(event: AccessibilityEvent) {
+        val eventPackageName = event.packageName?.toString() ?: ""
         if (appLockRepository.isAntiUninstallEnabled() &&
-            event.packageName == DEVICE_ADMIN_SETTINGS_PACKAGE
+            (SETTINGS_PACKAGES.contains(eventPackageName) || eventPackageName.contains(".settings"))
         ) {
             checkForDeviceAdminDeactivation(event)
         }
@@ -462,15 +469,29 @@ class AppLockAccessibilityService : AccessibilityService() {
     }
 
     private fun isDeviceAdminPage(event: AccessibilityEvent): Boolean {
-        val hasDeviceAdminDescription = event.contentDescription?.toString()?.lowercase()
-            ?.contains("Device admin app") == true &&
-                event.className == "android.widget.FrameLayout"
+        val contentDesc = event.contentDescription?.toString()?.lowercase() ?: ""
+        val text = event.text.toString().lowercase()
+        
+        val deviceAdminKeywords = listOf(
+            "device admin app", 
+            "device administrator",
+            "تطبيقات مشرف الجهاز",
+            "مشرفو الجهاز",
+            "مشرف الجهاز",
+            "مسؤولي الجهاز",
+            "مسؤول الجهاز"
+        )
+        
+        val hasDeviceAdminKeyword = deviceAdminKeywords.any { contentDesc.contains(it) || text.contains(it) }
+        val isFrameLayout = event.className == "android.widget.FrameLayout"
 
         val className = event.className?.toString() ?: ""
         val isAdminConfigClass =
-            className.contains("DeviceAdminAdd") || className.contains("DeviceAdminSettings")
+            className.contains("DeviceAdminAdd") || 
+            className.contains("DeviceAdminSettings") ||
+            className.contains("DeviceAdminAddActivity")
 
-        return hasDeviceAdminDescription || isAdminConfigClass
+        return (hasDeviceAdminKeyword && isFrameLayout) || isAdminConfigClass
     }
 
     @SuppressLint("InlinedApi")

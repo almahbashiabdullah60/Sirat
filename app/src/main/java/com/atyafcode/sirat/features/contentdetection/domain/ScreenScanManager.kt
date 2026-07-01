@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.PowerManager
 import android.util.Log
@@ -223,10 +224,12 @@ class ScreenScanManager(
         packageName: String,
         onDetection: (DetectionResult.NsfwDetected) -> Unit
     ) {
-        var screenshot: AccessibilityService.ScreenshotResult? = null
+        var hwBuffer: android.hardware.HardwareBuffer? = null
         try {
-            screenshot = takeScreenshotSync(service) ?: return
-            val bitmap = screenshot?.bitmap ?: return
+            val screenshot = takeScreenshotSync(service) ?: return
+            hwBuffer = screenshot.hardwareBuffer
+            val colorSpace = screenshot.colorSpace
+            val bitmap = Bitmap.wrapHardwareBuffer(hwBuffer, colorSpace) ?: return
 
             // تحديث عتبة الثقة من إعدادات المستخدم
             classifier.confidenceThreshold = appLockRepository.getContentDetectionThreshold()
@@ -257,12 +260,7 @@ class ScreenScanManager(
         } catch (e: Exception) {
             LogUtils.e(TAG, "Error during scan", e)
         } finally {
-            // تحرير ScreenshotResult يدويًا
-            try {
-                screenshot?.close()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error closing screenshot", e)
-            }
+            hwBuffer?.close()
         }
     }
 

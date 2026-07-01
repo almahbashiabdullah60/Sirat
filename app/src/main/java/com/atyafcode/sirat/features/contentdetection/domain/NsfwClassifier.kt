@@ -23,7 +23,7 @@ class NsfwClassifier(private val context: Context) {
 
     companion object {
         private const val TAG = "NsfwClassifier"
-        private const val MODEL_FILE = "nsfw_model.tflite"
+        private const val MODEL_FILE = "nsfw.tflite"
         private const val IMAGE_SIZE = 224
         private const val PIXEL_SIZE = 3 // RGB
     }
@@ -63,9 +63,9 @@ class NsfwClassifier(private val context: Context) {
                         options.setNumThreads(2)
                         Log.d(TAG, "GPU not supported, using CPU with 2 threads")
                     }
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     options.setNumThreads(2)
-                    Log.w(TAG, "GPU Delegate failed, falling back to CPU", e)
+                    Log.w(TAG, "GPU Delegate failed (possibly missing dependencies), falling back to CPU", e)
                 }
 
                 interpreter = Interpreter(modelBuffer, options)
@@ -160,17 +160,21 @@ class NsfwClassifier(private val context: Context) {
     }
 
     /**
-     * تحويل Bitmap إلى ByteBuffer بصيغة NORMALIZED [0,1]
+     * تحويل Bitmap إلى ByteBuffer وفق preprocessing نموذج Yahoo Open NSFW:
+     * RGB → BGR, pixel * 255, subtract VGG mean [104, 117, 123]
      */
     private fun convertBitmapToBuffer(bitmap: Bitmap, buffer: ByteBuffer) {
         val pixels = IntArray(IMAGE_SIZE * IMAGE_SIZE)
         bitmap.getPixels(pixels, 0, IMAGE_SIZE, 0, 0, IMAGE_SIZE, IMAGE_SIZE)
 
         for (pixel in pixels) {
-            // تطبيع القيم إلى [0, 1]
-            buffer.putFloat(((pixel shr 16) and 0xFF) / 255.0f) // R
-            buffer.putFloat(((pixel shr 8) and 0xFF) / 255.0f)  // G
-            buffer.putFloat((pixel and 0xFF) / 255.0f)           // B
+            val r = (pixel shr 16) and 0xFF
+            val g = (pixel shr 8) and 0xFF
+            val b = pixel and 0xFF
+            // RGB → BGR, multiply by 255, subtract VGG mean
+            buffer.putFloat(b.toFloat() - 123f)   // B
+            buffer.putFloat(g.toFloat() - 117f)   // G
+            buffer.putFloat(r.toFloat() - 104f)   // R
         }
     }
 

@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -34,6 +35,7 @@ import com.atyafcode.sirat.data.repository.AppLockRepository
 import com.atyafcode.sirat.data.repository.PreferencesRepository
 import com.atyafcode.sirat.features.lockscreen.ui.KeypadSection
 import com.atyafcode.sirat.features.lockscreen.ui.PasswordIndicators
+import com.atyafcode.sirat.features.lockscreen.ui.SupervisedLockOverlay
 // import com.atyafcode.sirat.features.lockscreen.ui.PatternLockScreen
 import com.atyafcode.sirat.ui.theme.AppLockTheme
 
@@ -70,26 +72,8 @@ class AdminDisableActivity : ComponentActivity() {
                         PreferencesRepository.LOCK_TYPE_PASSWORD -> {
                             AdminDisablePasswordScreen(
                                 modifier = Modifier.padding(padding),
-                                onPasswordVerified = {
-                                    val deviceAdmin = DeviceAdmin()
-                                    deviceAdmin.setPasswordVerified(this@AdminDisableActivity, true)
-
-                                    Toast.makeText(
-                                        this@AdminDisableActivity,
-                                        R.string.password_verified_admin,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    appLockRepository.setAntiUninstallEnabled(false)
-                                    finish()
-                                },
-                                onCancel = {
-                                    val deviceAdmin = DeviceAdmin()
-                                    deviceAdmin.setPasswordVerified(
-                                        this@AdminDisableActivity,
-                                        false
-                                    )
-                                    finish()
-                                },
+                                onPasswordVerified = { handleSuccess() },
+                                onCancel = { handleCancel() },
                                 validatePassword = { inputPassword ->
                                     appLockRepository.validatePassword(inputPassword)
                                         .also { isValid ->
@@ -105,29 +89,19 @@ class AdminDisableActivity : ComponentActivity() {
                             )
                         }
 
+                        PreferencesRepository.LOCK_TYPE_SUPERVISED -> {
+                            SupervisedLockOverlay(
+                                lockedAppName = stringResource(R.string.settings_screen_anti_uninstall_title),
+                                onUnlock = { handleSuccess() },
+                                onExit = { handleCancel() }
+                            )
+                        }
+
                         else -> {
                             AdminDisableScreen(
                                 modifier = Modifier.padding(padding),
-                                onPasswordVerified = {
-                                    val deviceAdmin = DeviceAdmin()
-                                    deviceAdmin.setPasswordVerified(this@AdminDisableActivity, true)
-
-                                    Toast.makeText(
-                                        this@AdminDisableActivity,
-                                        R.string.password_verified_admin,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    appLockRepository.setAntiUninstallEnabled(false)
-                                    finish()
-                                },
-                                onCancel = {
-                                    val deviceAdmin = DeviceAdmin()
-                                    deviceAdmin.setPasswordVerified(
-                                        this@AdminDisableActivity,
-                                        false
-                                    )
-                                    finish()
-                                },
+                                onPasswordVerified = { handleSuccess() },
+                                onCancel = { handleCancel() },
                                 validatePassword = { inputPassword ->
                                     appLockRepository.validatePassword(inputPassword)
                                         .also { isValid ->
@@ -146,6 +120,29 @@ class AdminDisableActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun handleSuccess() {
+        val deviceAdmin = DeviceAdmin()
+        deviceAdmin.setPasswordVerified(this, true)
+
+        try {
+            if (devicePolicyManager.isAdminActive(deviceAdminComponentName)) {
+                devicePolicyManager.setUninstallBlocked(deviceAdminComponentName, packageName, false)
+            }
+        } catch (e: Exception) {
+            Log.e("AdminDisable", "Failed to unblock uninstall: ${e.message}")
+        }
+
+        appLockRepository.setAntiUninstallEnabled(false)
+        Toast.makeText(this, R.string.password_verified_admin, Toast.LENGTH_SHORT).show()
+        finish()
+    }
+
+    private fun handleCancel() {
+        val deviceAdmin = DeviceAdmin()
+        deviceAdmin.setPasswordVerified(this, false)
+        finish()
     }
 }
 

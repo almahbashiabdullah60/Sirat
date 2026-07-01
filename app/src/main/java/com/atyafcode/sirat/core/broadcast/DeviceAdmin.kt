@@ -20,7 +20,12 @@ class DeviceAdmin : DeviceAdminReceiver() {
 
         val component = ComponentName(context, DeviceAdmin::class.java)
 
-        getManager(context).setUninstallBlocked(component, context.packageName, true)
+        try {
+            getManager(context).setUninstallBlocked(component, context.packageName, true)
+        } catch (e: SecurityException) {
+            // This might happen if we are not the profile or device owner
+            // In many consumer apps, this call will fail
+        }
     }
 
     override fun onDisabled(context: Context, intent: android.content.Intent) {

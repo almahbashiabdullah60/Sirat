@@ -55,8 +55,7 @@ class PreferencesRepository(context: Context) {
     }
 
     fun getLockType(): String {
-        val type = settingsPrefs.getString(KEY_LOCK_TYPE, LOCK_TYPE_PIN) ?: LOCK_TYPE_PIN
-        return if (type == LOCK_TYPE_PATTERN) LOCK_TYPE_PIN else type
+        return settingsPrefs.getString(KEY_LOCK_TYPE, LOCK_TYPE_PIN) ?: LOCK_TYPE_PIN
     }
 
     fun setLockGenerationType(isRandom: Boolean) {

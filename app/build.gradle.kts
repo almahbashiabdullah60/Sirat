@@ -97,7 +97,10 @@ dependencies {
 
     // NSFW Content Detection — On-device AI (visual screen scanning)
     implementation(libs.tensorflow.lite)
+    // NSFW Content Detection — On-device AI (visual screen scanning)
+    implementation(libs.tensorflow.lite)
     implementation(libs.tensorflow.lite.gpu)
+    implementation(libs.tensorflow.lite.gpu.api)
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

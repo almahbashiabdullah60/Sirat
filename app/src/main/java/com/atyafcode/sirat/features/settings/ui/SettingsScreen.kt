@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -89,6 +91,25 @@ fun SettingsScreen(
     var disableHapticFeedback by remember { mutableStateOf(appLockRepository.shouldDisableHaptics()) }
     var loggingEnabled by remember { mutableStateOf(appLockRepository.isLoggingEnabled()) }
     var appLanguage by remember { mutableStateOf(appLockRepository.getAppLanguage()) }
+
+    // Refresh settings when returning to this screen
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                antiUninstallEnabled = appLockRepository.isAntiUninstallEnabled()
+                useMaxBrightness = appLockRepository.shouldUseMaxBrightness()
+                useBiometricAuth = appLockRepository.isBiometricAuthEnabled()
+                disableHapticFeedback = appLockRepository.shouldDisableHaptics()
+                loggingEnabled = appLockRepository.isLoggingEnabled()
+                appLanguage = appLockRepository.getAppLanguage()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     var showPermissionDialog by remember { mutableStateOf(false) }
     var showDeviceAdminDialog by remember { mutableStateOf(false) }
