@@ -46,4 +46,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.core)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.testing.junit)
+    androidTestImplementation(libs.androidx.testing.runner)
+    androidTestImplementation(libs.androidx.testing.espresso)
 }

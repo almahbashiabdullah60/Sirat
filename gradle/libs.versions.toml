@@ -24,6 +24,10 @@ camerax = "1.4.1"
 dnsjava = "3.6.2"
 room = "2.7.0"
 ksp = "2.1.0-1.0.29"
+junit = "4.13.2"
+androidx-test-ext-junit = "1.3.0"
+androidx-test-runner = "1.7.0"
+androidx-test-espresso-core = "3.7.0"
 tensorflowLite = "2.17.0"
 tensorflowLiteGpu = "2.17.0"
 
@@ -39,6 +43,10 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-testing-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+androidx-testing-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
+androidx-testing-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-test-espresso-core" }
 
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }

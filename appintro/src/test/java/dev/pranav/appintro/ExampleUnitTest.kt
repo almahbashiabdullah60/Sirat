@@ -1,4 +1,4 @@
-package dev.pranav.appintro
+package com.atyafcode.sirat.appintro
 
 import org.junit.Assert.*
 import org.junit.Test

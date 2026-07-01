@@ -1,4 +1,4 @@
-package dev.pranav.appintro
+package com.atyafcode.sirat.appintro
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("dev.pranav.appintro.test", appContext.packageName)
+        assertEquals("com.atyafcode.sirat.appintro.test", appContext.packageName)
     }
 }

@@ -39,4 +39,9 @@ dependencies {
     implementation(libs.androidx.annotation)
     annotationProcessor(libs.refine.annotation.processor)
     compileOnly(libs.refine.annotation)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.testing.junit)
+    androidTestImplementation(libs.androidx.testing.runner)
+    androidTestImplementation(libs.androidx.testing.espresso)
 }
